@@ -18,7 +18,8 @@ import com.example.modmetro.config.MetroConfig;
  * speed-restriction marker.
  *
  * When a LEAD cart passes over one (1-2 blocks beneath the rail, the same
- * scan depth ModMetro uses for station blocks), the train's speed is capped
+ * scan depth and sub-stepped path scan ModMetro uses for station blocks,
+ * so markers register at any speed), the train's speed is capped
  * at 25% of the configured line speed. The cap lifts the moment the train
  * pulls into its next station. Followers pace off the lead cart's velocity,
  * so the whole train slows as one.
@@ -48,11 +49,23 @@ public abstract class MetroSlowZoneMixin {
         }
 
         if (!this.mmsCompat$speedRestricted) {
-            BlockPos pos = self.blockPosition();
-            for (int y = 1; y <= 2; y++) {
-                if (world.getBlockState(pos.below(y)).getBlock() == MetroMod.METRO_MODEL_BLOCK) {
-                    this.mmsCompat$speedRestricted = true;
-                    break;
+            // Sub-step along the path covered this tick — ModMetro's station
+            // scan does exactly this, which is why stations never get skipped
+            // at speed. One check per block of travel, prev position -> now.
+            Vec3 vel = self.getDeltaMovement();
+            Vec3 now = new Vec3(self.getX(), self.getY(), self.getZ());
+            Vec3 prev = now.subtract(vel);
+            int steps = Math.max(1, (int) Math.ceil(vel.horizontalDistance()));
+
+            outer:
+            for (int i = 0; i <= steps; i++) {
+                double fraction = steps == 1 ? 1.0 : (double) i / steps;
+                BlockPos checkPos = BlockPos.containing(prev.lerp(now, fraction));
+                for (int y = 1; y <= 2; y++) {
+                    if (world.getBlockState(checkPos.below(y)).getBlock() == MetroMod.METRO_MODEL_BLOCK) {
+                        this.mmsCompat$speedRestricted = true;
+                        break outer;
+                    }
                 }
             }
         }
