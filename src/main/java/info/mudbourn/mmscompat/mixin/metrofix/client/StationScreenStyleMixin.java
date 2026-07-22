@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
  * ModMetro's stock palette is navy-purple panels (0xFF0D0D22 / 0xFF12122E)
  * with a saturated orange accent (0xFFFF8800) and green/red action-button
  * fills — jarring and nothing like vanilla. Replaced with the MMS deepslate
- * + copper scheme: near-neutral dark grays, one muted copper accent.
+ * + copper scheme: near-neutral dark grays, white accents, no side bar.
  *
  * StationScreen declares the palette as private static final int fields, but
  * javac inlines those into each call site, so the fields are unreachable and
@@ -46,17 +46,34 @@ public abstract class StationScreenStyleMixin {
         return 0xFF333338;
     }
 
-    // ── accent (left bar, header rule, live dot, title, focus ring) ─────
+    // ── accent (0xFFFF8800 orange, four occurrences in render) ──────────
+    // Ordinals follow source order: 0 = left bar fill, 1 = header underline,
+    // 2 = live status dot, 3 = title text.
 
-    /** loud orange 0xFFFF8800 → muted copper */
-    @ModifyConstant(method = "render", constant = @Constant(intValue = -30720))
-    private int mmsCompat$accentRender(int c) {
-        return 0xFFC77B50;
+    /** left accent bar: removed — transparent fill draws nothing, panel shows */
+    @ModifyConstant(method = "render", constant = @Constant(intValue = -30720, ordinal = 0))
+    private int mmsCompat$accentBarRemoved(int c) {
+        return 0x00000000;
+    }
+
+    @ModifyConstant(method = "render", constant = @Constant(intValue = -30720, ordinal = 1))
+    private int mmsCompat$accentHeaderRule(int c) {
+        return 0xFFFFFFFF;
+    }
+
+    @ModifyConstant(method = "render", constant = @Constant(intValue = -30720, ordinal = 2))
+    private int mmsCompat$accentDot(int c) {
+        return 0xFFFFFFFF;
+    }
+
+    @ModifyConstant(method = "render", constant = @Constant(intValue = -30720, ordinal = 3))
+    private int mmsCompat$accentTitle(int c) {
+        return 0xFFFFFFFF;
     }
 
     @ModifyConstant(method = "drawField", constant = @Constant(intValue = -30720))
     private int mmsCompat$accentFocus(int c) {
-        return 0xFFC77B50;
+        return 0xFFFFFFFF;
     }
 
     // ── text ────────────────────────────────────────────────────────────
