@@ -36,13 +36,17 @@ public abstract class MetroStationWaitTimeoutMixin {
     /**
      * Longest a cart will believe "next station occupied" before departing anyway.
      *
-     * 300 ticks (15s). Sized against legitimate blocking: a train ahead dwelling
-     * ~6s, plus up to 1s of latency from ModMetro's hardcoded 20-tick recheck
-     * cadence, plus room for a two-deep cascade (~13s worst case). Raise this if
-     * dwell times go up; lower it only if you are certain queues stay shallow.
+     * 100 ticks (5s). On a saturated loop (trains >= stations on the line),
+     * ModMetro's occupancy check is *always* true — a cart's CURRENT_STATION
+     * only clears once it is >10 blocks past the platform — so every hop rides
+     * this ceiling as a fixed per-hop delay rather than a rare escape hatch.
+     * 5s still absorbs a legitimate dwell-ahead (the blocker departs and clears
+     * within ~2s of moving off) without turning the line into a stutter-fest.
+     * Raise this if lines gain slack (more stations than trains) and you want
+     * stricter separation.
      */
     @Unique
-    private static final long WAIT_TIMEOUT_TICKS = 300L;
+    private static final long WAIT_TIMEOUT_TICKS = 100L;
 
     /** Game time when the current unbroken run of "occupied" began; -1 when not blocked. */
     @Unique
