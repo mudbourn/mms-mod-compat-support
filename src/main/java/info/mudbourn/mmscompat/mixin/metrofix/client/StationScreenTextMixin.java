@@ -18,7 +18,6 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
  *    data, not labels. Translating them would write English defaults back
  *    into saved station data and desync client from server.
  *  - "continue" / "reverse": action state values stored in NBT.
- *  - "METRO VILLA STARSHIP": branding.
  *
  * Note the double spaces after the ✔ ✖ ▶ ◀ ⚠ glyphs are load-bearing —
  * the constants must match byte-for-byte or the injector fails at load.
@@ -39,6 +38,12 @@ public abstract class StationScreenTextMixin {
     @ModifyConstant(method = "init", constant = @Constant(stringValue = "✖  Cancelar"))
     private String mmsCompat$cancel(String original) {
         return "✖  " + MetroText.tr("mms_compat.metro.gui.cancel");
+    }
+
+    /** Rebrand: the stock "METRO VILLA STARSHIP" nameplate means nothing on MMS. */
+    @ModifyConstant(method = "render", constant = @Constant(stringValue = "METRO VILLA STARSHIP"))
+    private String mmsCompat$brand(String original) {
+        return MetroText.tr("mms_compat.metro.gui.brand");
     }
 
     @ModifyConstant(method = "render", constant = @Constant(stringValue = "Configuración de Parada"))

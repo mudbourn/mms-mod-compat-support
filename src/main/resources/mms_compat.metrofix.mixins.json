@@ -4,7 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "plugin": "info.mudbourn.mmscompat.mixin.metrofix.MetroFixGate",
   "mixins": ["MetroCartSeatMixin", "MetroCommandTextMixin", "MetroStationOccupancyDisableMixin"],
-  "client": ["client.StationScreenTextMixin", "client.MetroHudTextMixin"],
+  "client": ["client.StationScreenTextMixin", "client.StationScreenStyleMixin", "client.MetroHudTextMixin"],
   "injectors": {
     "defaultRequire": 1
   }

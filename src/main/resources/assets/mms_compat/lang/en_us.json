@@ -1,4 +1,5 @@
 {
+  "mms_compat.metro.gui.brand": "MMS Metro Authority",
   "mms_compat.metro.gui.title": "Configure Station",
   "mms_compat.metro.gui.heading": "Stop Configuration",
   "mms_compat.metro.gui.station_name": "Station Name",
