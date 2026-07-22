@@ -1,0 +1,10 @@
+{
+  "job": "jobsplus:hunter",
+  "parent": "jobsplus:hunter/bow_unbreaking_ii",
+  "icon": {
+    "id": "minecraft:bow",
+    "count": 3
+  },
+  "price": 10,
+  "required_level": 30
+}

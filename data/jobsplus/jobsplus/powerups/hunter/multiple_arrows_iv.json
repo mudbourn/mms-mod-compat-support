@@ -1,0 +1,10 @@
+{
+  "job": "jobsplus:hunter",
+  "parent": "jobsplus:hunter/multiple_arrows_iii",
+  "icon": {
+    "id": "minecraft:arrow",
+    "count": 4
+  },
+  "price": 15,
+  "required_level": 60
+}

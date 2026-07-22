@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.metrofix",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.metrofix.MetroFixGate",
+  "mixins": ["MetroCartSeatMixin", "MetroCommandTextMixin", "MetroStationWaitTimeoutMixin"],
+  "client": ["client.StationScreenTextMixin", "client.MetroHudTextMixin"],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

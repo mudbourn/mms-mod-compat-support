@@ -1,0 +1,15 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.ar",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.ar.AbsolutReviveMixinGate",
+  "mixins": [
+    "AbsolutReviveDropMixin",
+    "AbsolutReviveAggroMixin",
+    "AbsolutReviveBleedoutMixin",
+    "AbsolutReviveNotifyMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

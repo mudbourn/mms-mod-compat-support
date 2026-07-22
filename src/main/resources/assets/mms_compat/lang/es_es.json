@@ -1,0 +1,26 @@
+{
+  "mms_compat.metro.gui.title": "Configurar Estación",
+  "mms_compat.metro.gui.heading": "Configuración de Parada",
+  "mms_compat.metro.gui.station_name": "Nombre de la Estación",
+  "mms_compat.metro.gui.wait_time": "Tiempo de Espera  (segundos)",
+  "mms_compat.metro.gui.next_station": "Próxima Estación",
+  "mms_compat.metro.gui.line": "Línea",
+  "mms_compat.metro.gui.range_warning": "Ingresa un valor entre 1 y 9999",
+  "mms_compat.metro.gui.save": "Guardar",
+  "mms_compat.metro.gui.cancel": "Cancelar",
+  "mms_compat.metro.gui.action_continue": "Acción: Continuar hacia siguiente",
+  "mms_compat.metro.gui.action_reverse": "Acción: Invertir dirección",
+
+  "mms_compat.metro.hud.car": "Vagón",
+  "mms_compat.metro.hud.station": "Estación",
+  "mms_compat.metro.hud.next": "Próx",
+  "mms_compat.metro.hud.waiting": "Espera",
+  "mms_compat.metro.hud.in_transit": "En tránsito...",
+
+  "mms_compat.metro.cmd.must_be_riding": "Debes estar montado en un vagón del metro para usar este comando.",
+  "mms_compat.metro.cmd.train_removed": "Tren removido correctamente.",
+  "mms_compat.metro.cmd.unknown_variable": "Variable desconocida.",
+  "mms_compat.metro.cmd.train_spawned": "Tren de metro generado con %s vagones.",
+  "mms_compat.metro.cmd.cars_removed": "Se removieron %s vagones en total.",
+  "mms_compat.metro.cmd.config_updated": "Configuración actualizada: %s = %s"
+}

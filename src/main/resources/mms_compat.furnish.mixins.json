@@ -1,0 +1,10 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.furnish",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.furnish.FurnishMixinGate",
+  "mixins": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

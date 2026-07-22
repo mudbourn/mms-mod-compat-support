@@ -1,0 +1,28 @@
+{
+  "mms_compat.metro.gui.title": "Configure Station",
+  "mms_compat.metro.gui.heading": "Stop Configuration",
+  "mms_compat.metro.gui.station_name": "Station Name",
+  "mms_compat.metro.gui.wait_time": "Dwell Time  (seconds)",
+  "mms_compat.metro.gui.next_station": "Next Station",
+  "mms_compat.metro.gui.line": "Line",
+  "mms_compat.metro.gui.range_warning": "Enter a value between 1 and 9999",
+  "mms_compat.metro.gui.save": "Save",
+  "mms_compat.metro.gui.cancel": "Cancel",
+  "mms_compat.metro.gui.action_continue": "Action: Continue to next",
+  "mms_compat.metro.gui.action_reverse": "Action: Reverse direction",
+
+  "mms_compat.metro.hud.car": "Car",
+  "mms_compat.metro.hud.station": "Station",
+  "mms_compat.metro.hud.next": "Next",
+  "mms_compat.metro.hud.waiting": "Waiting",
+  "mms_compat.metro.hud.in_transit": "In transit...",
+
+  "mms_compat.metro.cmd.must_be_riding": "You must be riding a metro car to use this command.",
+  "mms_compat.metro.cmd.train_removed": "Train removed successfully.",
+  "mms_compat.metro.cmd.unknown_variable": "Unknown variable.",
+  "mms_compat.metro.cmd.train_spawned": "Metro train spawned with %s cars.",
+  "mms_compat.metro.cmd.cars_removed": "Removed %s cars in total.",
+  "mms_compat.metro.cmd.config_updated": "Configuration updated: %s = %s",
+
+  "mms_compat.absolutrevive.downed": "%s is down!"
+}

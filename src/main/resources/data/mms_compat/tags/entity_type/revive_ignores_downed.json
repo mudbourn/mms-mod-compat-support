@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:ender_dragon",
+    "minecraft:wither",
+    "minecraft:warden",
+    "minecraft:elder_guardian",
+    "minecraft:piglin_brute",
+    "minecraft:ravager",
+    { "id": "friendsandfoes:wildfire", "required": false },
+    { "id": "friendsandfoes:mauler", "required": false },
+    { "id": "frostiful:frostologer", "required": false }
+  ]
+}

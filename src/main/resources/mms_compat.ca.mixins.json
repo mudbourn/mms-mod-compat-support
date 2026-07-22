@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.ca",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.CaMixinPlugin",
+  "mixins": [
+    "EntityEquipmentTrinketsMixin",
+    "EquipmentOwnerInitMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

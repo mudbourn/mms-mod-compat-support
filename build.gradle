@@ -1,0 +1,54 @@
+plugins {
+    id 'net.fabricmc.fabric-loom-remap' version '1.17.14'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://api.modrinth.com/maven" }
+}
+
+dependencies {
+    modImplementation files("libs/absolutrevive-v1.2.1b.jar")
+    modCompileOnly files("libs/furnish-31.jar")
+    modCompileOnly files("libs/jobsplus-19.1.0-fabric.jar")
+    modCompileOnly files("libs/arc-19.1.1-fabric.jar")
+    modCompileOnly files("libs/modmetro-v1.jar")
+    modCompileOnly files("libs/rubies-1.0.0+1.21.11.jar")
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.141.4+1.21.11"
+    modCompileOnly "maven.modrinth:combat-amenities:3.1.7-1.21.11"
+    modCompileOnly "maven.modrinth:trinkets-updated:3.11.0-beta.2+1.21.11"
+    modCompileOnly "maven.modrinth:cardinal-components-api:7.3.1"
+    modCompileOnly files("libs/cardinal-components-base-7.3.1.jar")
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 21
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+    withSourcesJar()
+}
+
+processResources {
+    filesMatching("fabric.mod.json") {
+        expand "version": project.mod_version
+    }
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
+}

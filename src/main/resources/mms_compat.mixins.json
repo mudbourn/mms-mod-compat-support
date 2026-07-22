@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "package": "info.mudbourn.mmscompat.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": ["CreativeTabDedupMixin"],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

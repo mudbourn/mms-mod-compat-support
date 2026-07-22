@@ -1,0 +1,10 @@
+{
+  "job": "jobsplus:hunter",
+  "parent": "jobsplus:hunter/attack_speed_ii",
+  "icon": {
+    "id": "minecraft:golden_sword",
+    "count": 3
+  },
+  "price": 10,
+  "required_level": 30
+}

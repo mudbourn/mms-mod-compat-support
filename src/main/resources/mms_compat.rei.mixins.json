@@ -1,0 +1,10 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.rei",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.ReiMixinPlugin",
+  "mixins": ["ReiNbtHasherNullFilterMixin"],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

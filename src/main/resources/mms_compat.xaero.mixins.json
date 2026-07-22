@@ -1,0 +1,10 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.xaero",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.xaero.XaeroMixinGate",
+  "client": ["XaeroChunkSyncMixin"],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}
