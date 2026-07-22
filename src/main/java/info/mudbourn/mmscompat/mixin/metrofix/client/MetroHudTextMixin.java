@@ -26,6 +26,12 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(MetroClient.class)
 public abstract class MetroHudTextMixin {
 
+    /** HUD accent (top bar + title): stock orange 0xFFFF8800 → white, matching the station screen restyle. */
+    @ModifyConstant(method = "renderMetroHUD", constant = @Constant(intValue = -30720))
+    private int mmsCompat$hudAccent(int c) {
+        return 0xFFFFFFFF;
+    }
+
     @ModifyConstant(method = "renderMetroHUD", constant = @Constant(stringValue = "En transito..."))
     private String mmsCompat$inTransit(String original) {
         return MetroText.tr("mms_compat.metro.hud.in_transit");

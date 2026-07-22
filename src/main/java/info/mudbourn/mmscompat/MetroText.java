@@ -35,7 +35,7 @@ public final class MetroText {
 
         String p = "🚇 METRO VILLA STARSHIP - Vagon #";
         if (text.startsWith(p)) {
-            return "🚇 METRO VILLA STARSHIP - "
+            return "🚇 " + tr("mms_compat.metro.gui.brand") + " - "
                     + tr("mms_compat.metro.hud.car") + " #" + text.substring(p.length());
         }
         if (text.startsWith("Estacion: ")) {
