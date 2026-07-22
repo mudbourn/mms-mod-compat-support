@@ -47,6 +47,9 @@ public abstract class MetroFollowerSeparationMixin {
     @Shadow
     protected abstract BlockPos findNearestRail(Level world, BlockPos center);
 
+    @Unique
+    private int mmsCompat$lastSnapTick = -100;
+
     @Inject(method = "tickFollowerCart", at = @At("TAIL"))
     private void mmsCompat$clampSeparation(Level world, CallbackInfo ci) {
         MetroCartEntity front = this.cachedFrontCart;
@@ -65,6 +68,22 @@ public abstract class MetroFollowerSeparationMixin {
         if (!overlapping && !stacked) {
             return;
         }
+
+        // Moving train: never teleport (snapping to block centers mid-motion
+        // reads as bouncing). Ease off instead: run slightly slower than the
+        // car ahead and let the gap re-open over a few ticks.
+        Vec3 frontVel = front.getDeltaMovement();
+        if (frontVel.horizontalDistance() > 0.05) {
+            self.setDeltaMovement(frontVel.scale(0.9));
+            return;
+        }
+
+        // Parked train: hard un-stack is safe, but at most once every 10 ticks
+        // so a full queue doesn't churn while it drains.
+        if (self.tickCount - this.mmsCompat$lastSnapTick < 10) {
+            return;
+        }
+        this.mmsCompat$lastSnapTick = self.tickCount;
 
         // Walk back from the front car along this cart's own travel heading
         // (approach direction is noise when already overlapped/stacked).
