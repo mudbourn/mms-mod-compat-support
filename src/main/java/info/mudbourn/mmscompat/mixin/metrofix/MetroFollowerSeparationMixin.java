@@ -65,22 +65,33 @@ public abstract class MetroFollowerSeparationMixin {
 
         boolean overlapping = distToFront < spacing - 0.35;
         boolean stacked = !overlapping && mmsCompat$isStacked(world, self);
+        Vec3 frontVel = front.getDeltaMovement();
+        boolean frontMoving = frontVel.horizontalDistance() > 0.05;
+
         if (!overlapping && !stacked) {
+            // Parked and already in position: freeze. ModMetro's creep
+            // controller keeps micro-nudging parked followers around their
+            // target (±0.3 error band), which alone reads as glitchy wobble —
+            // and worse, it drags carts off any corrective snap, retriggering
+            // it in a loop. A parked cart in position has no reason to move.
+            if (!frontMoving && distToFront <= spacing + 0.5) {
+                self.setDeltaMovement(Vec3.ZERO);
+            }
             return;
         }
 
         // Moving train: never teleport (snapping to block centers mid-motion
         // reads as bouncing). Ease off instead: run slightly slower than the
         // car ahead and let the gap re-open over a few ticks.
-        Vec3 frontVel = front.getDeltaMovement();
-        if (frontVel.horizontalDistance() > 0.05) {
+        if (frontMoving) {
             self.setDeltaMovement(frontVel.scale(0.9));
             return;
         }
 
-        // Parked train: hard un-stack is safe, but at most once every 10 ticks
-        // so a full queue doesn't churn while it drains.
+        // Parked and out of position: hard un-stack, at most once every
+        // 10 ticks per cart so a draining queue settles instead of churning.
         if (self.tickCount - this.mmsCompat$lastSnapTick < 10) {
+            self.setDeltaMovement(Vec3.ZERO);
             return;
         }
         this.mmsCompat$lastSnapTick = self.tickCount;
