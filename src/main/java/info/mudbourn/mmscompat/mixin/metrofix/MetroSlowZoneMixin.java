@@ -18,7 +18,7 @@ import com.example.modmetro.config.MetroConfig;
  * speed-ramp marker.
  *
  * The ramp is LINEAR in configured line speed (MetroConfig.speed): each
- * step adds/removes 15% OF TOP SPEED, one step every 10 ticks, 5 steps.
+ * step adds/removes 15% OF TOP SPEED, one step every 5 ticks, 5 steps.
  * Cap sequence going down: 100% -> 85 -> 70 -> 55 -> 40 -> 25% (floor),
  * then holds so the train gracefully lands at the next stop. Departing
  * the stop climbs the same stairs back to 100%, after which the cap is
@@ -46,7 +46,7 @@ public abstract class MetroSlowZoneMixin {
     @Unique
     private static final int RAMP_STEPS = 5;          // floor = 1 - 5*0.15 = 25%
     @Unique
-    private static final int TICKS_PER_STEP = 10;
+    private static final int TICKS_PER_STEP = 5;
     @Unique
     private static final double STOPPED_EPSILON = 0.01;
 
