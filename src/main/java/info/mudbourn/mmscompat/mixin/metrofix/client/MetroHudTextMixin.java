@@ -132,11 +132,27 @@ public abstract class MetroHudTextMixin {
                     ? Minecraft.getInstance().player.getVehicle() : null;
             String line = vehicle != null ? MetroLineSyncClient.lineFor(vehicle.getId()) : "";
             if (!line.isEmpty()) {
-                title += " - " + MetroText.tr("mms_compat.metro.gui.line") + " " + line;
+                // The line NAME is builder-authored and usually already carries
+                // its own label ("Line 1", "Línea 1"), so prefixing the
+                // translated label unconditionally rendered "Line Line 1".
+                // Only label a bare name.
+                String label = MetroText.tr("mms_compat.metro.gui.line");
+                title += " - " + (mmsCompat$alreadyLabelled(line, label) ? line : label + " " + line);
             }
             graphics.drawCenteredString(font, title, x, y, color);
             return;
         }
         graphics.drawCenteredString(font, MetroText.rewriteHud(text), x, y, color);
+    }
+
+    /**
+     * True if a builder-authored line name already begins with its own label,
+     * in either shipped language, so it should not be labelled again.
+     */
+    @Unique
+    private static boolean mmsCompat$alreadyLabelled(String line, String label) {
+        String l = line.trim().toLowerCase(java.util.Locale.ROOT);
+        return l.startsWith(label.trim().toLowerCase(java.util.Locale.ROOT))
+                || l.startsWith("line") || l.startsWith("l\u00ednea") || l.startsWith("linea");
     }
 }

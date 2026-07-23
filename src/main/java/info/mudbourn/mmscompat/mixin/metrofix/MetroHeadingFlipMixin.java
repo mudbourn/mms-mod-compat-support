@@ -66,6 +66,22 @@ public abstract class MetroHeadingFlipMixin {
     @Unique
     private double mmsCompat$opposingDistance;
 
+    /**
+     * Consecutive opposing ticks. Required IN ADDITION to the distance, because
+     * distance alone is not a guard at speed: at the 3.4 b/t line speed a single
+     * tick contributes 3.4 blocks and clears a 3-block threshold on its own, so
+     * every transient one-tick reversal at a corner latched a permanent flip.
+     * Ticks alone are not a guard either — that was the original 5-tick version,
+     * which cruise zones reduced to under a block. A real reversal satisfies
+     * both; a corner artefact satisfies neither for long.
+     */
+    @Unique
+    private int mmsCompat$opposingTicks;
+
+    /** Minimum consecutive opposing ticks, whatever the distance covered. */
+    @Unique
+    private static final int MIN_OPPOSING_TICKS = 4;
+
     @Redirect(
             method = "tick",
             at = @At(value = "INVOKE",
@@ -74,6 +90,7 @@ public abstract class MetroHeadingFlipMixin {
         double dot = lastDirection.dot(newDirection);
         if (dot >= 0.0) {
             this.mmsCompat$opposingDistance = 0.0;
+            this.mmsCompat$opposingTicks = 0;
             return dot;
         }
 
@@ -85,20 +102,26 @@ public abstract class MetroHeadingFlipMixin {
             // Off-rail motion is not evidence of anything; the cart is being
             // repositioned, not driven.
             this.mmsCompat$opposingDistance = 0.0;
+            this.mmsCompat$opposingTicks = 0;
             return dot;
         }
 
         this.mmsCompat$opposingDistance += self.getDeltaMovement().horizontalDistance();
-        if (this.mmsCompat$opposingDistance >= MetroTuning.heading_flip_distance) {
+        this.mmsCompat$opposingTicks++;
+        if (this.mmsCompat$opposingTicks >= MIN_OPPOSING_TICKS
+                && this.mmsCompat$opposingDistance >= MetroTuning.heading_flip_distance) {
             if (MetroTuning.heading_flip_debug) {
                 MetroTuning.log().info(
                         "[mms_compat] heading flip accepted for cart #{} at {} after {} blocks "
                         + "against heading {} -> {}",
-                        self.getTrainIndex(), pos, String.format("%.2f", this.mmsCompat$opposingDistance),
+                        self.getTrainIndex(), pos,
+                        String.format("%.2f over %d ticks", this.mmsCompat$opposingDistance,
+                                this.mmsCompat$opposingTicks),
                         lastDirection, newDirection);
             }
             this.mmsCompat$opposingDistance = 0.0;
-            return 1.0; // sustained reversal over real distance: admit it
+            this.mmsCompat$opposingTicks = 0;
+            return 1.0; // sustained reversal, in both ticks and distance: admit it
         }
         return dot;
     }
