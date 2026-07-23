@@ -28,6 +28,8 @@ public class MmsModCompatSupport implements ModInitializer {
         if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("modmetro")) {
             info.mudbourn.mmscompat.metro.MetroLineSyncServer.register();
             info.mudbourn.mmscompat.metro.MetroTrainDespawn.register();
+            // Cruise-zone governor settings (config/mms_compat_metro.json)
+            info.mudbourn.mmscompat.metro.MetroCruiseConfig.load();
         }
 
         // /vanity command (permission level 0 \u2014 public)
