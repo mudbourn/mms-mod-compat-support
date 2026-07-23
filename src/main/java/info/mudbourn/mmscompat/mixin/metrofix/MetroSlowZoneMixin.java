@@ -18,11 +18,15 @@ import com.example.modmetro.config.MetroConfig;
  * speed-ramp marker.
  *
  * The ramp is LINEAR in configured line speed (MetroConfig.speed): each
- * step adds/removes 15% OF TOP SPEED, one step every 5 ticks, 5 steps.
+ * step adds/removes 15% OF TOP SPEED, one step every 2 ticks, 5 steps.
  * Cap sequence going down: 100% -> 85 -> 70 -> 55 -> 40 -> 25% (floor),
  * then holds so the train gracefully lands at the next stop. Departing
  * the stop climbs the same stairs back to 100%, after which the cap is
  * dropped and ModMetro's own acceleration (+10%/tick) rules as usual.
+ *
+ * A second distinct marker while the ramp is active skips the stairs and
+ * pins the cap at the floor until the next stop clears the train — used
+ * on terminal-loop approaches where the turnaround must be taken slowly.
  *
  * When a LEAD cart passes over a marker (1-2 blocks beneath the rail,
  * same scan depth and sub-stepped path scan ModMetro uses for station
@@ -46,7 +50,7 @@ public abstract class MetroSlowZoneMixin {
     @Unique
     private static final int RAMP_STEPS = 5;          // floor = 1 - 5*0.15 = 25%
     @Unique
-    private static final int TICKS_PER_STEP = 5;
+    private static final int TICKS_PER_STEP = 2;      // halved from 5: full ramp in ~10 ticks
     @Unique
     private static final double STOPPED_EPSILON = 0.01;
 
@@ -69,6 +73,9 @@ public abstract class MetroSlowZoneMixin {
     private int mmsCompat$rampSteps = 0;
     @Unique
     private int mmsCompat$rampTicks = 0;
+    /** Last marker block hit, so the same marker can't count twice across ticks. */
+    @Unique
+    private BlockPos mmsCompat$lastMarkerPos = null;
 
     @Inject(method = "tickLeadCart", at = @At("TAIL"))
     private void mmsCompat$slowZone(Level world, CallbackInfo ci) {
@@ -82,9 +89,12 @@ public abstract class MetroSlowZoneMixin {
             if (atRest) {
                 // Landed at a stop: arm the inverse ramp for departure. Steps
                 // stay where the down-ramp left them so the train pulls out
-                // slowly rather than lurching to full speed.
+                // slowly rather than lurching to full speed. New markers count
+                // fresh from here — the hardset (see below) must re-trigger on
+                // every lap of a terminal loop.
                 this.mmsCompat$rampPhase = PHASE_ARMED_UP;
                 this.mmsCompat$rampTicks = 0;
+                this.mmsCompat$lastMarkerPos = null;
             }
         } else if (this.mmsCompat$rampPhase == PHASE_ARMED_UP) {
             if (!atRest) {
@@ -92,10 +102,22 @@ public abstract class MetroSlowZoneMixin {
                 this.mmsCompat$rampPhase = PHASE_UP;
                 this.mmsCompat$rampTicks = 0;
             }
-        } else if (this.mmsCompat$rampPhase == PHASE_NONE) {
-            // Sub-step along the path covered this tick — ModMetro's station
-            // scan does exactly this, which is why stations never get skipped
-            // at speed. One check per block of travel, prev position -> now.
+        }
+
+        // Marker scan — in every moving phase, not just NONE. Sub-step along
+        // the path covered this tick — ModMetro's station scan does exactly
+        // this, which is why stations never get skipped at speed. One check
+        // per block of travel, prev position -> now. A marker only counts
+        // once (lastMarkerPos), so a slow crawl over one marker across many
+        // ticks is a single hit.
+        //
+        //  - first marker (phase NONE): start the staged down-ramp
+        //  - any further DISTINCT marker while the ramp is active: hardset
+        //    straight to the floor cap and hold it there until the train
+        //    reaches a stop and is cleared to move (normal recovery). This is
+        //    the terminal-loop case: two markers on the approach pin the
+        //    train slow through the tight turnaround.
+        if (this.mmsCompat$rampPhase != PHASE_ARMED_UP && speed >= STOPPED_EPSILON) {
             Vec3 now = new Vec3(self.getX(), self.getY(), self.getZ());
             Vec3 prev = now.subtract(vel);
             int steps = Math.max(1, (int) Math.ceil(speed));
@@ -105,9 +127,18 @@ public abstract class MetroSlowZoneMixin {
                 double fraction = steps == 1 ? 1.0 : (double) i / steps;
                 BlockPos checkPos = BlockPos.containing(prev.lerp(now, fraction));
                 for (int y = 1; y <= 2; y++) {
-                    if (world.getBlockState(checkPos.below(y)).getBlock() == MetroMod.METRO_MODEL_BLOCK) {
-                        this.mmsCompat$rampPhase = PHASE_DOWN;
-                        this.mmsCompat$rampSteps = 0;
+                    BlockPos markerPos = checkPos.below(y);
+                    if (world.getBlockState(markerPos).getBlock() == MetroMod.METRO_MODEL_BLOCK
+                            && !markerPos.equals(this.mmsCompat$lastMarkerPos)) {
+                        this.mmsCompat$lastMarkerPos = markerPos;
+                        if (this.mmsCompat$rampPhase == PHASE_NONE) {
+                            this.mmsCompat$rampPhase = PHASE_DOWN;
+                            this.mmsCompat$rampSteps = 0;
+                        } else {
+                            // second bump: floor, immediately and until a stop
+                            this.mmsCompat$rampPhase = PHASE_HOLD;
+                            this.mmsCompat$rampSteps = RAMP_STEPS;
+                        }
                         this.mmsCompat$rampTicks = 0;
                         break outer;
                     }

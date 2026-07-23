@@ -24,6 +24,12 @@ public class MmsModCompatSupport implements ModInitializer {
         CreativeEmbargo.register();
         info.mudbourn.mmscompat.waypoint.SharedWaypointServer.register();
 
+        // Metro line-name sync (ModMetro never sends lineName to clients)
+        if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("modmetro")) {
+            info.mudbourn.mmscompat.metro.MetroLineSyncServer.register();
+            info.mudbourn.mmscompat.metro.MetroTrainDespawn.register();
+        }
+
         // /vanity command (permission level 0 \u2014 public)
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             registerVanityCommand(dispatcher);
@@ -35,7 +41,7 @@ public class MmsModCompatSupport implements ModInitializer {
 
         // Xaero's World Map chunk sync (server-side packet handler)
 
-        LOG.info("MMS Mod Compat Support v0.5.0 loaded — creative-tab dedup, REI null-filter fix, AR item-drop suppression, creative embargo, /vanity, Jobs+ XP cooldown, warrior job, Xaero chunk sync.");
+        LOG.info("MMS Mod Compat Support v0.6.3 loaded — creative-tab dedup, REI null-filter fix, AR item-drop suppression, creative embargo, /vanity, Jobs+ XP cooldown, warrior job, Xaero chunk sync.");
     }
 
     private void registerVanityCommand(com.mojang.brigadier.CommandDispatcher<net.minecraft.commands.CommandSourceStack> dispatcher) {

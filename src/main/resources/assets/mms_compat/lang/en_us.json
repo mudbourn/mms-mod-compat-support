@@ -14,7 +14,7 @@
 
   "mms_compat.metro.hud.car": "Car",
   "mms_compat.metro.hud.station": "Station",
-  "mms_compat.metro.hud.next": "Next",
+  "mms_compat.metro.hud.next": "Next stop",
   "mms_compat.metro.hud.waiting": "Waiting",
   "mms_compat.metro.hud.in_transit": "In transit...",
 

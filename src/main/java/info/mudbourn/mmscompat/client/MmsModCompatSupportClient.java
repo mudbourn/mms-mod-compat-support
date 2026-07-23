@@ -10,5 +10,8 @@ public class MmsModCompatSupportClient implements ClientModInitializer {
             SharedWaypointClient.register();
             XaeroGlobalWaypointBridge.register();
         }
+        if (FabricLoader.getInstance().isModLoaded("modmetro")) {
+            MetroLineSyncClient.register();
+        }
     }
 }

@@ -2,8 +2,11 @@ package info.mudbourn.mmscompat.mixin.metrofix.client;
 
 import com.example.modmetro.MetroClient;
 import info.mudbourn.mmscompat.MetroText;
+import info.mudbourn.mmscompat.client.MetroLineSyncClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
@@ -32,6 +35,19 @@ public abstract class MetroHudTextMixin {
         return 0xFFFFFFFF;
     }
 
+    /**
+     * Drop the HUD from y=20 to y=60 so it clears WTHIT's top-center tooltip
+     * — in tunnel sections the player is almost always looking at a block, so
+     * at stock position the two overlap near-constantly. Every fill and text
+     * offset derives from this one local, so a single shift moves the whole
+     * box. ordinal 0 pins the y assignment; the other literal 20 in this
+     * method is the ticks-per-second divisor in the wait countdown.
+     */
+    @ModifyConstant(method = "renderMetroHUD", constant = @Constant(intValue = 20, ordinal = 0))
+    private int mmsCompat$hudY(int y) {
+        return 60;
+    }
+
     @ModifyConstant(method = "renderMetroHUD", constant = @Constant(stringValue = "En transito..."))
     private String mmsCompat$inTransit(String original) {
         return MetroText.tr("mms_compat.metro.hud.in_transit");
@@ -49,6 +65,13 @@ public abstract class MetroHudTextMixin {
         graphics.drawString(font, MetroText.rewriteHud(text), x, y, color);
     }
 
+    /**
+     * Title line. Stock text is "🚇 METRO VILLA STARSHIP - Vagon #N"; we show
+     * the line instead of the car number — riders care which line they're on,
+     * not which car of the train they boarded. The line name comes from our
+     * own sync (ModMetro never sends it to clients); until the first payload
+     * lands (~1s after boarding) the title is just the brand.
+     */
     @Redirect(
         method = "renderMetroHUD",
         at = @At(
@@ -58,6 +81,17 @@ public abstract class MetroHudTextMixin {
         )
     )
     private void mmsCompat$rewriteHudTitle(GuiGraphics graphics, Font font, String text, int x, int y, int color) {
+        if (text != null && text.startsWith("🚇 METRO VILLA STARSHIP")) {
+            String title = "🚇 " + MetroText.tr("mms_compat.metro.gui.brand");
+            Entity vehicle = Minecraft.getInstance().player != null
+                    ? Minecraft.getInstance().player.getVehicle() : null;
+            String line = vehicle != null ? MetroLineSyncClient.lineFor(vehicle.getId()) : "";
+            if (!line.isEmpty()) {
+                title += " - " + MetroText.tr("mms_compat.metro.gui.line") + " " + line;
+            }
+            graphics.drawCenteredString(font, title, x, y, color);
+            return;
+        }
         graphics.drawCenteredString(font, MetroText.rewriteHud(text), x, y, color);
     }
 }
