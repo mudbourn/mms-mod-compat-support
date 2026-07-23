@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.cpa",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.CpaMixinPlugin",
+  "client": [
+    "CarryOnCompatAnimationMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
