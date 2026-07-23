@@ -17,15 +17,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Settings for the cruise-zone speed governor ({@code MetroCruiseZoneMixin}).
- *
- * Written to {@code config/mms_compat_metro.json} on first run.
+ * Metro tuning knobs, written to {@code config/mms_compat_metro.json} on first
+ * run. Covers the cruise-zone governor ({@code MetroCruiseZoneMixin}) and the
+ * heading-reversal hysteresis ({@code MetroHeadingFlipMixin}).
  *
  * <pre>
  * {
  *   "cruise_enabled": true,
  *   "cruise_speed": 0.8,
- *   "cruise_marker_block": "minecraft:target"
+ *   "cruise_marker_block": "minecraft:target",
+ *   "heading_flip_distance": 3.0,
+ *   "heading_flip_debug": false
  * }
  * </pre>
  *
@@ -41,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * {@code minecraft:target} — decorative, essentially never structural, and it
  * sits in the trackbed under the rail where nothing else competes for it.
  */
-public final class MetroCruiseConfig {
+public final class MetroTuning {
 
     private static final Logger LOG = LoggerFactory.getLogger("mms_compat");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -52,17 +54,36 @@ public final class MetroCruiseConfig {
     public static double cruise_speed = 0.8;
     public static String cruise_marker_block = "minecraft:target";
 
+    /**
+     * How far a cart must actually travel AGAINST its cached heading before the
+     * reversal is believed, in blocks.
+     *
+     * This was originally a tick count (5), chosen when the line ran at 3.4 b/t
+     * — where 5 ticks meant ~17 blocks of backwards travel and no transient
+     * could fake it. Cruise zones then dropped carts to 0.8 b/t, making the
+     * same 5 ticks barely 4 blocks, and under braking well under one: a
+     * momentary vanilla rail bounce at a junction cleared it, the flip was
+     * recorded as genuine, and the train drove back the way it came. Distance
+     * is speed-invariant, so the guard means the same thing at every speed.
+     */
+    public static double heading_flip_distance = 3.0;
+
+    /** Log every accepted heading flip with its position. Diagnostic only. */
+    public static boolean heading_flip_debug = false;
+
     /** Resolved lazily — block registries are not populated at mod-init time. */
     private static Block resolvedMarker;
     private static String resolvedFrom;
 
-    private MetroCruiseConfig() {
+    private MetroTuning() {
     }
 
     private static final class Data {
         boolean cruise_enabled = true;
         double cruise_speed = 0.8;
         String cruise_marker_block = "minecraft:target";
+        double heading_flip_distance = 3.0;
+        boolean heading_flip_debug = false;
     }
 
     public static void load() {
@@ -78,6 +99,10 @@ public final class MetroCruiseConfig {
                 if (data.cruise_marker_block != null && !data.cruise_marker_block.isBlank()) {
                     cruise_marker_block = data.cruise_marker_block;
                 }
+                if (data.heading_flip_distance > 0.0) {
+                    heading_flip_distance = data.heading_flip_distance;
+                }
+                heading_flip_debug = data.heading_flip_debug;
             }
         } catch (Exception e) {
             LOG.warn("[mms_compat] could not read {} — using defaults", FILE.getName(), e);
@@ -91,6 +116,8 @@ public final class MetroCruiseConfig {
             data.cruise_enabled = cruise_enabled;
             data.cruise_speed = cruise_speed;
             data.cruise_marker_block = cruise_marker_block;
+            data.heading_flip_distance = heading_flip_distance;
+            data.heading_flip_debug = heading_flip_debug;
             GSON.toJson(data, writer);
         } catch (Exception e) {
             LOG.warn("[mms_compat] could not write {}", FILE.getName(), e);
@@ -102,6 +129,10 @@ public final class MetroCruiseConfig {
      * which case the governor stays off rather than silently clamping on some
      * fallback block the builder never placed.
      */
+    public static org.slf4j.Logger log() {
+        return LOG;
+    }
+
     public static Block marker() {
         if (resolvedMarker != null && cruise_marker_block.equals(resolvedFrom)) {
             return resolvedMarker;

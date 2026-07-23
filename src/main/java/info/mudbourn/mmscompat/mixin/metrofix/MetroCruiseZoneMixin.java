@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import info.mudbourn.mmscompat.metro.MetroCruiseConfig;
+import info.mudbourn.mmscompat.metro.MetroTuning;
 
 import com.example.modmetro.MetroCartEntity;
 
@@ -54,7 +54,7 @@ public abstract class MetroCruiseZoneMixin {
 
     @Inject(method = "tick", at = @At("RETURN"))
     private void mmsCompat$cruiseClamp(CallbackInfo ci) {
-        if (!MetroCruiseConfig.cruise_enabled) {
+        if (!MetroTuning.cruise_enabled) {
             return;
         }
         MetroCartEntity self = (MetroCartEntity) (Object) this;
@@ -65,12 +65,12 @@ public abstract class MetroCruiseZoneMixin {
 
         Vec3 vel = self.getDeltaMovement();
         double speed = vel.horizontalDistance();
-        double cruise = MetroCruiseConfig.cruise_speed;
+        double cruise = MetroTuning.cruise_speed;
         if (speed <= cruise || cruise <= 0.0) {
             return; // already at or below cruise: nothing to do, and never speed up
         }
 
-        Block marker = MetroCruiseConfig.marker();
+        Block marker = MetroTuning.marker();
         if (marker == null) {
             return; // unresolvable marker id: stay out of the way entirely
         }

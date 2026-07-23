@@ -29,7 +29,7 @@ public class MmsModCompatSupport implements ModInitializer {
             info.mudbourn.mmscompat.metro.MetroLineSyncServer.register();
             info.mudbourn.mmscompat.metro.MetroTrainDespawn.register();
             // Cruise-zone governor settings (config/mms_compat_metro.json)
-            info.mudbourn.mmscompat.metro.MetroCruiseConfig.load();
+            info.mudbourn.mmscompat.metro.MetroTuning.load();
         }
 
         // /vanity command (permission level 0 \u2014 public)

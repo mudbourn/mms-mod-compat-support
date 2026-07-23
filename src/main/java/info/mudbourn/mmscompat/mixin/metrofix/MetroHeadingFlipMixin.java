@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import info.mudbourn.mmscompat.metro.MetroRailPath;
+import info.mudbourn.mmscompat.metro.MetroTuning;
 
 import com.example.modmetro.MetroCartEntity;
 
@@ -49,12 +50,21 @@ import com.example.modmetro.MetroCartEntity;
 @Mixin(MetroCartEntity.class)
 public abstract class MetroHeadingFlipMixin {
 
-    /** Consecutive opposing ticks on rail before a heading flip is believed. */
+    /**
+     * Distance actually travelled against the cached heading, in blocks, since
+     * the last tick that agreed with it. Reset by any agreeing tick or by
+     * leaving the rail.
+     *
+     * Deliberately a DISTANCE and not a tick count. The original version
+     * counted 5 opposing ticks, sized for the 3.4 b/t line speed where that
+     * meant ~17 blocks. Cruise zones cut carts to 0.8 b/t, which made the same
+     * 5 ticks 4 blocks — and under braking a fraction of one — so a transient
+     * rail bounce at a junction was enough to latch a permanent reversal and
+     * send the train back the way it came. Blocks mean the same thing at every
+     * speed; ticks do not.
+     */
     @Unique
-    private static final int FLIP_TICKS = 5;
-
-    @Unique
-    private int mmsCompat$opposingTicks;
+    private double mmsCompat$opposingDistance;
 
     @Redirect(
             method = "tick",
@@ -63,7 +73,7 @@ public abstract class MetroHeadingFlipMixin {
     private double mmsCompat$allowHeadingFlip(Vec3 lastDirection, Vec3 newDirection) {
         double dot = lastDirection.dot(newDirection);
         if (dot >= 0.0) {
-            this.mmsCompat$opposingTicks = 0;
+            this.mmsCompat$opposingDistance = 0.0;
             return dot;
         }
 
@@ -74,13 +84,21 @@ public abstract class MetroHeadingFlipMixin {
         if (!onRail) {
             // Off-rail motion is not evidence of anything; the cart is being
             // repositioned, not driven.
-            this.mmsCompat$opposingTicks = 0;
+            this.mmsCompat$opposingDistance = 0.0;
             return dot;
         }
 
-        if (++this.mmsCompat$opposingTicks >= FLIP_TICKS) {
-            this.mmsCompat$opposingTicks = 0;
-            return 1.0; // sustained reversal: admit the new heading
+        this.mmsCompat$opposingDistance += self.getDeltaMovement().horizontalDistance();
+        if (this.mmsCompat$opposingDistance >= MetroTuning.heading_flip_distance) {
+            if (MetroTuning.heading_flip_debug) {
+                MetroTuning.log().info(
+                        "[mms_compat] heading flip accepted for cart #{} at {} after {} blocks "
+                        + "against heading {} -> {}",
+                        self.getTrainIndex(), pos, String.format("%.2f", this.mmsCompat$opposingDistance),
+                        lastDirection, newDirection);
+            }
+            this.mmsCompat$opposingDistance = 0.0;
+            return 1.0; // sustained reversal over real distance: admit it
         }
         return dot;
     }
