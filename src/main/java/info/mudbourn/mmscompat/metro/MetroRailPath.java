@@ -1,4 +1,4 @@
-package info.mudbourn.mmscompat.mixin.metrofix;
+package info.mudbourn.mmscompat.metro;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.BaseRailBlock;
  * catch-up point). That is only equivalent to track distance on straight
  * track. Through a U-turn a cart four blocks of RAIL behind the car ahead is
  * barely one block of AIR behind it, and every consumer of that number then
- * does the wrong thing — see {@link MetroCurveFollowMixin} for the failure
+ * does the wrong thing — see {@code MetroCurveFollowMixin} for the failure
  * chain that follows.
  *
  * This class replaces the crow-flight metric with a breadth-first walk over
@@ -31,12 +31,12 @@ import net.minecraft.world.level.block.BaseRailBlock;
  * actually pending, so the per-tick cost stays in the same class as the
  * mod's existing scans.
  */
-final class MetroRailPath {
+public final class MetroRailPath {
 
     private MetroRailPath() {
     }
 
-    static boolean isRail(Level world, BlockPos pos) {
+    public static boolean isRail(Level world, BlockPos pos) {
         return world.getBlockState(pos).getBlock() instanceof BaseRailBlock;
     }
 
@@ -51,7 +51,7 @@ final class MetroRailPath {
      * {@code maxSteps} — the caller then leaves ModMetro's own logic alone
      * rather than guessing.
      */
-    static List<BlockPos> spineBehind(Level world, BlockPos followerRail, BlockPos frontRail,
+    public static List<BlockPos> spineBehind(Level world, BlockPos followerRail, BlockPos frontRail,
                                       int maxSteps, int extraBehind) {
         List<BlockPos> path = path(world, followerRail, frontRail, maxSteps);
         if (path == null) {
@@ -68,7 +68,7 @@ final class MetroRailPath {
      * Track distance in rail blocks between two carts' rails, or -1 if they
      * are not connected within {@code maxSteps}.
      */
-    static int distance(Level world, BlockPos fromRail, BlockPos toRail, int maxSteps) {
+    public static int distance(Level world, BlockPos fromRail, BlockPos toRail, int maxSteps) {
         List<BlockPos> path = path(world, fromRail, toRail, maxSteps);
         return path == null ? -1 : path.size() - 1;
     }

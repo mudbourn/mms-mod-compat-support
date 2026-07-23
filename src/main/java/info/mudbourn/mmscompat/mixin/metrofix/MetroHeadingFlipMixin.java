@@ -8,6 +8,8 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
+import info.mudbourn.mmscompat.metro.MetroRailPath;
+
 import com.example.modmetro.MetroCartEntity;
 
 /**

@@ -11,6 +11,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import info.mudbourn.mmscompat.metro.MetroRailPath;
+
 import com.example.modmetro.MetroCartEntity;
 import com.example.modmetro.config.MetroConfig;
 
