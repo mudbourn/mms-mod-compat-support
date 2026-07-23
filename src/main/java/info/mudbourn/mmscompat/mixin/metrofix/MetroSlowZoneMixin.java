@@ -100,7 +100,18 @@ public abstract class MetroSlowZoneMixin {
     @Unique
     private int mmsCompat$graceTicks = 0;
 
-    @Inject(method = "tickLeadCart", at = @At("TAIL"))
+    /**
+     * NOTE: @At("RETURN"), not @At("TAIL"). tickLeadCart has several return
+     * paths (the station-wait branch, its occupancy re-check, and the normal
+     * running branch), and javac gives each its own RETURN opcode. TAIL only
+     * instruments the LAST one — the normal running path — so with TAIL this
+     * handler never ran on arrival, during the wait, or on the departure
+     * tick. The ramp state machine then never saw the stop: a double-bump
+     * pin was never released, leaving trains crawling at 10% of line speed
+     * forever after their next station stop. RETURN instruments every exit;
+     * the handler is idempotent so running once per tick on any path is fine.
+     */
+    @Inject(method = "tickLeadCart", at = @At("RETURN"))
     private void mmsCompat$slowZone(Level world, CallbackInfo ci) {
         MetroCartEntity self = (MetroCartEntity) (Object) this;
         Vec3 vel = self.getDeltaMovement();
