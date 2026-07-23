@@ -1,5 +1,6 @@
 package info.mudbourn.mmscompat.mixin.metrofix.client;
 
+import com.example.modmetro.MetroCartEntity;
 import com.example.modmetro.MetroClient;
 import info.mudbourn.mmscompat.MetroText;
 import info.mudbourn.mmscompat.client.MetroLineSyncClient;
@@ -8,6 +9,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
@@ -53,6 +55,24 @@ public abstract class MetroHudTextMixin {
         return MetroText.tr("mms_compat.metro.hud.in_transit");
     }
 
+    /** Stock yellow of the "Prox:" line — identifies it among the drawString calls. */
+    @Unique
+    private static final int PROX_COLOR = 0xFFFF55;
+
+    /** Vehicle the cached next-stop belongs to; a remount resets the cache. */
+    @Unique
+    private int mmsCompat$nextVehicleId = -1;
+    @Unique
+    private String mmsCompat$nextStop = "";
+
+    /**
+     * Persistent next-stop line. Stock only draws "Prox:" while the cart's
+     * synced NEXT_STATION is non-empty — it blanks between a reverse and the
+     * following stop, and reads "reverse" while turning around. We suppress
+     * the stock line (matched by its yellow color) and always draw our own
+     * from a cache of the last real station name, updated whenever the cart
+     * syncs a new one (i.e. every stop it reaches).
+     */
     @Redirect(
         method = "renderMetroHUD",
         at = @At(
@@ -62,7 +82,32 @@ public abstract class MetroHudTextMixin {
         )
     )
     private void mmsCompat$rewriteHudLine(GuiGraphics graphics, Font font, String text, int x, int y, int color) {
+        if (color == PROX_COLOR) {
+            return; // stock Prox line — replaced by the persistent one below
+        }
         graphics.drawString(font, MetroText.rewriteHud(text), x, y, color);
+        // The white status line ("Station:"/"In transit...") draws every
+        // frame, so it anchors our next-stop line 12px beneath it — the
+        // stock Prox position.
+        if (color == -1) {
+            Entity vehicle = Minecraft.getInstance().player != null
+                    ? Minecraft.getInstance().player.getVehicle() : null;
+            if (vehicle instanceof MetroCartEntity cart) {
+                if (vehicle.getId() != this.mmsCompat$nextVehicleId) {
+                    this.mmsCompat$nextVehicleId = vehicle.getId();
+                    this.mmsCompat$nextStop = "";
+                }
+                String next = cart.getNextStation();
+                if (!next.isEmpty() && !next.equalsIgnoreCase("reverse")) {
+                    this.mmsCompat$nextStop = next;
+                }
+                if (!this.mmsCompat$nextStop.isEmpty()) {
+                    graphics.drawString(font,
+                            MetroText.tr("mms_compat.metro.hud.next") + ": " + this.mmsCompat$nextStop,
+                            x, y + 12, PROX_COLOR);
+                }
+            }
+        }
     }
 
     /**

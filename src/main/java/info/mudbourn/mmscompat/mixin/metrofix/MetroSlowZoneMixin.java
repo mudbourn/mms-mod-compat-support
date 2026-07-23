@@ -25,8 +25,9 @@ import com.example.modmetro.config.MetroConfig;
  * dropped and ModMetro's own acceleration (+10%/tick) rules as usual.
  *
  * A second distinct marker while the ramp is active skips the stairs and
- * pins the cap at the floor until the next stop clears the train — used
- * on terminal-loop approaches where the turnaround must be taken slowly.
+ * pins the cap at PINNED_FRACTION (10% of top speed — a crawl, well below
+ * the 25% ramp floor) until the next stop clears the train — used on
+ * terminal-loop approaches where the turnaround must be taken slowly.
  *
  * When a LEAD cart passes over a marker (1-2 blocks beneath the rail,
  * same scan depth and sub-stepped path scan ModMetro uses for station
@@ -53,6 +54,9 @@ public abstract class MetroSlowZoneMixin {
     private static final int TICKS_PER_STEP = 2;      // halved from 5: full ramp in ~10 ticks
     @Unique
     private static final double STOPPED_EPSILON = 0.01;
+    /** Double-bump pin: crawl at 10% of top speed, well below the ramp floor. */
+    @Unique
+    private static final double PINNED_FRACTION = 0.10;
 
     /** Ramp phases: NONE -> DOWN -> HOLD -> (at station) ARMED_UP -> UP -> NONE */
     @Unique
@@ -76,6 +80,9 @@ public abstract class MetroSlowZoneMixin {
     /** Last marker block hit, so the same marker can't count twice across ticks. */
     @Unique
     private BlockPos mmsCompat$lastMarkerPos = null;
+    /** Double-bump pin active: cap at PINNED_FRACTION instead of the step formula. */
+    @Unique
+    private boolean mmsCompat$pinned = false;
 
     @Inject(method = "tickLeadCart", at = @At("TAIL"))
     private void mmsCompat$slowZone(Level world, CallbackInfo ci) {
@@ -95,6 +102,8 @@ public abstract class MetroSlowZoneMixin {
                 this.mmsCompat$rampPhase = PHASE_ARMED_UP;
                 this.mmsCompat$rampTicks = 0;
                 this.mmsCompat$lastMarkerPos = null;
+                // the pin releases at the stop; departure climbs the normal stairs
+                this.mmsCompat$pinned = false;
             }
         } else if (this.mmsCompat$rampPhase == PHASE_ARMED_UP) {
             if (!atRest) {
@@ -135,9 +144,11 @@ public abstract class MetroSlowZoneMixin {
                             this.mmsCompat$rampPhase = PHASE_DOWN;
                             this.mmsCompat$rampSteps = 0;
                         } else {
-                            // second bump: floor, immediately and until a stop
+                            // second bump: pin to the crawl cap, immediately
+                            // and until a stop
                             this.mmsCompat$rampPhase = PHASE_HOLD;
                             this.mmsCompat$rampSteps = RAMP_STEPS;
+                            this.mmsCompat$pinned = true;
                         }
                         this.mmsCompat$rampTicks = 0;
                         break outer;
@@ -166,9 +177,12 @@ public abstract class MetroSlowZoneMixin {
             }
         }
 
-        // Enforce the current cap: top speed minus 15% of top per step.
+        // Enforce the current cap: top speed minus 15% of top per step, or
+        // the flat crawl cap while double-bump pinned.
         if (this.mmsCompat$rampPhase != PHASE_NONE && this.mmsCompat$rampSteps > 0) {
-            double cap = MetroConfig.speed * (1.0 - STEP_FRACTION * this.mmsCompat$rampSteps);
+            double cap = MetroConfig.speed * (this.mmsCompat$pinned
+                    ? PINNED_FRACTION
+                    : 1.0 - STEP_FRACTION * this.mmsCompat$rampSteps);
             if (speed > cap) {
                 double s = cap / speed;
                 self.setDeltaMovement(vel.x * s, vel.y, vel.z * s);
