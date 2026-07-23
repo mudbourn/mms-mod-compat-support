@@ -63,7 +63,14 @@ public abstract class MetroFollowerSeparationMixin {
         double dz = self.getZ() - front.getZ();
         double distToFront = Math.sqrt(dx * dx + dz * dz);
 
-        boolean overlapping = distToFront < spacing - 0.35;
+        // Straight-line closeness is only evidence of overlap if the TRACK
+        // agrees. Through a curve the two carts can be a block apart in the
+        // air and a full correct spacing apart along the rail; treating that
+        // as overlap used to run the follower at 0.9x the car ahead for the
+        // whole curve, opening the gap until ModMetro's catch-up snap fired
+        // and tore the train apart. See MetroCurveFollowMixin.
+        boolean overlapping = distToFront < spacing - 0.35
+                && mmsCompat$railGapBelow(world, self, front, spacing - 0.35);
         boolean stacked = !overlapping && mmsCompat$isStacked(world, self);
         Vec3 frontVel = front.getDeltaMovement();
         boolean frontMoving = frontVel.horizontalDistance() > 0.05;
@@ -96,8 +103,31 @@ public abstract class MetroFollowerSeparationMixin {
         }
         this.mmsCompat$lastSnapTick = self.tickCount;
 
-        // Walk back from the front car along this cart's own travel heading
-        // (approach direction is noise when already overlapped/stacked).
+        // Preferred: walk back along the actual rail spine from the car
+        // ahead. Correct on curves as well as straight track.
+        BlockPos myRail = this.findNearestRail(world, self.blockPosition());
+        BlockPos frontRail = this.findNearestRail(world, front.blockPosition());
+        if (myRail != null && frontRail != null) {
+            java.util.List<BlockPos> spine = MetroRailPath.spineBehind(
+                    world, myRail, frontRail, (int) Math.ceil(spacing) + 10, 4);
+            if (spine != null) {
+                int from = Math.max(1, (int) Math.round(spacing));
+                for (int back = from; back <= from + 3 && back < spine.size(); back++) {
+                    BlockPos rail = spine.get(back);
+                    if (mmsCompat$railOccupied(world, rail, self)) {
+                        continue;
+                    }
+                    self.teleportTo(rail.getX() + 0.5, rail.getY() + 0.5, rail.getZ() + 0.5);
+                    self.setDeltaMovement(front.getDeltaMovement());
+                    return;
+                }
+                return; // spine known but fully occupied: leave it be
+            }
+        }
+
+        // Fallback (no rail connection found): walk back from the front car
+        // along this cart's own travel heading (approach direction is noise
+        // when already overlapped/stacked).
         Vec3 dir = this.lastDirection;
         double dirLen = Math.sqrt(dir.x * dir.x + dir.z * dir.z);
         if (dirLen < 0.001) {
@@ -123,6 +153,20 @@ public abstract class MetroFollowerSeparationMixin {
         }
         // No free rail found within range: leave position alone rather than
         // teleporting off-rail — the mod's own logic retries next tick.
+    }
+
+    /** True only if the carts really are closer than {@code limit} ALONG THE RAIL. */
+    @Unique
+    private boolean mmsCompat$railGapBelow(Level world, MetroCartEntity self,
+                                           MetroCartEntity front, double limit) {
+        BlockPos myRail = this.findNearestRail(world, self.blockPosition());
+        BlockPos frontRail = this.findNearestRail(world, front.blockPosition());
+        if (myRail == null || frontRail == null) {
+            return true; // no rail reading: trust the straight-line result
+        }
+        int railDist = MetroRailPath.distance(world, myRail, frontRail,
+                (int) Math.ceil(limit) + 10);
+        return railDist < 0 || railDist < limit;
     }
 
     @Unique
