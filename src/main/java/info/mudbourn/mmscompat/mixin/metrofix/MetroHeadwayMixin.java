@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.example.modmetro.MetroCartEntity;
+import com.example.modmetro.config.MetroConfig;
 
 /**
  * Headway control: keeps whole trains from convoying nose-to-tail.
@@ -78,7 +79,14 @@ public abstract class MetroHeadwayMixin {
         }
 
         if (this.mmsCompat$headwayCapped) {
-            double cap = 0.85 * MetroSpeedScale.effectiveMaxSpeed(self);
+            // 85% of the actual line speed. effectiveMaxSpeed alone is the
+            // ACE/vanilla cart baseline (0.4 b/t empty, ~1.0 ridden) — using
+            // it as the base clamped headway-capped trains to vanilla-minecart
+            // pace instead of a gentle 15% drain, which read as "the train
+            // never recovers its speed after a stop" whenever another train
+            // sat within 24 blocks ahead (routine once slow zones bunch
+            // trains up at a terminal).
+            double cap = 0.85 * Math.max(MetroConfig.speed, MetroSpeedScale.effectiveMaxSpeed(self));
             Vec3 vel = self.getDeltaMovement();
             double sp = vel.horizontalDistance();
             if (sp > cap) {
