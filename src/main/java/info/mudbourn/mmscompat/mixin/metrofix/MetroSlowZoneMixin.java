@@ -35,6 +35,9 @@ import com.example.modmetro.config.MetroConfig;
  * Followers pace off the lead cart's velocity, so the whole train ramps
  * as one.
  *
+ * Departure starts a marker blackout (DEPARTURE_GRACE_TICKS) so a reversing
+ * train can cross its own approach markers without re-triggering them.
+ *
  * The up-ramp arms when the train is waiting at a station OR simply
  * stopped (belt and suspenders: ModMetro's waiting flag is synced a tick
  * late on arrival and an early return in the occupancy re-check can skip
@@ -57,6 +60,16 @@ public abstract class MetroSlowZoneMixin {
     /** Double-bump pin: crawl at 10% of top speed, well below the ramp floor. */
     @Unique
     private static final double PINNED_FRACTION = 0.10;
+    /**
+     * Marker blackout after departing a stop, in ticks. On terminal loops the
+     * reverse stop sends the train back OVER its own approach markers; since
+     * lastMarkerPos resets at the stop (markers must re-arm each lap), the
+     * outbound pass would re-trigger them and pin the train slow all the way
+     * to the next station. 40 ticks comfortably outlasts the ~10-tick up-ramp
+     * so the train is past the marker zone before markers count again.
+     */
+    @Unique
+    private static final int DEPARTURE_GRACE_TICKS = 40;
 
     /** Ramp phases: NONE -> DOWN -> HOLD -> (at station) ARMED_UP -> UP -> NONE */
     @Unique
@@ -83,6 +96,9 @@ public abstract class MetroSlowZoneMixin {
     /** Double-bump pin active: cap at PINNED_FRACTION instead of the step formula. */
     @Unique
     private boolean mmsCompat$pinned = false;
+    /** Ticks left in the post-departure marker blackout. */
+    @Unique
+    private int mmsCompat$graceTicks = 0;
 
     @Inject(method = "tickLeadCart", at = @At("TAIL"))
     private void mmsCompat$slowZone(Level world, CallbackInfo ci) {
@@ -107,10 +123,16 @@ public abstract class MetroSlowZoneMixin {
             }
         } else if (this.mmsCompat$rampPhase == PHASE_ARMED_UP) {
             if (!atRest) {
-                // Permitted to move again: climb back up.
+                // Permitted to move again: climb back up, markers blacked out
+                // until the train clears its own approach marker zone.
                 this.mmsCompat$rampPhase = PHASE_UP;
                 this.mmsCompat$rampTicks = 0;
+                this.mmsCompat$graceTicks = DEPARTURE_GRACE_TICKS;
             }
+        }
+
+        if (this.mmsCompat$graceTicks > 0) {
+            this.mmsCompat$graceTicks--;
         }
 
         // Marker scan — in every moving phase, not just NONE. Sub-step along
@@ -126,7 +148,8 @@ public abstract class MetroSlowZoneMixin {
         //    reaches a stop and is cleared to move (normal recovery). This is
         //    the terminal-loop case: two markers on the approach pin the
         //    train slow through the tight turnaround.
-        if (this.mmsCompat$rampPhase != PHASE_ARMED_UP && speed >= STOPPED_EPSILON) {
+        if (this.mmsCompat$rampPhase != PHASE_ARMED_UP && this.mmsCompat$graceTicks == 0
+                && speed >= STOPPED_EPSILON) {
             Vec3 now = new Vec3(self.getX(), self.getY(), self.getZ());
             Vec3 prev = now.subtract(vel);
             int steps = Math.max(1, (int) Math.ceil(speed));
