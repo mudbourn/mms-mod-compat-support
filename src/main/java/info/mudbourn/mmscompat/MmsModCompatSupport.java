@@ -1,6 +1,5 @@
 package info.mudbourn.mmscompat;
 
-import info.mudbourn.mmscompat.map.ChunkSyncManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -23,6 +22,7 @@ public class MmsModCompatSupport implements ModInitializer {
     public void onInitialize() {
         // Creative-menu embargo strip
         CreativeEmbargo.register();
+        info.mudbourn.mmscompat.waypoint.SharedWaypointServer.register();
 
         // /vanity command (permission level 0 \u2014 public)
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
@@ -34,7 +34,6 @@ public class MmsModCompatSupport implements ModInitializer {
             JobsPlusActionCooldown.forget(handler.getPlayer().getUUID()));
 
         // Xaero's World Map chunk sync (server-side packet handler)
-        ChunkSyncManager.register();
 
         LOG.info("MMS Mod Compat Support v0.5.0 loaded — creative-tab dedup, REI null-filter fix, AR item-drop suppression, creative embargo, /vanity, Jobs+ XP cooldown, warrior job, Xaero chunk sync.");
     }

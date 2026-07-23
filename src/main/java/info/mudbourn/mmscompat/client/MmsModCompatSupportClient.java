@@ -7,6 +7,7 @@ public class MmsModCompatSupportClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         if (FabricLoader.getInstance().isModLoaded("xaerominimap")) {
+            SharedWaypointClient.register();
             XaeroGlobalWaypointBridge.register();
         }
     }
