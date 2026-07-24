@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -18,6 +19,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.example.modmetro.MetroCartEntity;
+
+import info.mudbourn.mmscompat.duck.MetroTailStationDuck;
 
 /**
  * Makes a {@code reverse} station actually reverse the TRAIN, not just the
@@ -135,6 +138,19 @@ public abstract class MetroReverseConsistMixin {
         newHead.getEntityData().set(CURRENT_STATION, oldLead.getEntityData().get(CURRENT_STATION));
         newHead.getEntityData().set(NEXT_STATION, oldLead.getEntityData().get(NEXT_STATION));
 
+        // The tail-station guard is lead-only state too, and losing it is what
+        // produced the stop-and-double-back at reverse stations: the new head
+        // starts life train-length past the platform, so ModMetro's own
+        // lastStationPos guard is >10 blocks stale and clears on its first
+        // tick, while lastServed was recorded on the OLD lead. The rear cart —
+        // the old lead, still rolling over the reverse block — then re-triggers
+        // the stop a few blocks into the departure and reverses the train back.
+        BlockPos served = ((MetroTailStationDuck) oldLead).mmsCompat$getLastServed();
+        if (served == null) {
+            served = leadAcc.mmsCompat$getLastStationPos();
+        }
+        ((MetroTailStationDuck) newHead).mmsCompat$setLastServed(served);
+
         UUID newTrainId = newHead.getUUID();
         for (int i = 0; i < n; i++) {
             MetroCartEntity cart = train.get(i);
@@ -143,6 +159,9 @@ public abstract class MetroReverseConsistMixin {
             acc.mmsCompat$setLastDirection(dir);
             acc.mmsCompat$setCachedFrontCart(null);
             acc.mmsCompat$setCachedLeadCart(null);
+            // Every cached neighbour reference in the consist now points the
+            // wrong way round, the rear-cart cache included.
+            ((MetroTailStationDuck) cart).mmsCompat$invalidateTailCache();
             cart.setDeltaMovement(Vec3.ZERO);
             cart.hurtMarked = true;
         }

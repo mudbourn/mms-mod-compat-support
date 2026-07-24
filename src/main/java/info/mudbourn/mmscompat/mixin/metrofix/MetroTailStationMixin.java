@@ -20,6 +20,8 @@ import com.example.modmetro.MetroCartEntity;
 import com.example.modmetro.StationBlockEntity;
 import com.example.modmetro.config.MetroConfig;
 
+import info.mudbourn.mmscompat.duck.MetroTailStationDuck;
+
 /**
  * Lets EITHER end of the train activate a station — the last cart as well as
  * the first.
@@ -56,9 +58,15 @@ import com.example.modmetro.config.MetroConfig;
  *  - {@link #mmsCompat$lastServed} — the station this train most recently
  *    waited at, remembered until it serves a DIFFERENT one. This is the guard
  *    that actually holds during departure.
+ *
+ * Both guards live on whichever cart is index 0, so a reversal — which hands
+ * that role to a different entity — must carry them across. It does, via
+ * {@link info.mudbourn.mmscompat.duck.MetroTailStationDuck}; without that the
+ * new head departs with an empty {@code lastServed} and re-stops the train on
+ * the reverse block it is pulling off, which reverses it straight back.
  */
 @Mixin(MetroCartEntity.class)
-public abstract class MetroTailStationMixin {
+public abstract class MetroTailStationMixin implements MetroTailStationDuck {
 
     /** Re-resolve the rear cart at most this often (ticks); consists rarely change. */
     @Unique
@@ -151,6 +159,22 @@ public abstract class MetroTailStationMixin {
         self.getEntityData().set(CURRENT_STATION, be.getStationName());
         self.setDeltaMovement(Vec3.ZERO);
         self.hurtMarked = true;
+    }
+
+    @Override
+    public BlockPos mmsCompat$getLastServed() {
+        return this.mmsCompat$lastServed;
+    }
+
+    @Override
+    public void mmsCompat$setLastServed(BlockPos pos) {
+        this.mmsCompat$lastServed = pos;
+    }
+
+    @Override
+    public void mmsCompat$invalidateTailCache() {
+        this.mmsCompat$cachedTail = null;
+        this.mmsCompat$tailRescanTick = -100;
     }
 
     /**
