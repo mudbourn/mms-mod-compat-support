@@ -1,0 +1,10 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.apoli",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.apoli.ApoliMixinGate",
+  "mixins": ["ApoliArmorNullGuardMixin"],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
