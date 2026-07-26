@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.mapsync",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.mapsync.MapSyncMixinGate",
+  "mixins": [
+    "ScheduledScanOffThreadMixin",
+    "ScanSaveOnServerThreadMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -35,11 +35,13 @@ public class JobXpCooldownMixin {
         if (serverPlayer == null || serverPlayer.level().isClientSide()) return experience;
 
         CooldownCategory category = JobsPlusActionCooldown.getCooldownType();
+        String actionId = JobsPlusActionCooldown.getCurrentActionId();
         // Clean up ThreadLocal after reading
         JobsPlusActionCooldown.clearCooldownType();
 
+        boolean unrecognised = category == CooldownCategory.NONE;
         // NONE means the action type was not recognised — default to HARD
-        if (category == CooldownCategory.NONE) {
+        if (unrecognised) {
             category = CooldownCategory.HARD;
         }
 
@@ -47,11 +49,36 @@ public class JobXpCooldownMixin {
         String jobId = jobInstance.getIdentifier().toString();
 
         if (JobsPlusActionCooldown.isOnCooldown(serverPlayer.getUUID(), jobId, category, gameTime)) {
+            report(serverPlayer, jobId, actionId, category, unrecognised, experience, 0.0);
             return 0.0; // block XP entirely
         }
 
         // Not on cooldown — arm it and let XP through at full value
         JobsPlusActionCooldown.setCooldown(serverPlayer.getUUID(), jobId, category, gameTime);
+        report(serverPlayer, jobId, actionId, category, unrecognised, experience, experience);
         return experience;
+    }
+
+    /**
+     * Live readout for {@code /mmsjob watch}.  Without this the whole cooldown
+     * path is invisible in-game — which is how the dead capture mixin went
+     * unnoticed for days.
+     */
+    @org.spongepowered.asm.mixin.Unique
+    private void report(Player player, String jobId, String actionId,
+                        CooldownCategory category, boolean unrecognised,
+                        double in, double out) {
+        if (!JobsPlusActionCooldown.isWatching(player.getUUID())) return;
+
+        boolean blocked = out <= 0;
+        String job = jobId.contains(":") ? jobId.substring(jobId.indexOf(':') + 1) : jobId;
+
+        player.displayClientMessage(net.minecraft.network.chat.Component.literal(
+            (blocked ? "§c✗ " : "§a✓ ") + job
+                + " §7" + actionId
+                + " §8[" + category + (unrecognised ? "*" : "") + "] "
+                + (blocked
+                    ? "§cblocked §8(" + String.format("%.1f", in) + " xp)"
+                    : "§a+" + String.format("%.1f", out) + " xp")), false);
     }
 }

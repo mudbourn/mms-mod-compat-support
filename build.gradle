@@ -22,6 +22,8 @@ dependencies {
     modCompileOnly files("libs/modmetro-v1.jar")
     modCompileOnly files("libs/rubies-1.0.0+1.21.11.jar")
     modCompileOnly files("libs/xaerominimap-fabric-1.21.11-26.4.2.jar")
+    modCompileOnly files("libs/mapsyncer-1.0.3-fabric-1.21.11-bugfix.jar")
+    modCompileOnly files("libs/Origins-Legacy-1.12.16+1.21.11.jar")
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"

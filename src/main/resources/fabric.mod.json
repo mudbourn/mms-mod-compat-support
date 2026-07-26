@@ -6,10 +6,29 @@
   "description": "Server-wide mod compat patches for MMSLive01. Creative-tab dedup, REI null-filter fix, CA+Trinkets bridge, AR item-drop suppression, creative embargo, vanity armor, Jobs+ lang fix, ModMetro seating + localization.",
   "environment": "*",
   "entrypoints": {
-    "main": ["info.mudbourn.mmscompat.MmsModCompatSupport"],
-    "client": ["info.mudbourn.mmscompat.client.MmsModCompatSupportClient"]
+    "main": [
+      "info.mudbourn.mmscompat.MmsModCompatSupport"
+    ],
+    "client": [
+      "info.mudbourn.mmscompat.client.MmsModCompatSupportClient"
+    ]
   },
-  "mixins": ["mms_compat.mixins.json", "mms_compat.rei.mixins.json", "mms_compat.rubies.mixins.json", "mms_compat.ca.mixins.json", "mms_compat.ar.mixins.json", "mms_compat.jeg.mixins.json", "mms_compat.furnish.mixins.json", "mms_compat.jobsplus.mixins.json", "mms_compat.metro.mixins.json", "mms_compat.metrofix.mixins.json", "mms_compat.xaero.mixins.json", "mms_compat.cpa.mixins.json"],
+  "mixins": [
+    "mms_compat.mixins.json",
+    "mms_compat.rei.mixins.json",
+    "mms_compat.rubies.mixins.json",
+    "mms_compat.ca.mixins.json",
+    "mms_compat.ar.mixins.json",
+    "mms_compat.jeg.mixins.json",
+    "mms_compat.furnish.mixins.json",
+    "mms_compat.jobsplus.mixins.json",
+    "mms_compat.metro.mixins.json",
+    "mms_compat.metrofix.mixins.json",
+    "mms_compat.xaero.mixins.json",
+    "mms_compat.cpa.mixins.json",
+    "mms_compat.mapsync.mixins.json",
+    "mms_compat.originsclasses.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.16.0",
     "minecraft": "~1.21.11",

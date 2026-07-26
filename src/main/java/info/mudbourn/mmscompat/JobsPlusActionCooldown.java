@@ -14,6 +14,7 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Per-player-per-job hard-cooldown system for Jobs+ XP grants.
@@ -51,6 +52,7 @@ public final class JobsPlusActionCooldown {
 
     public static void setCooldownType(String actionTypeId) {
         CURRENT_CATEGORY.set(categoryFor(actionTypeId));
+        CURRENT_ACTION_ID.set(actionTypeId);
     }
 
     public static CooldownCategory getCooldownType() {
@@ -59,6 +61,29 @@ public final class JobsPlusActionCooldown {
 
     public static void clearCooldownType() {
         CURRENT_CATEGORY.remove();
+        CURRENT_ACTION_ID.remove();
+    }
+
+    /** Raw action type id for the grant in flight — watch readout only. */
+    private static final ThreadLocal<String> CURRENT_ACTION_ID = new ThreadLocal<>();
+
+    public static String getCurrentActionId() {
+        String id = CURRENT_ACTION_ID.get();
+        return id == null ? "<none>" : id;
+    }
+
+    // ── XP watch (/mmsjob watch) ─────────────────────────────────────────
+    private static final Set<UUID> WATCHERS = ConcurrentHashMap.newKeySet();
+
+    /** @return {@code true} if watching is now on for this player. */
+    public static boolean toggleWatch(UUID playerId) {
+        if (WATCHERS.remove(playerId)) return false;
+        WATCHERS.add(playerId);
+        return true;
+    }
+
+    public static boolean isWatching(UUID playerId) {
+        return !WATCHERS.isEmpty() && WATCHERS.contains(playerId);
     }
 
     // ── Config ───────────────────────────────────────────────────────────
@@ -159,6 +184,7 @@ public final class JobsPlusActionCooldown {
     /** Drops all cooldown state for a player — call on disconnect. */
     public static void forget(UUID playerId) {
         COOLDOWNS.keySet().removeIf(key -> key.startsWith(playerId + "|"));
+        WATCHERS.remove(playerId);
     }
 
     // ── Config I/O ───────────────────────────────────────────────────────

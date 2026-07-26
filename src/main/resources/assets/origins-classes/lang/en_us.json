@@ -1,0 +1,17 @@
+{
+  "_comment": "MMS override — appends the Jobs+ synergy line to each class description. Every class except Nitwit has a matching Jobs+ job of the same name; Nitwit is unchoosable on MMS (see data/origins-classes/origins/nitwit.json).",
+  "origin.origins-classes.warrior.description": "These honorable fighters favor the sword and shield to take down their foes.\n\n§6⚔ Pairs with the Warrior job.§7 Level it for stacking combat bonuses.",
+  "origin.origins-classes.archer.description": "One shot, one kill.\n\n§6⚔ Pairs with the Archer job.§7 Level it for stacking ranged bonuses.",
+  "origin.origins-classes.rogue.description": "Usually known to be thieves and robbers, rogues are proficient in ambushes and stealth attacks.\n\n§6⚔ Pairs with the Rogue job.§7 Level it for stacking stealth bonuses.",
+  "origin.origins-classes.beastmaster.description": "Beastmasters are solitary people who prefer the company of animals.\n\n§6⚔ Pairs with the Beastmaster job.§7 Level it for stacking taming bonuses.",
+  "origin.origins-classes.blacksmith.description": "Valued friends of anyone, Blacksmiths are able to create better tools, weapons and armor.\n\n§6⚔ Pairs with the Blacksmith job.§7 Level it for stacking forging bonuses.",
+  "origin.origins-classes.cleric.description": "They have learned how to channel the magic present in the world and use that to their advantage.\n\n§6⚔ Pairs with the Cleric job.§7 Level it for stacking brewing bonuses.",
+  "origin.origins-classes.cook.description": "There is no one better to prepare your food than a Cook.\n\n§6⚔ Pairs with the Cook job.§7 Level it for stacking cooking bonuses.",
+  "origin.origins-classes.farmer.description": "Farmers have been known to provide everyone with food for as long as anyone can remember.\n\n§6⚔ Pairs with the Farmer job.§7 Level it for stacking harvest bonuses.",
+  "origin.origins-classes.merchant.description": "Always looking for an additional emerald, Merchants are proficient traders.\n\n§6⚔ Pairs with the Merchant job.§7 Level it for stacking trading bonuses.",
+  "origin.origins-classes.rancher.description": "Making the most of animals, Ranchers are able to gather many useful resources.\n\n§6⚔ Pairs with the Rancher job.§7 Level it for stacking livestock bonuses.",
+  "origin.origins-classes.miner.description": "Miners are the most proficient at digging up the earth's treasures.\n\n§6⚔ Pairs with the Miner job.§7 Level it for stacking mining bonuses.",
+  "origin.origins-classes.lumberjack.description": "Trees should watch out when Lumberjacks are around.\n\n§6⚔ Pairs with the Lumberjack job.§7 Level it for stacking woodcutting bonuses.",
+  "origin.origins-classes.explorer.description": "Explorers find their way through the most difficult terrain easily and discover hidden landmarks.\n\n§6⚔ Pairs with the Explorer job.§7 Level it for stacking travel bonuses.",
+  "_comment2": "The static \"Pairs with X\" line is the fallback. ClassJobSynergyMixin appends a second, live line reporting whether the viewer holds that job and at what level."
+}

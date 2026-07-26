@@ -35,6 +35,10 @@ public class MmsModCompatSupport implements ModInitializer {
         // /vanity command (permission level 0 \u2014 public)
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             registerVanityCommand(dispatcher);
+            // /mmsjob debug wrappers (op only) — self-targeted Jobs+ test harness
+            if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jobsplus")) {
+                info.mudbourn.mmscompat.jobsplus.JobsDebugCommand.register(dispatcher);
+            }
         });
 
         // Drop Jobs+ XP cooldown state when a player leaves
