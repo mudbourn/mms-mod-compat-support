@@ -59,19 +59,13 @@ public abstract class MetroHudTextMixin {
     @Unique
     private static final int PROX_COLOR = 0xFFFF55;
 
-    /** Vehicle the cached next-stop belongs to; a remount resets the cache. */
-    @Unique
-    private int mmsCompat$nextVehicleId = -1;
-    @Unique
-    private String mmsCompat$nextStop = "";
-
     /**
      * Persistent next-stop line. Stock only draws "Prox:" while the cart's
      * synced NEXT_STATION is non-empty — it blanks between a reverse and the
      * following stop, and reads "reverse" while turning around. We suppress
-     * the stock line (matched by its yellow color) and always draw our own
-     * from a cache of the last real station name, updated whenever the cart
-     * syncs a new one (i.e. every stop it reaches).
+     * the stock line (matched by its yellow color) and always draw our own,
+     * preferring the server-synced next station (always fresh) over the
+     * entity tracker (blanks during reversals).
      */
     @Redirect(
         method = "renderMetroHUD",
@@ -93,17 +87,16 @@ public abstract class MetroHudTextMixin {
             Entity vehicle = Minecraft.getInstance().player != null
                     ? Minecraft.getInstance().player.getVehicle() : null;
             if (vehicle instanceof MetroCartEntity cart) {
-                if (vehicle.getId() != this.mmsCompat$nextVehicleId) {
-                    this.mmsCompat$nextVehicleId = vehicle.getId();
-                    this.mmsCompat$nextStop = "";
-                }
-                String next = cart.getNextStation();
-                if (!next.isEmpty() && !next.equalsIgnoreCase("reverse")) {
-                    this.mmsCompat$nextStop = next;
-                }
-                if (!this.mmsCompat$nextStop.isEmpty()) {
+                // Prefer server-synced next station (always current);
+                // fall back to entity tracker for immediate feedback.
+                String synced = MetroLineSyncClient.nextStationFor(vehicle.getId());
+                String live = cart.getNextStation();
+                String next = !synced.isEmpty() ? synced
+                            : (!live.isEmpty() && !live.equalsIgnoreCase("reverse")) ? live
+                            : "";
+                if (!next.isEmpty()) {
                     graphics.drawString(font,
-                            MetroText.tr("mms_compat.metro.hud.next") + ": " + this.mmsCompat$nextStop,
+                            MetroText.tr("mms_compat.metro.hud.next") + ": " + next,
                             x, y + 12, PROX_COLOR);
                 }
             }
@@ -132,27 +125,14 @@ public abstract class MetroHudTextMixin {
                     ? Minecraft.getInstance().player.getVehicle() : null;
             String line = vehicle != null ? MetroLineSyncClient.lineFor(vehicle.getId()) : "";
             if (!line.isEmpty()) {
-                // The line NAME is builder-authored and usually already carries
-                // its own label ("Line 1", "Línea 1"), so prefixing the
-                // translated label unconditionally rendered "Line Line 1".
-                // Only label a bare name.
-                String label = MetroText.tr("mms_compat.metro.gui.line");
-                title += " - " + (mmsCompat$alreadyLabelled(line, label) ? line : label + " " + line);
+                // Just show the line name as-is — no "Line" prefix.
+                // Builders name their lines ("Line 1", "XP FARM RAILWAY", etc.)
+                // and a forced label is always wrong for at least some of them.
+                title += " - " + line;
             }
             graphics.drawCenteredString(font, title, x, y, color);
             return;
         }
         graphics.drawCenteredString(font, MetroText.rewriteHud(text), x, y, color);
-    }
-
-    /**
-     * True if a builder-authored line name already begins with its own label,
-     * in either shipped language, so it should not be labelled again.
-     */
-    @Unique
-    private static boolean mmsCompat$alreadyLabelled(String line, String label) {
-        String l = line.trim().toLowerCase(java.util.Locale.ROOT);
-        return l.startsWith(label.trim().toLowerCase(java.util.Locale.ROOT))
-                || l.startsWith("line") || l.startsWith("l\u00ednea") || l.startsWith("linea");
     }
 }

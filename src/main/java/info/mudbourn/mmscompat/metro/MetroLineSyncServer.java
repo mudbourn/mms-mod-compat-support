@@ -47,10 +47,12 @@ public final class MetroLineSyncServer {
                 }
                 String line = ((MetroCartLineAccessor) cart).mmsCompat$getLineName();
                 if (line == null) line = "";
-                String key = cart.getId() + "|" + line;
+                String next = cart.getNextStation();
+                if (next == null) next = "";
+                String key = cart.getId() + "|" + line + "|" + next;
                 if (!key.equals(lastSent.get(player.getUUID()))
                         && ServerPlayNetworking.canSend(player, MetroLineSync.TYPE)) {
-                    ServerPlayNetworking.send(player, new MetroLineSync(cart.getId(), line));
+                    ServerPlayNetworking.send(player, new MetroLineSync(cart.getId(), line, next));
                     lastSent.put(player.getUUID(), key);
                 }
             }

@@ -15,6 +15,7 @@ import java.util.Map;
 public final class MetroLineSyncClient {
 
     private static final Map<Integer, String> lines = new HashMap<>();
+    private static final Map<Integer, String> nextStations = new HashMap<>();
 
     private MetroLineSyncClient() {}
 
@@ -22,13 +23,26 @@ public final class MetroLineSyncClient {
         // payload type itself is registered in MetroLineSyncServer.register(),
         // which runs from the common initializer on both physical sides
         ClientPlayNetworking.registerGlobalReceiver(MetroLineSync.TYPE, (payload, context) ->
-                context.client().execute(() -> lines.put(payload.vehicleId(), payload.line())));
+                context.client().execute(() -> {
+                    lines.put(payload.vehicleId(), payload.line());
+                    if (!payload.nextStation().isEmpty()) {
+                        nextStations.put(payload.vehicleId(), payload.nextStation());
+                    }
+                }));
 
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> lines.clear());
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            lines.clear();
+            nextStations.clear();
+        });
     }
 
     /** Line name for a vehicle entity id, or "" while unknown/unsynced. */
     public static String lineFor(int vehicleId) {
         return lines.getOrDefault(vehicleId, "");
+    }
+
+    /** Next station for a vehicle entity id, or "" while unknown/unsynced. */
+    public static String nextStationFor(int vehicleId) {
+        return nextStations.getOrDefault(vehicleId, "");
     }
 }
