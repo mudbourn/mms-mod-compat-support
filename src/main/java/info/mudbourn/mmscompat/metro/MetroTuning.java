@@ -68,6 +68,14 @@ public final class MetroTuning {
      */
     public static double heading_flip_distance = 3.0;
 
+    /**
+     * Per-tick velocity multiplier applied when a metro cart is accelerating
+     * after leaving a station.  The vanilla ModMetro value is 1.1 (hardcoded).
+     * Lower values = slower acceleration; 1.0 = no acceleration (cart never
+     * speeds up).  Range clamped to [1.0, 1.5] at load/save.
+     */
+    public static double acceleration_factor = 1.1;
+
     /** Log every accepted heading flip with its position. Diagnostic only. */
     public static boolean heading_flip_debug = false;
 
@@ -84,6 +92,7 @@ public final class MetroTuning {
         String cruise_marker_block = "minecraft:target";
         double heading_flip_distance = 3.0;
         boolean heading_flip_debug = false;
+        double acceleration_factor = 1.1;
     }
 
     public static void load() {
@@ -103,6 +112,9 @@ public final class MetroTuning {
                     heading_flip_distance = data.heading_flip_distance;
                 }
                 heading_flip_debug = data.heading_flip_debug;
+                if (data.acceleration_factor >= 1.0 && data.acceleration_factor <= 1.5) {
+                    acceleration_factor = data.acceleration_factor;
+                }
             }
         } catch (Exception e) {
             LOG.warn("[mms_compat] could not read {} — using defaults", FILE.getName(), e);
@@ -118,6 +130,7 @@ public final class MetroTuning {
             data.cruise_marker_block = cruise_marker_block;
             data.heading_flip_distance = heading_flip_distance;
             data.heading_flip_debug = heading_flip_debug;
+            data.acceleration_factor = acceleration_factor;
             GSON.toJson(data, writer);
         } catch (Exception e) {
             LOG.warn("[mms_compat] could not write {}", FILE.getName(), e);

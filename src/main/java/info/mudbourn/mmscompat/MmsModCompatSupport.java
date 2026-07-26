@@ -32,9 +32,10 @@ public class MmsModCompatSupport implements ModInitializer {
             info.mudbourn.mmscompat.metro.MetroTuning.load();
         }
 
-        // /vanity command (permission level 0 \u2014 public)
+        // /vanity command (permission level 0 — public)
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             registerVanityCommand(dispatcher);
+            registerMetroAccelCommand(dispatcher);
             // /mmsjob debug wrappers (op only) — self-targeted Jobs+ test harness
             if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jobsplus")) {
                 info.mudbourn.mmscompat.jobsplus.JobsDebugCommand.register(dispatcher);
@@ -94,5 +95,43 @@ public class MmsModCompatSupport implements ModInitializer {
             || slot == EquipmentSlot.CHEST
             || slot == EquipmentSlot.LEGS
             || slot == EquipmentSlot.FEET;
+    }
+
+    private void registerMetroAccelCommand(com.mojang.brigadier.CommandDispatcher<net.minecraft.commands.CommandSourceStack> dispatcher) {
+        dispatcher.register(Commands.literal("metroaccel")
+            .requires(src -> src.permissions().hasPermission(
+                new net.minecraft.server.permissions.Permission.HasCommandLevel(
+                    net.minecraft.server.permissions.PermissionLevel.byId(2))))
+            .executes(ctx -> {
+                ctx.getSource().sendSuccess(() ->
+                    Component.literal(String.format(
+                        "\u00a77Metro acceleration factor: \u00a7e%.4f \u00a77(default 1.1)",
+                        info.mudbourn.mmscompat.metro.MetroTuning.acceleration_factor)), false);
+                return 1;
+            })
+            .then(Commands.literal("set")
+                .then(Commands.argument("value",
+                        com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg(1.0, 1.5))
+                    .executes(ctx -> {
+                        double val = com.mojang.brigadier.arguments.DoubleArgumentType.getDouble(ctx, "value");
+                        info.mudbourn.mmscompat.metro.MetroTuning.acceleration_factor = val;
+                        info.mudbourn.mmscompat.metro.MetroTuning.save();
+                        ctx.getSource().sendSuccess(() ->
+                            Component.literal(String.format(
+                                "\u00a7aMetro acceleration factor set to \u00a7e%.4f", val)), true);
+                        return 1;
+                    })
+                )
+            )
+            .then(Commands.literal("reset")
+                .executes(ctx -> {
+                    info.mudbourn.mmscompat.metro.MetroTuning.acceleration_factor = 1.1;
+                    info.mudbourn.mmscompat.metro.MetroTuning.save();
+                    ctx.getSource().sendSuccess(() ->
+                        Component.literal("\u00a7aMetro acceleration factor reset to default (1.1)"), true);
+                    return 1;
+                })
+            )
+        );
     }
 }
