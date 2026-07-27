@@ -41,13 +41,13 @@ public abstract class MetroRailSnapMixin {
     private static final double LIFT_CORRECTION = 0.5 - 0.0625;
 
     @Redirect(method = "tickFollowerCart", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Entity;teleportTo(DDD)V", ordinal = 0))
+            target = "Lcom/example/modmetro/MetroCartEntity;teleportTo(DDD)V", ordinal = 0))
     private void mmsCompat$fixOffRailRecoveryY(MetroCartEntity self, double x, double y, double z) {
         self.teleportTo(x, y - LIFT_CORRECTION, z);
     }
 
     @Redirect(method = "tickFollowerCart", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Entity;teleportTo(DDD)V", ordinal = 1))
+            target = "Lcom/example/modmetro/MetroCartEntity;teleportTo(DDD)V", ordinal = 1))
     private void mmsCompat$fixCatchupSnapY(MetroCartEntity self, double x, double y, double z) {
         self.teleportTo(x, y - LIFT_CORRECTION, z);
     }
