@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.HashMap;
@@ -21,6 +22,14 @@ import java.util.UUID;
  * stations, and switching carts. Poll-based on purpose: ModMetro assigns
  * {@code lineName} deep inside its movement tick, and hooking that spot
  * would couple us to fragile decompiled internals for no gain at 1 Hz.
+ *
+ * {@code lineName} is a lead-cart-only field, and followers only copy
+ * CURRENT/NEXT_STATION from the lead once they're within spacing + 4 of it —
+ * never {@code lineName} at all. So this reads off the rider's consist lead
+ * (via {@code leadCartUuid}), not the rider's own cart, which is what
+ * actually fixes the blank HUD for followers. See also
+ * {@code MetroFollowerLineSyncMixin}, which propagates {@code lineName} onto
+ * followers unconditionally for any other consumer of the field.
  *
  * Only referenced when ModMetro is loaded (guarded in the mod initializer),
  * so the MetroCartEntity import never resolves without it.
@@ -45,9 +54,19 @@ public final class MetroLineSyncServer {
                     lastSent.remove(player.getUUID());
                     continue;
                 }
-                String line = ((MetroCartLineAccessor) cart).mmsCompat$getLineName();
+                // lineName and NEXT_STATION only get copied onto followers once
+                // they've settled into spacing (see tickFollowerCart); reading
+                // straight off the rider's cart leaves stragglers and the
+                // just-boarded blank. Read off the consist lead instead.
+                MetroCartEntity leadCart = cart;
+                if (cart.getLeadCartUuid() != null
+                        && cart.level() instanceof ServerLevel sw
+                        && sw.getEntity(cart.getLeadCartUuid()) instanceof MetroCartEntity resolved) {
+                    leadCart = resolved;
+                }
+                String line = ((MetroCartLineAccessor) leadCart).mmsCompat$getLineName();
                 if (line == null) line = "";
-                String next = cart.getNextStation();
+                String next = leadCart.getNextStation();
                 if (next == null) next = "";
                 String key = cart.getId() + "|" + line + "|" + next;
                 if (!key.equals(lastSent.get(player.getUUID()))

@@ -24,6 +24,7 @@
   "mms_compat.metro.cmd.train_spawned": "Metro train spawned with %s cars.",
   "mms_compat.metro.cmd.cars_removed": "Removed %s cars in total.",
   "mms_compat.metro.cmd.config_updated": "Configuration updated: %s = %s",
+  "mms_compat.metro.cmd.spawn_insufficient_track": "Not enough track: %s of %s cars fit.",
 
   "mms_compat.absolutrevive.downed": "%s is down!"
 }

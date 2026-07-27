@@ -22,5 +22,6 @@
   "mms_compat.metro.cmd.unknown_variable": "Variable desconocida.",
   "mms_compat.metro.cmd.train_spawned": "Tren de metro generado con %s vagones.",
   "mms_compat.metro.cmd.cars_removed": "Se removieron %s vagones en total.",
-  "mms_compat.metro.cmd.config_updated": "Configuración actualizada: %s = %s"
+  "mms_compat.metro.cmd.config_updated": "Configuración actualizada: %s = %s",
+  "mms_compat.metro.cmd.spawn_insufficient_track": "Vía insuficiente: caben %s de %s vagones."
 }

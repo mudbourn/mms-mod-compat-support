@@ -119,7 +119,7 @@ public abstract class MetroFollowerSeparationMixin {
                     if (mmsCompat$railOccupied(world, rail, self)) {
                         continue;
                     }
-                    self.teleportTo(rail.getX() + 0.5, rail.getY() + 0.5, rail.getZ() + 0.5);
+                    self.teleportTo(rail.getX() + 0.5, rail.getY() + 0.0625, rail.getZ() + 0.5);
                     self.setDeltaMovement(front.getDeltaMovement());
                     return;
                 }
@@ -149,7 +149,7 @@ public abstract class MetroFollowerSeparationMixin {
             if (rail == null || mmsCompat$railOccupied(world, rail, self)) {
                 continue;
             }
-            self.teleportTo(rail.getX() + 0.5, rail.getY() + 0.5, rail.getZ() + 0.5);
+            self.teleportTo(rail.getX() + 0.5, rail.getY() + 0.0625, rail.getZ() + 0.5);
             self.setDeltaMovement(front.getDeltaMovement());
             return;
         }

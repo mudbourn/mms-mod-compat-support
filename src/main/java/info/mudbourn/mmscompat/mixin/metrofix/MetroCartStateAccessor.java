@@ -47,4 +47,10 @@ public interface MetroCartStateAccessor {
 
     @Accessor("stationWaitTimer")
     void mmsCompat$setStationWaitTimer(int ticks);
+
+    @Accessor("leadSearchRetries")
+    int mmsCompat$getLeadSearchRetries();
+
+    @Accessor("leadSearchRetries")
+    void mmsCompat$setLeadSearchRetries(int retries);
 }

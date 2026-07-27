@@ -35,23 +35,44 @@ public final class MetroTrainDespawn {
                 return InteractionResult.PASS;
             }
             if (world instanceof ServerLevel level) {
-                UUID trainId = cart.getLeadCartUuid();
-                List<MetroCartEntity> train = new ArrayList<>();
-                for (Entity e : level.getEntities(MetroMod.METRO_CART, ent -> true)) {
-                    if (e instanceof MetroCartEntity other
-                            && (other == cart || Objects.equals(trainId, other.getLeadCartUuid()))) {
-                        train.add(other);
-                    }
-                }
-                for (MetroCartEntity c : train) {
-                    c.ejectPassengers();
-                    c.discard();
+                int removed = despawnTrain(level, cart.getLeadCartUuid());
+                if (removed == 0) {
+                    // No leadCartUuid, or nothing else matched it: the swung-at
+                    // cart is the whole train.
+                    cart.ejectPassengers();
+                    cart.discard();
+                    removed = 1;
                 }
                 player.displayClientMessage(Component.literal(
-                        String.format(MetroText.tr("mms_compat.metro.cmd.cars_removed"), train.size())), true);
+                        String.format(MetroText.tr("mms_compat.metro.cmd.cars_removed"), removed)), true);
             }
             // cancel the swing on both sides — the spawner never damages carts
             return InteractionResult.SUCCESS;
         });
+    }
+
+    /**
+     * Discards every loaded cart sharing {@code trainId} as its lead UUID.
+     * Returns the number removed (0 if {@code trainId} is null or nothing
+     * matched). Server-side only — call only with a {@link ServerLevel}.
+     *
+     * Shared with {@code MetroOrphanRecoveryMixin}, which despawns a single
+     * cart that could not be re-linked to any consist.
+     */
+    public static int despawnTrain(ServerLevel level, UUID trainId) {
+        if (trainId == null) {
+            return 0;
+        }
+        List<MetroCartEntity> train = new ArrayList<>();
+        for (Entity e : level.getEntities(MetroMod.METRO_CART, ent -> true)) {
+            if (e instanceof MetroCartEntity other && Objects.equals(trainId, other.getLeadCartUuid())) {
+                train.add(other);
+            }
+        }
+        for (MetroCartEntity c : train) {
+            c.ejectPassengers();
+            c.discard();
+        }
+        return train.size();
     }
 }

@@ -3,7 +3,7 @@
   "package": "info.mudbourn.mmscompat.mixin.metrofix",
   "compatibilityLevel": "JAVA_21",
   "plugin": "info.mudbourn.mmscompat.mixin.metrofix.MetroFixGate",
-  "mixins": ["MetroCartLineAccessor", "MetroCartStateAccessor", "MetroCartSeatMixin", "MetroCommandTextMixin", "MetroCommandNodeMixin", "MetroStationOccupancyDisableMixin", "MetroDirectionPersistMixin", "MetroFollowerSeparationMixin", "MetroCurveFollowMixin", "MetroReverseConsistMixin", "MetroHeadingFlipMixin", "MetroTailStationMixin", "MetroStationReseatMixin", "MetroCruiseZoneMixin", "MetroSlowZoneMixin", "MetroHeadwayMixin", "MetroTrackerSmoothingMixin", "MetroAccelerationMixin"],
+  "mixins": ["MetroCartLineAccessor", "MetroCartStateAccessor", "MetroCartSeatMixin", "MetroCommandTextMixin", "MetroCommandNodeMixin", "MetroStationOccupancyDisableMixin", "MetroDirectionPersistMixin", "MetroFollowerSeparationMixin", "MetroCurveFollowMixin", "MetroReverseConsistMixin", "MetroHeadingFlipMixin", "MetroTailStationMixin", "MetroStationReseatMixin", "MetroCruiseZoneMixin", "MetroSlowZoneMixin", "MetroHeadwayMixin", "MetroTrackerSmoothingMixin", "MetroAccelerationMixin", "MetroFollowerLineSyncMixin", "MetroRailSnapMixin", "MetroOrphanRecoveryMixin", "MetroTrainIndexSyncMixin", "MetroDepartureBrakeGraceMixin", "MetroSpawnValidationMixin"],
   "client": ["client.StationScreenTextMixin", "client.StationScreenStyleMixin", "client.MetroHudTextMixin"],
   "injectors": {
     "defaultRequire": 1

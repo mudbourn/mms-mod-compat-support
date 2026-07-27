@@ -79,6 +79,55 @@ public final class MetroTuning {
     /** Log every accepted heading flip with its position. Diagnostic only. */
     public static boolean heading_flip_debug = false;
 
+    /**
+     * How far above the expected on-rail height ({@code railY + 0.0625}) a
+     * cart can sit before {@code isOnRail} stops trusting the block-column
+     * check and reports it as off-rail so recovery re-fires. See
+     * {@code MetroRailSnapMixin}.
+     */
+    public static double rail_vertical_tolerance = 0.2;
+
+    /**
+     * Consecutive failed {@code findFrontCart} lookups a follower tolerates
+     * before escalating past ModMetro's own retry counter, which it
+     * increments forever but never reads. Below this, a missed lookup is
+     * treated as a one-tick fluke (chunk edge, network hiccup); at or above
+     * it, the cart is presumed genuinely orphaned (see
+     * {@code MetroOrphanRecoveryMixin}).
+     */
+    public static int orphan_recovery_ticks = 100;
+
+    /**
+     * If an orphaned follower cannot be re-linked to its own train or
+     * re-indexed onto another consist on the same line, despawn it rather
+     * than leaving it to strand forever and choke arrivals behind it.
+     */
+    public static boolean orphan_despawn_enabled = true;
+
+    /**
+     * Ticks after a cart is (re)loaded from NBT during which orphan
+     * escalation will re-link or re-index but never despawn. Covers the
+     * server-restart window where {@code MetroTrainIndexSyncMixin} has to
+     * resync the synched train index before {@code findFrontCart} lookups
+     * can succeed again — without this, every follower at index &ge;2 gets
+     * despawned within seconds of every reboot. Default ~30s at 20 tps.
+     */
+    public static int post_reload_grace_ticks = 600;
+
+    /**
+     * Ticks after a lead cart departs a station during which
+     * {@code applyProximityBraking} is suppressed entirely, letting
+     * ModMetro's 1.1x/tick ramp climb back to line speed uncontested. Without
+     * this, a train genuinely near another (e.g. the block ahead hasn't
+     * cleared yet) can have ramp-up and proximity braking settle at a stable
+     * equilibrium below top speed that never resolves. See
+     * {@code MetroDepartureBrakeGraceMixin}. Default 30 ticks (1.5s) — enough
+     * for the ramp to clear MetroConfig.speed at 1.1x/tick from a 0.4
+     * departure velocity in the common case, short enough that a train
+     * departing into close traffic still brakes promptly once it expires.
+     */
+    public static int departure_brake_grace_ticks = 30;
+
     /** Resolved lazily — block registries are not populated at mod-init time. */
     private static Block resolvedMarker;
     private static String resolvedFrom;
@@ -93,6 +142,11 @@ public final class MetroTuning {
         double heading_flip_distance = 3.0;
         boolean heading_flip_debug = false;
         double acceleration_factor = 1.1;
+        int orphan_recovery_ticks = 100;
+        boolean orphan_despawn_enabled = true;
+        double rail_vertical_tolerance = 0.2;
+        int post_reload_grace_ticks = 600;
+        int departure_brake_grace_ticks = 30;
     }
 
     public static void load() {
@@ -115,6 +169,19 @@ public final class MetroTuning {
                 if (data.acceleration_factor >= 1.0 && data.acceleration_factor <= 1.5) {
                     acceleration_factor = data.acceleration_factor;
                 }
+                if (data.orphan_recovery_ticks > 0) {
+                    orphan_recovery_ticks = data.orphan_recovery_ticks;
+                }
+                orphan_despawn_enabled = data.orphan_despawn_enabled;
+                if (data.rail_vertical_tolerance > 0.0) {
+                    rail_vertical_tolerance = data.rail_vertical_tolerance;
+                }
+                if (data.post_reload_grace_ticks >= 0) {
+                    post_reload_grace_ticks = data.post_reload_grace_ticks;
+                }
+                if (data.departure_brake_grace_ticks >= 0) {
+                    departure_brake_grace_ticks = data.departure_brake_grace_ticks;
+                }
             }
         } catch (Exception e) {
             LOG.warn("[mms_compat] could not read {} — using defaults", FILE.getName(), e);
@@ -131,6 +198,11 @@ public final class MetroTuning {
             data.heading_flip_distance = heading_flip_distance;
             data.heading_flip_debug = heading_flip_debug;
             data.acceleration_factor = acceleration_factor;
+            data.orphan_recovery_ticks = orphan_recovery_ticks;
+            data.orphan_despawn_enabled = orphan_despawn_enabled;
+            data.rail_vertical_tolerance = rail_vertical_tolerance;
+            data.post_reload_grace_ticks = post_reload_grace_ticks;
+            data.departure_brake_grace_ticks = departure_brake_grace_ticks;
             GSON.toJson(data, writer);
         } catch (Exception e) {
             LOG.warn("[mms_compat] could not write {}", FILE.getName(), e);
