@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_21",
   "plugin": "info.mudbourn.mmscompat.CpaMixinPlugin",
   "client": [
-    "CarryOnCompatAnimationMixin"
+    "CarryOnCompatAnimationMixin",
+    "ForceEnableArmAnimationMixin"
   ],
   "injectors": {
     "defaultRequire": 1
