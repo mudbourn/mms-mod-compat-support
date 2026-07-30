@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "plugin": "info.mudbourn.mmscompat.mixin.biscuitroll.BiscuitRollMixinGate",
   "mixins": ["BiscuitRollAnimationReloadMixin"],
+  "client": ["UselessReptileReloadAnimationIdMixin"],
   "injectors": {
     "defaultRequire": 1
   }

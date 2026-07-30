@@ -18,9 +18,19 @@ public class BiscuitRollMixinGate implements IMixinConfigPlugin {
     private final boolean present =
         FabricLoader.getInstance().isModLoaded("biscuit_roll");
 
+    private final boolean reptilePresent =
+        FabricLoader.getInstance().isModLoaded("uselessreptile");
+
     @Override public void onLoad(String mixinPackage) {}
     @Override public String getRefMapperConfig() { return null; }
-    @Override public boolean shouldApplyMixin(String targetClassName, String mixinClassName) { return present; }
+
+    @Override public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        // The animation-id fix lives in a Useless Reptile class, not a Biscuit Roll one.
+        if (targetClassName.startsWith("nordmods.uselessreptile.")) {
+            return reptilePresent;
+        }
+        return present;
+    }
     @Override public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {}
     @Override public List<String> getMixins() { return List.of(); }
     @Override public void preApply(String targetClassName, org.objectweb.asm.tree.ClassNode targetClass, String mixinClassName, org.spongepowered.asm.mixin.extensibility.IMixinInfo mixinInfo) {}
