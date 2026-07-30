@@ -1,0 +1,11 @@
+{
+  "stone_impact": {
+    "category": "player",
+    "subtitle": "subtitles.mms_compat.stone_impact",
+    "sounds": [
+      "mms_compat:stone_impact1",
+      "mms_compat:stone_impact2",
+      "mms_compat:stone_impact3"
+    ]
+  }
+}

@@ -2,7 +2,7 @@
   "required": true,
   "package": "info.mudbourn.mmscompat.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": ["CreativeTabDedupMixin"],
+  "mixins": ["CreativeTabDedupMixin", "ArrowFlightMixin"],
   "injectors": {
     "defaultRequire": 1
   }

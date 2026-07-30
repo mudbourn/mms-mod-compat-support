@@ -19,8 +19,11 @@ import xaero.hud.minimap.waypoint.set.WaypointSet;
 import xaero.hud.minimap.world.MinimapWorld;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -86,8 +89,22 @@ public final class SharedWaypointClient {
         if (world == null) return;
 
         String dimension = client.player.level().dimension().identifier().toString();
-        List<Entry> wanted = CACHE.get(dimension);
-        if (wanted == null) return; // no server data (yet) — leave whatever exists alone
+        List<Entry> serverList = CACHE.get(dimension);
+        if (serverList == null) return; // no server data (yet) — leave whatever exists alone
+
+        // Publishing copies rather than moves (see XaeroGlobalWaypointBridge), so
+        // a player's own GLOBAL waypoint comes back down in the shared list while
+        // they still hold it. Mirroring it as well would show it twice, so skip
+        // any entry whose name the player already has in one of their own sets.
+        // If they later delete their copy, the shared one reappears on the next
+        // reconcile — the mirror stays self-healing.
+        Set<String> ownNames = ownWaypointNames(world);
+        List<Entry> wanted = new ArrayList<>();
+        for (Entry e : serverList) {
+            if (!ownNames.contains(e.name().toLowerCase(Locale.ROOT))) {
+                wanted.add(e);
+            }
+        }
 
         WaypointSet set = world.getWaypointSet(SharedWaypoints.SET_NAME);
         if (set == null) {
@@ -116,6 +133,18 @@ public final class SharedWaypointClient {
         }
         LOGGER.info("mirrored {} shared waypoints into Xaero set '{}' for {}",
                 wanted.size(), SharedWaypoints.SET_NAME, dimension);
+    }
+
+    /** Lowercased names of every waypoint the player holds outside the shared set. */
+    private static Set<String> ownWaypointNames(MinimapWorld world) {
+        Set<String> names = new HashSet<>();
+        for (WaypointSet set : world.getIterableWaypointSets()) {
+            if (SharedWaypoints.SET_NAME.equals(set.getName())) continue;
+            for (Waypoint w : set.getWaypoints()) {
+                names.add(w.getName().toLowerCase(Locale.ROOT));
+            }
+        }
+        return names;
     }
 
     private static String signature(WaypointSet set) {

@@ -11,13 +11,11 @@
   "mms_compat.metro.gui.cancel": "Cancel",
   "mms_compat.metro.gui.action_continue": "Action: Continue to next",
   "mms_compat.metro.gui.action_reverse": "Action: Reverse direction",
-
   "mms_compat.metro.hud.car": "Car",
   "mms_compat.metro.hud.station": "Station",
   "mms_compat.metro.hud.next": "Next stop",
   "mms_compat.metro.hud.waiting": "Waiting",
   "mms_compat.metro.hud.in_transit": "In transit...",
-
   "mms_compat.metro.cmd.must_be_riding": "You must be riding a metro car to use this command.",
   "mms_compat.metro.cmd.train_removed": "Train removed successfully.",
   "mms_compat.metro.cmd.unknown_variable": "Unknown variable.",
@@ -25,6 +23,6 @@
   "mms_compat.metro.cmd.cars_removed": "Removed %s cars in total.",
   "mms_compat.metro.cmd.config_updated": "Configuration updated: %s = %s",
   "mms_compat.metro.cmd.spawn_insufficient_track": "Not enough track: %s of %s cars fit.",
-
-  "mms_compat.absolutrevive.downed": "%s is down!"
+  "mms_compat.absolutrevive.downed": "%s is down!",
+  "subtitles.mms_compat.stone_impact": "Stone strikes"
 }

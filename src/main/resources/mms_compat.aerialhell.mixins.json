@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.aerialhell",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.aerialhell.AerialHellMixinGate",
+  "client": [
+    "StellarChickenTintMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

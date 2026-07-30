@@ -1,0 +1,15 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.expandedweaponry",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.expandedweaponry.ExpandedWeaponryMixinGate",
+  "mixins": [
+    "LongbowVelocityMixin"
+  ],
+  "client": [
+    "LongbowDrawSoundMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.mutantmonsters",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.mutantmonsters.MutantMonstersMixinGate",
+  "mixins": [
+    "SkeletonArmorQuickDrawMixin",
+    "SkeletonArmorInfinityMixin",
+    "AttachmentBuilderIdentifierMixin",
+    "CreeperMinionShoulderSyncMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -11,6 +11,9 @@
     ],
     "client": [
       "info.mudbourn.mmscompat.client.MmsModCompatSupportClient"
+    ],
+    "server": [
+      "info.mudbourn.mmscompat.dfu.DfuWarmup"
     ]
   },
   "mixins": [
@@ -28,7 +31,12 @@
     "mms_compat.cpa.mixins.json",
     "mms_compat.mapsync.mixins.json",
     "mms_compat.originsclasses.mixins.json",
-    "mms_compat.apoli.mixins.json"
+    "mms_compat.apoli.mixins.json",
+    "mms_compat.inspectanim.mixins.json",
+    "mms_compat.aerialhell.mixins.json",
+    "mms_compat.mutantmonsters.mixins.json",
+    "mms_compat.expandedweaponry.mixins.json",
+    "mms_compat.biscuitroll.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.0",

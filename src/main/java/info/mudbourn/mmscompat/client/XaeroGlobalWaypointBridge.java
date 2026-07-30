@@ -1,8 +1,6 @@
 package info.mudbourn.mmscompat.client;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import info.mudbourn.mmscompat.waypoint.SharedWaypoints;
@@ -23,19 +21,32 @@ import xaero.hud.minimap.waypoint.set.WaypointSet;
 import xaero.hud.minimap.world.MinimapWorld;
 
 /**
- * Publish half of the shared-waypoint flow, driven entirely from Xaero's UI:
+ * Publish half of the shared-waypoint flow, driven from Xaero's UI:
  *
- *   - Toggle a waypoint to GLOBAL visibility in Xaero  ->  it is published
- *     to the server's shared list (SharedWaypointServer).
- *   - Once the server syncs it back into the shared "MMS" set
- *     (SharedWaypointClient), the private copy is removed: the waypoint has
- *     MIGRATED from the player's personal set to the shared one.
+ *   - A waypoint set to GLOBAL visibility is published to the server's shared
+ *     list (SharedWaypointServer).
+ *   - A waypoint left LOCAL is never published.
  *
- * Waypoints left LOCAL (Xaero's default) never leave the client — privacy
- * by architecture. The shared set itself is never scanned, so server->client
- * sync can never feed back into an upload.
+ * <p><b>Copy, never move.</b> Publishing does not touch the player's own
+ * waypoint — it stays in their set, with their colour and placement, exactly as
+ * they made it. An earlier version deleted the private copy once the server
+ * echoed the waypoint back ("migration"), which silently removed player-made
+ * waypoints; that behaviour is gone and must not come back. To avoid the
+ * waypoint then appearing twice, {@link SharedWaypointClient} skips mirroring
+ * any shared entry whose name the player already has locally.</p>
  *
- * Publish-only by design: unpublishing is an explicit /mmswp remove.
+ * <p><b>Known consequence of the trigger.</b> Xaero's GLOBAL setting means
+ * "render at any distance", not "share this" — its tooltip reads "Local: only
+ * visible when in the maximum waypoint render distance. Global: always
+ * visible." Using it as the publish trigger is a deliberate server convention,
+ * not an inference about player intent: marking a waypoint always-visible for
+ * personal convenience will also publish its name and coordinates server-wide.
+ * {@code isGlobal()} is likewise true for WORLD_MAP_GLOBAL. Players who want a
+ * waypoint kept private must leave it LOCAL.</p>
+ *
+ * <p>The shared set itself is never scanned, so server->client sync can never
+ * feed back into an upload. Publish-only by design: unpublishing is an explicit
+ * /mmswp remove.</p>
  */
 public final class XaeroGlobalWaypointBridge {
 
@@ -80,40 +91,23 @@ public final class XaeroGlobalWaypointBridge {
         }
 
         String dimension = client.player.level().dimension().identifier().toString();
-        boolean migrated = false;
 
         for (WaypointSet set : world.getIterableWaypointSets()) {
             if (SharedWaypoints.SET_NAME.equals(set.getName())) {
                 continue; // server-fed set: mirror only, never a publish source
             }
-            List<Waypoint> toMigrate = new ArrayList<>();
             for (Waypoint w : set.getWaypoints()) {
                 if (w.getPurpose() != WaypointPurpose.NORMAL) continue;   // no deathpoints
                 if (w.isTemporary() || w.isDestination()) continue;       // no one-off markers
                 if (!w.getVisibility().isGlobal()) continue;              // LOCAL = private, untouched
 
                 if (SharedWaypointClient.isShared(dimension, w.getName())) {
-                    // Server list has it (our publish confirmed, or the name
-                    // already existed): drop the private copy — migration done.
-                    toMigrate.add(w);
+                    // Already on the server list — nothing to do. The player's
+                    // own copy stays exactly where it is.
+                    pendingPublishes.remove(w.getName());
                 } else {
                     publish(dimension, w);
                 }
-            }
-            for (Waypoint w : toMigrate) {
-                removeByName(set, w.getName());
-                pendingPublishes.remove(w.getName());
-                migrated = true;
-                LOGGER.info("waypoint '{}' migrated to shared set '{}'",
-                        w.getName(), SharedWaypoints.SET_NAME);
-            }
-        }
-
-        if (migrated) {
-            try {
-                session.getWorldManagerIO().saveWorld(world);
-            } catch (Exception e) {
-                LOGGER.error("failed to save Xaero waypoints after migration", e);
             }
         }
     }
@@ -142,14 +136,5 @@ public final class XaeroGlobalWaypointBridge {
             }
         }
         return 15; // white
-    }
-
-    private static void removeByName(WaypointSet set, String name) {
-        var iter = set.getWaypoints().iterator();
-        while (iter.hasNext()) {
-            if (name.equals(iter.next().getName())) {
-                iter.remove();
-            }
-        }
     }
 }

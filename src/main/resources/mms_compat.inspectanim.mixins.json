@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.inspectanim",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.InspectAnimMixinPlugin",
+  "client": [
+    "InspectAnimPoseCaptureMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

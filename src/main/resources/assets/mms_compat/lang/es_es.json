@@ -10,18 +10,17 @@
   "mms_compat.metro.gui.cancel": "Cancelar",
   "mms_compat.metro.gui.action_continue": "Acción: Continuar hacia siguiente",
   "mms_compat.metro.gui.action_reverse": "Acción: Invertir dirección",
-
   "mms_compat.metro.hud.car": "Vagón",
   "mms_compat.metro.hud.station": "Estación",
   "mms_compat.metro.hud.next": "Próxima parada",
   "mms_compat.metro.hud.waiting": "Espera",
   "mms_compat.metro.hud.in_transit": "En tránsito...",
-
   "mms_compat.metro.cmd.must_be_riding": "Debes estar montado en un vagón del metro para usar este comando.",
   "mms_compat.metro.cmd.train_removed": "Tren removido correctamente.",
   "mms_compat.metro.cmd.unknown_variable": "Variable desconocida.",
   "mms_compat.metro.cmd.train_spawned": "Tren de metro generado con %s vagones.",
   "mms_compat.metro.cmd.cars_removed": "Se removieron %s vagones en total.",
   "mms_compat.metro.cmd.config_updated": "Configuración actualizada: %s = %s",
-  "mms_compat.metro.cmd.spawn_insufficient_track": "Vía insuficiente: caben %s de %s vagones."
+  "mms_compat.metro.cmd.spawn_insufficient_track": "Vía insuficiente: caben %s de %s vagones.",
+  "subtitles.mms_compat.stone_impact": "Golpe de piedra"
 }

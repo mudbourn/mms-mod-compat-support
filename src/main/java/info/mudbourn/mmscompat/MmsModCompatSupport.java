@@ -24,6 +24,10 @@ public class MmsModCompatSupport implements ModInitializer {
         CreativeEmbargo.register();
         info.mudbourn.mmscompat.waypoint.SharedWaypointServer.register();
 
+        // Anchor/tuna swing cooldown, tuna knockback, glaive blocking
+        MmsSounds.register();
+        WeaponTuning.register();
+
         // Metro line-name sync (ModMetro never sends lineName to clients)
         if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("modmetro")) {
             info.mudbourn.mmscompat.metro.MetroLineSyncServer.register();
@@ -80,6 +84,44 @@ public class MmsModCompatSupport implements ModInitializer {
                     Component.literal("\u00a77Item made \u00a7evanity\u00a77 (cosmetic, no stats, no enchants, unbreakable)"), false);
                 return 1;
             })
+            .then(Commands.literal("kits")
+                .executes(ctx -> {
+                    String names = String.join("§7, §e", VanityKits.KITS.keySet());
+                    ctx.getSource().sendSuccess(() ->
+                        Component.literal("§7Vanity kits: §e" + names), false);
+                    return 1;
+                })
+            )
+            .then(Commands.literal("kit")
+                .then(Commands.argument("kit", com.mojang.brigadier.arguments.StringArgumentType.word())
+                    .suggests((ctx, builder) ->
+                        net.minecraft.commands.SharedSuggestionProvider.suggest(VanityKits.KITS.keySet(), builder))
+                    .executes(ctx -> {
+                        if (!(ctx.getSource().getEntity() instanceof ServerPlayer player)) {
+                            ctx.getSource().sendFailure(Component.literal("§cPlayers only."));
+                            return 0;
+                        }
+                        String name = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "kit");
+                        VanityKits.Kit kit = VanityKits.KITS.get(name);
+                        if (kit == null) {
+                            ctx.getSource().sendFailure(Component.literal(
+                                "§cNo such vanity kit: §e" + name + "§c — try §e/vanity kits"));
+                            return 0;
+                        }
+
+                        int given = VanityKits.give(player, kit);
+                        if (given == 0) {
+                            ctx.getSource().sendFailure(Component.literal(
+                                "§cKit §e" + name + "§c has no items available in this modset."));
+                            return 0;
+                        }
+                        final int count = given;
+                        ctx.getSource().sendSuccess(() -> Component.literal(
+                            "§7Gave §e" + count + "§7 vanity piece(s) — §e" + kit.display()), false);
+                        return count;
+                    })
+                )
+            )
         );
     }
 

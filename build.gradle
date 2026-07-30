@@ -24,6 +24,13 @@ dependencies {
     modCompileOnly files("libs/xaerominimap-fabric-1.21.11-26.4.2.jar")
     modCompileOnly files("libs/mapsyncer-1.0.3-fabric-1.21.11-bugfix.jar")
     modCompileOnly files("libs/Origins-Legacy-1.12.16+1.21.11.jar")
+    modCompileOnly files("libs/MutantMonsters-v21.11.2-mc1.21.11-Fabric.jar")
+    modCompileOnly files("libs/PuzzlesLib-v21.11.13-mc1.21.11-Fabric.jar")
+    modCompileOnly files("libs/expanded_weaponry-0.8.jar")
+    // Expanded Weaponry ships Kielson's API as a nested jar; nested jars are not
+    // put on the compile classpath, so CustomBow has to be pulled in separately.
+    modCompileOnly files("libs/kielsons-api-0.8.1.jar")
+    modCompileOnly files("libs/sounds-2.4.23+edge+1.21.11-fabric.jar")
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
