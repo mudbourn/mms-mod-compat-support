@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.lean",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.LeanMixinPlugin",
+  "client": [
+    "AvatarRendererLeanMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

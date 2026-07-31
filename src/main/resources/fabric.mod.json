@@ -41,7 +41,8 @@
     "mms_compat.computerpc.mixins.json",
     "mms_compat.frostiful.mixins.json",
     "mms_compat.heldpose.mixins.json",
-    "mms_compat.jei.mixins.json"
+    "mms_compat.jei.mixins.json",
+    "mms_compat.lean.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.0",
