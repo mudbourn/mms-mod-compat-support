@@ -157,7 +157,9 @@ public class CreativeEmbargo {
         });
     }
 
-    private static boolean isEmbargoed(ItemStack stack) {
+    // Package-external callers: MobEmbargoedEquipmentMixin reuses this so mob
+    // equipment and the creative tabs cannot disagree about what is embargoed.
+    public static boolean isEmbargoed(ItemStack stack) {
         Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         return EMBARGO.contains(id);
     }

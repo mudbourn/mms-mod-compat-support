@@ -15,7 +15,10 @@ import java.util.Set;
 public class HeldPoseMixinGate implements IMixinConfigPlugin {
 
     private final boolean present = FabricLoader.getInstance().isModLoaded("bettercombat")
-            && FabricLoader.getInstance().isModLoaded("emf_compat_core");
+            && FabricLoader.getInstance().isModLoaded("emf_compat_core")
+            // HeldPoseUnpauseMixin targets EMF itself, not the compat layer, so the
+            // gate now has to cover the mod that owns the target class as well.
+            && FabricLoader.getInstance().isModLoaded("entity_model_features");
 
     @Override public void onLoad(String mixinPackage) {}
     @Override public String getRefMapperConfig() { return null; }

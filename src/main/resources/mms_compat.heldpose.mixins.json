@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_21",
   "plugin": "info.mudbourn.mmscompat.mixin.heldpose.HeldPoseMixinGate",
   "client": [
-    "HeldPoseMixin"
+    "HeldPoseMixin",
+    "HeldPoseUnpauseMixin"
   ],
   "injectors": {
     "defaultRequire": 1

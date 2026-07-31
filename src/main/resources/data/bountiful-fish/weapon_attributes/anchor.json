@@ -2,6 +2,7 @@
   "attributes": {
     "range_bonus": 2.0,
     "two_handed": true,
+    "pose": "bettercombat:pose_two_handed_heavy",
     "category": "anchor",
     "attacks": [
       {

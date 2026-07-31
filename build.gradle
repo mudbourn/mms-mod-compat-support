@@ -31,6 +31,20 @@ dependencies {
     // put on the compile classpath, so CustomBow has to be pulled in separately.
     modCompileOnly files("libs/kielsons-api-0.8.1.jar")
     modCompileOnly files("libs/sounds-2.4.23+edge+1.21.11-fabric.jar")
+    // Added alongside the v0.9.47 mixins. These jars were committed to libs/ and the
+    // classes that import them were committed too, but these declarations were not --
+    // build.gradle was already tracked, so the edit missed the commit and the tree
+    // could not compile.
+    modCompileOnly files("libs/bettercombat-fabric-3.1.0+1.21.11.jar")
+    modCompileOnly files("libs/emf_compat_core_1.21.11_1.0.0.jar")
+    modCompileOnly files("libs/aerialhell-0.7.7.7_fabric1.21.11.jar")
+    modCompileOnly files("libs/frostiful-2.4.0+1.21.11.jar")
+    // HeldPoseUnpauseMixin targets EMF's own EMFAnimationEntityContext, not the
+    // compat layer, so EMF itself has to be on the compile classpath.
+    modCompileOnly files("libs/entity_model_features-3.2.4-1.21.11-fabric.jar")
+    // EMF's EMFEntityRenderState#emfEntity() returns an ETF type, and reading the
+    // UUID off it therefore needs Entity Texture Features on the classpath too.
+    modCompileOnly files("libs/entity_texture_features_1.21.11-fabric-7.1.jar")
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"

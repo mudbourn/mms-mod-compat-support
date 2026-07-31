@@ -62,7 +62,7 @@ public class HeldPoseMixin {
      * capture in the same frame agree — both read the same posed model — rather than
      * one clearing the other.
      */
-    private static final String SOURCE = "mms_held_pose";
+    private static final String SOURCE = info.mudbourn.mmscompat.client.HeldPoseSource.SOURCE;
 
     @Inject(method = "setupAnim", at = @At("RETURN"))
     private void mms$captureHeldPose(AvatarRenderState state, CallbackInfo ci) {
@@ -113,6 +113,23 @@ public class HeldPoseMixin {
             return false;
         }
         WeaponAttributes attributes = WeaponRegistry.getAttributes(stack);
-        return attributes != null && (attributes.pose() != null || attributes.offHandPose() != null);
+        if (attributes == null) {
+            return false;
+        }
+        return mms$isPose(attributes.pose()) || mms$isPose(attributes.offHandPose());
+    }
+
+    /**
+     * A blank pose is not a pose. {@code WeaponAttributes#pose} is a plain String
+     * deserialized straight out of {@code weapon_attributes} with no normalization,
+     * so a profile that declares {@code "pose": ""} — as {@code bettercombat:trident}
+     * does — yields a non-null empty string. A null check alone therefore treats the
+     * trident as posed, and Better Combat applies no pose animation for it, so the
+     * snapshot taken below captures DetailedAnimations' idle arms and replays them
+     * over EMF's animation every frame. That is not a missing hold, it is an actively
+     * reinstated swing, and it is why the tridents visibly swing in the air.
+     */
+    private static boolean mms$isPose(String pose) {
+        return pose != null && !pose.isBlank();
     }
 }

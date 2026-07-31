@@ -4,9 +4,14 @@
   "compatibilityLevel": "JAVA_21",
   "plugin": "info.mudbourn.mmscompat.mixin.aerialhell.AerialHellMixinGate",
   "client": [
-    "StellarChickenTintMixin"
+    "StellarChickenTintMixin",
+    "CortinariusCowShroomLayerMixin",
+    "HellSpiderSpikesLayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "BiomeShifterFieldSizeMixin"
+  ]
 }

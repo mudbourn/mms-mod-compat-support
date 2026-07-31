@@ -34,9 +34,14 @@
     "mms_compat.apoli.mixins.json",
     "mms_compat.inspectanim.mixins.json",
     "mms_compat.aerialhell.mixins.json",
+    "mms_compat.cemrelay.mixins.json",
     "mms_compat.mutantmonsters.mixins.json",
     "mms_compat.expandedweaponry.mixins.json",
-    "mms_compat.biscuitroll.mixins.json"
+    "mms_compat.biscuitroll.mixins.json",
+    "mms_compat.computerpc.mixins.json",
+    "mms_compat.frostiful.mixins.json",
+    "mms_compat.heldpose.mixins.json",
+    "mms_compat.jei.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.0",
