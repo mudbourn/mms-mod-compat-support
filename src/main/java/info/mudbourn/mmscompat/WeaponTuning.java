@@ -173,12 +173,17 @@ public final class WeaponTuning {
                                                     AttributeModifier.Operation.ADD_VALUE),
                                             EquipmentSlotGroup.HAND))));
 
-            // Glaives block. Lifted from the vanilla shield rather than
-            // hand-rolled so the delay, damage reduction and sounds match what
-            // players already expect from blocking.
+            // Glaives and the large tuna block. Lifted from the vanilla shield
+            // rather than hand-rolled so the delay, damage reduction and sounds
+            // match what players already expect from blocking.
+            //
+            // The tuna shipped a blocking *model* (large_tuna_blocking.json in the
+            // bountifulfish-tuna-3d pack) and Better Combat plays the blocking pose
+            // for it, but without this component nothing intercepts the damage —
+            // it was purely cosmetic until 0.9.56.
             BlocksAttacks shieldBlocking = Items.SHIELD.components().get(DataComponents.BLOCKS_ATTACKS);
             if (shieldBlocking != null) {
-                context.modify(WeaponTuning::isGlaive,
+                context.modify(WeaponTuning::blocksAttacks,
                         (builder, item) -> builder.set(DataComponents.BLOCKS_ATTACKS, shieldBlocking));
             }
         });
@@ -206,6 +211,11 @@ public final class WeaponTuning {
     private static ItemAttributeModifiers currentModifiers(Item item) {
         ItemAttributeModifiers current = item.components().get(DataComponents.ATTRIBUTE_MODIFIERS);
         return current == null ? ItemAttributeModifiers.EMPTY : current;
+    }
+
+    /** Items given vanilla shield blocking: every glaive, plus the large tuna. */
+    private static boolean blocksAttacks(Item item) {
+        return isGlaive(item) || is(item, LARGE_TUNA);
     }
 
     private static boolean isHeavySwinger(Item item) {

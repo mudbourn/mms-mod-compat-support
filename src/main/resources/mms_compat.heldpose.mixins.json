@@ -5,6 +5,7 @@
   "plugin": "info.mudbourn.mmscompat.mixin.heldpose.HeldPoseMixinGate",
   "client": [
     "HeldPoseMixin",
+    "BcSwingLegMixin",
     "HeldPoseUnpauseMixin"
   ],
   "injectors": {
