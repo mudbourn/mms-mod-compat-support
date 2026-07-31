@@ -6,6 +6,7 @@
   "client": [
     "HeldPoseMixin",
     "HeldPoseAdditiveMixin",
+    "BcLegPoseMixin",
     "HeldPoseUnpauseMixin"
   ],
   "injectors": {
