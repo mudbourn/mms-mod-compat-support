@@ -37,7 +37,7 @@ jobs:
       - name: Preflight
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LIBS_TOKEN: ${{ secrets.MMS_LIBS_TOKEN }}
+          LIBS_KEY: ${{ secrets.MMS_LIBS_SSH_KEY }}
         run: |
           set -euo pipefail
           INPUT="${{ inputs.version }}"
@@ -46,13 +46,13 @@ jobs:
             exit 1
           fi
 
-          if [ -z "${LIBS_TOKEN:-}" ]; then
-            echo "ERROR: secret MMS_LIBS_TOKEN is not set."
+          if [ -z "${LIBS_KEY:-}" ]; then
+            echo "ERROR: secret MMS_LIBS_SSH_KEY is not set."
             echo
             echo "This repo gitignores libs/ on purpose — those jars are other"
             echo "projects' redistributables, several ARR. CI reads them from the"
-            echo "private mudbourn/mms-libs repo, which needs a PAT with read"
-            echo "access exposed here as MMS_LIBS_TOKEN."
+            echo "private mudbourn/mms-libs repo, via a read-only deploy key"
+            echo "exposed here as MMS_LIBS_SSH_KEY."
             exit 1
           fi
 
@@ -100,7 +100,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: mudbourn/mms-libs
-          token: ${{ secrets.MMS_LIBS_TOKEN }}
+          ssh-key: ${{ secrets.MMS_LIBS_SSH_KEY }}
           path: .mms-libs
 
       - name: Stage libs/
