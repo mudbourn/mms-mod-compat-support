@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.heldpose",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.heldpose.HeldPoseMixinGate",
+  "client": [
+    "HeldPoseMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

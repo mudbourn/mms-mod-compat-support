@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.computerpc",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.computerpc.ComputerpcMixinGate",
+  "client": [
+    "DisplayCullingMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

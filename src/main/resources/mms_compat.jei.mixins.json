@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.jei",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.jei.JeiMixinGate",
+  "client": [
+    "JeiChatTooltipNullStyleMixin",
+    "JeiLifecycleReRegisterMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
