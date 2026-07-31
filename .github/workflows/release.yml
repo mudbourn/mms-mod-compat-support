@@ -2,13 +2,12 @@ name: Release
 
 # Manual only. Releasing is deliberate here: the pack pins an exact compat
 # version, and a jar whose internal version does not match its tag is the
-# "mms-deploy ships nothing" failure mode all over again. See the version
-# check below.
+# "mms-deploy ships nothing" failure mode all over again.
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version (e.g. 0.9.50) — must already match mod_version in gradle.properties"
+        description: "Release version (e.g. 0.9.50) — gradle.properties is bumped to match"
         required: true
         type: string
       prerelease:
@@ -17,7 +16,7 @@ on:
         type: boolean
         default: false
       dry_run:
-        description: "Build and validate only — do not tag or publish"
+        description: "Build and validate only — do not commit, tag, or publish"
         required: false
         type: boolean
         default: false
@@ -32,12 +31,13 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # The invariant worth protecting is "the jar's internal version equals its
-      # tag" — not "a human already edited gradle.properties". So the requested
-      # version is authoritative: if gradle.properties disagrees, bump it here
-      # and commit, rather than failing and making the release a two-step dance.
-      - name: Resolve version
-        id: version
+      # Everything that can fail without touching the repo goes first. A run
+      # that dies later must never leave main declaring a version that was
+      # never released.
+      - name: Preflight
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LIBS_TOKEN: ${{ secrets.MMS_LIBS_TOKEN }}
         run: |
           set -euo pipefail
           INPUT="${{ inputs.version }}"
@@ -46,12 +46,31 @@ jobs:
             exit 1
           fi
 
+          if [ -z "${LIBS_TOKEN:-}" ]; then
+            echo "ERROR: secret MMS_LIBS_TOKEN is not set."
+            echo
+            echo "This repo gitignores libs/ on purpose — those jars are other"
+            echo "projects' redistributables, several ARR. CI reads them from the"
+            echo "private mudbourn/mms-libs repo, which needs a PAT with read"
+            echo "access exposed here as MMS_LIBS_TOKEN."
+            exit 1
+          fi
+
           if gh release view "v${INPUT}" >/dev/null 2>&1; then
             echo "ERROR: release v${INPUT} already exists."
             echo "Pick a new version, or use dry_run to rebuild without publishing."
             exit 1
           fi
+          echo "Preflight passed for v${INPUT}."
 
+      # The requested version is authoritative: if gradle.properties disagrees,
+      # it is bumped here so the built jar is stamped correctly. The bump is
+      # only *committed* after the build succeeds — see "Commit version bump".
+      - name: Resolve version
+        id: version
+        run: |
+          set -euo pipefail
+          INPUT="${{ inputs.version }}"
           DECLARED=$(grep -E '^mod_version=' gradle.properties | cut -d= -f2- | tr -d '[:space:]')
           if [[ "$INPUT" == "$DECLARED" ]]; then
             echo "gradle.properties already at $INPUT."
@@ -72,23 +91,6 @@ jobs:
           sed -i -E "s|^mod_version=.*|mod_version=${INPUT}|" gradle.properties
           grep -E '^mod_version=' gradle.properties
           echo "bumped=true" >> "$GITHUB_OUTPUT"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Only persisted on a real release. A dry run keeps the bump in the
-      # working tree so the built jar is stamped correctly, but leaves main
-      # untouched.
-      - name: Commit version bump
-        if: ${{ steps.version.outputs.bumped == 'true' && !inputs.dry_run }}
-        run: |
-          set -euo pipefail
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add gradle.properties
-          git commit -m "Bump version to ${{ inputs.version }}"
-          git push origin HEAD:${{ github.ref_name }}
-          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-        id: bumpcommit
 
       # libs/ is gitignored on purpose: those jars are other projects'
       # redistributables under their own licenses, and several are ARR. They
@@ -140,7 +142,6 @@ jobs:
         run: ./gradlew build --no-daemon --stacktrace
 
       - name: Collect artifacts
-        id: collect
         run: |
           set -euo pipefail
           mkdir -p dist
@@ -152,9 +153,22 @@ jobs:
           ls -la dist
           test -n "$(ls -A dist)" || { echo "ERROR: no jars produced"; exit 1; }
 
-      # A dry run still builds and still enforces the version check, so it can
-      # be re-run against the current released version without burning a new
-      # one. Artifacts land on the run instead of on a release.
+      # Deliberately after the build. Committing the bump up front means a
+      # failed build leaves main claiming a version that has no release.
+      - name: Commit version bump
+        id: bumpcommit
+        if: ${{ steps.version.outputs.bumped == 'true' && !inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add gradle.properties
+          git commit -m "Bump version to ${{ inputs.version }}"
+          git push origin HEAD:${{ github.ref_name }}
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      # A dry run still builds and still stamps the version, so it can be
+      # re-run without burning a number. Artifacts land on the run.
       - name: Upload artifacts (dry run)
         if: ${{ inputs.dry_run }}
         uses: actions/upload-artifact@v4
