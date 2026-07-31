@@ -1,3 +1,8 @@
+# Third-party reference jars, needed only to compile against. They are other
+# projects' redistributables under their own licenses, and carrying them in a
+# public MIT repo misrepresents those licenses. Populate locally -- see README.
+libs/
+
 .gradle/
 build/
 .DS_Store
