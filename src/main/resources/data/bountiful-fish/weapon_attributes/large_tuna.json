@@ -12,7 +12,7 @@
         "upswing": 0.25,
         "animation": "bettercombat:two_handed_slash_horizontal_right",
         "swing_sound": {
-          "id": "mms_compat:stone_impact"
+          "id": "mms_compat:swing_left"
         }
       },
       {
@@ -22,7 +22,7 @@
         "upswing": 0.25,
         "animation": "bettercombat:two_handed_stab_left",
         "swing_sound": {
-          "id": "mms_compat:stone_impact"
+          "id": "mms_compat:swing_right"
         }
       },
       {
@@ -32,7 +32,7 @@
         "upswing": 0.25,
         "animation": "bettercombat:two_handed_slam",
         "swing_sound": {
-          "id": "mms_compat:stone_impact",
+          "id": "mms_compat:slam",
           "randomness": 0
         }
       }

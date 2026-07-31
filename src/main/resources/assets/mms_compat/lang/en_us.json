@@ -24,5 +24,7 @@
   "mms_compat.metro.cmd.config_updated": "Configuration updated: %s = %s",
   "mms_compat.metro.cmd.spawn_insufficient_track": "Not enough track: %s of %s cars fit.",
   "mms_compat.absolutrevive.downed": "%s is down!",
-  "subtitles.mms_compat.stone_impact": "Stone strikes"
+  "subtitles.mms_compat.stone_impact": "Stone strikes",
+  "subtitles.mms_compat.tuna_swing": "Fish swishes",
+  "subtitles.mms_compat.tuna_slam": "Fish slams"
 }

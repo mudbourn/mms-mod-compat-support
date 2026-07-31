@@ -7,5 +7,27 @@
       "mms_compat:stone_impact2",
       "mms_compat:stone_impact3"
     ]
+  },
+  "swing_right": {
+    "category": "player",
+    "subtitle": "subtitles.mms_compat.tuna_swing",
+    "sounds": [
+      "mms_compat:swing_right"
+    ]
+  },
+  "swing_left": {
+    "category": "player",
+    "subtitle": "subtitles.mms_compat.tuna_swing",
+    "sounds": [
+      "mms_compat:swing_left",
+      "mms_compat:swing_left2"
+    ]
+  },
+  "slam": {
+    "category": "player",
+    "subtitle": "subtitles.mms_compat.tuna_slam",
+    "sounds": [
+      "mms_compat:slam"
+    ]
   }
 }
