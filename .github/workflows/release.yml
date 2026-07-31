@@ -32,7 +32,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Validate version against gradle.properties
+      # The invariant worth protecting is "the jar's internal version equals its
+      # tag" — not "a human already edited gradle.properties". So the requested
+      # version is authoritative: if gradle.properties disagrees, bump it here
+      # and commit, rather than failing and making the release a two-step dance.
+      - name: Resolve version
+        id: version
         run: |
           set -euo pipefail
           INPUT="${{ inputs.version }}"
@@ -40,18 +45,50 @@ jobs:
             echo "ERROR: invalid version '$INPUT'. Expected X.Y.Z"
             exit 1
           fi
-          DECLARED=$(grep -E '^mod_version=' gradle.properties | cut -d= -f2- | tr -d '[:space:]')
-          if [[ "$INPUT" != "$DECLARED" ]]; then
-            echo "ERROR: version mismatch."
-            echo "  requested:            $INPUT"
-            echo "  gradle.properties:    $DECLARED"
-            echo
-            echo "Bump mod_version in gradle.properties and commit it first."
-            echo "Releasing a jar stamped with a different version than its tag means"
-            echo "the pack can pin a version that no built jar actually reports."
+
+          if gh release view "v${INPUT}" >/dev/null 2>&1; then
+            echo "ERROR: release v${INPUT} already exists."
+            echo "Pick a new version, or use dry_run to rebuild without publishing."
             exit 1
           fi
-          echo "Version $INPUT confirmed."
+
+          DECLARED=$(grep -E '^mod_version=' gradle.properties | cut -d= -f2- | tr -d '[:space:]')
+          if [[ "$INPUT" == "$DECLARED" ]]; then
+            echo "gradle.properties already at $INPUT."
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Refuse to go backwards. Re-releasing an older number under a newer
+          # tag is how the pack ends up pinning a version that does not mean
+          # what it says.
+          NEWEST=$(printf '%s\n%s\n' "$INPUT" "$DECLARED" | sort -V | tail -1)
+          if [[ "$NEWEST" != "$INPUT" ]]; then
+            echo "ERROR: $INPUT is older than gradle.properties ($DECLARED)."
+            exit 1
+          fi
+
+          echo "Bumping mod_version: $DECLARED -> $INPUT"
+          sed -i -E "s|^mod_version=.*|mod_version=${INPUT}|" gradle.properties
+          grep -E '^mod_version=' gradle.properties
+          echo "bumped=true" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Only persisted on a real release. A dry run keeps the bump in the
+      # working tree so the built jar is stamped correctly, but leaves main
+      # untouched.
+      - name: Commit version bump
+        if: ${{ steps.version.outputs.bumped == 'true' && !inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add gradle.properties
+          git commit -m "Bump version to ${{ inputs.version }}"
+          git push origin HEAD:${{ github.ref_name }}
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        id: bumpcommit
 
       # libs/ is gitignored on purpose: those jars are other projects'
       # redistributables under their own licenses, and several are ARR. They
@@ -132,10 +169,14 @@ jobs:
         run: |
           set -euo pipefail
           VERSION="${{ inputs.version }}"
+          # Tag the bump commit when there was one — github.sha still points at
+          # the pre-bump tree, and tagging that would ship a jar whose version
+          # the tagged source does not declare.
+          TARGET="${{ steps.bumpcommit.outputs.sha || github.sha }}"
           FLAGS=(--generate-notes --title "mms-mod-compat-support v${VERSION}")
           if [ "${{ inputs.prerelease }}" = "true" ]; then
             FLAGS+=(--prerelease)
           fi
           gh release create "v${VERSION}" dist/*.jar \
-            --target "${{ github.sha }}" \
+            --target "$TARGET" \
             "${FLAGS[@]}"
