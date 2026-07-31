@@ -16,6 +16,11 @@ on:
         required: false
         type: boolean
         default: false
+      dry_run:
+        description: "Build and validate only — do not tag or publish"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -25,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Validate version against gradle.properties
         run: |
@@ -53,7 +58,7 @@ jobs:
       # live in a private companion repo so this public MIT repo never carries
       # them and CI can still compile.
       - name: Check out compile-only libraries
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: mudbourn/mms-libs
           token: ${{ secrets.MMS_LIBS_TOKEN }}
@@ -87,7 +92,7 @@ jobs:
           fi
           echo "All referenced jars present."
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -110,7 +115,18 @@ jobs:
           ls -la dist
           test -n "$(ls -A dist)" || { echo "ERROR: no jars produced"; exit 1; }
 
+      # A dry run still builds and still enforces the version check, so it can
+      # be re-run against the current released version without burning a new
+      # one. Artifacts land on the run instead of on a release.
+      - name: Upload artifacts (dry run)
+        if: ${{ inputs.dry_run }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mms-mod-compat-support-${{ inputs.version }}
+          path: dist/*.jar
+
       - name: Publish release
+        if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
