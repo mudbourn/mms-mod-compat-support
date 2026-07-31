@@ -18,15 +18,6 @@ public final class HeldPoseSource {
 
     public static final String SOURCE = "mms_held_pose";
 
-    /**
-     * Separate slot for Better Combat attack legs. Kept apart from {@link #SOURCE}
-     * because the two have different lifetimes — a held pose persists for as long as
-     * the weapon is in hand, attack legs only for the swing — and PoseManager clears
-     * a whole source at a time, so sharing one key would have each clearing the
-     * other mid-frame.
-     */
-    public static final String LEG_SOURCE = "mms_bc_legs";
-
     private HeldPoseSource() {
     }
 }

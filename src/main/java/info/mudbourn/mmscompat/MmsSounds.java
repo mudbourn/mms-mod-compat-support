@@ -26,9 +26,36 @@ public final class MmsSounds {
 
     public static final SoundEvent STONE_IMPACT = SoundEvent.createVariableRangeEvent(STONE_IMPACT_ID);
 
+    /**
+     * Per-swing tuna sounds. One event per attack, because Better Combat picks a
+     * random variant from an event's pool and has no way to say "this file on
+     * this attack" — the swing→sound binding has to live in which event the
+     * attack references, not in the pool.
+     *
+     * <p>These MUST be registered here and not only declared in
+     * {@code sounds.json}. A resource pack entry maps an id to files for the
+     * client; it does not create the registry entry Better Combat resolves
+     * {@code swing_sound} against. Adding the pack entries alone in 0.9.53
+     * silenced the tuna outright, because every attack then pointed at an id
+     * with no sound event behind it.
+     */
+    public static final Identifier SWING_LEFT_ID =
+            Identifier.fromNamespaceAndPath("mms_compat", "swing_left");
+    public static final Identifier SWING_RIGHT_ID =
+            Identifier.fromNamespaceAndPath("mms_compat", "swing_right");
+    public static final Identifier SLAM_ID =
+            Identifier.fromNamespaceAndPath("mms_compat", "slam");
+
+    public static final SoundEvent SWING_LEFT = SoundEvent.createVariableRangeEvent(SWING_LEFT_ID);
+    public static final SoundEvent SWING_RIGHT = SoundEvent.createVariableRangeEvent(SWING_RIGHT_ID);
+    public static final SoundEvent SLAM = SoundEvent.createVariableRangeEvent(SLAM_ID);
+
     private MmsSounds() {}
 
     public static void register() {
         Registry.register(BuiltInRegistries.SOUND_EVENT, STONE_IMPACT_ID, STONE_IMPACT);
+        Registry.register(BuiltInRegistries.SOUND_EVENT, SWING_LEFT_ID, SWING_LEFT);
+        Registry.register(BuiltInRegistries.SOUND_EVENT, SWING_RIGHT_ID, SWING_RIGHT);
+        Registry.register(BuiltInRegistries.SOUND_EVENT, SLAM_ID, SLAM);
     }
 }

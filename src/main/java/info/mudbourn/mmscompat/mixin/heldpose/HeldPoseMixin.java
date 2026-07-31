@@ -1,7 +1,6 @@
 package info.mudbourn.mmscompat.mixin.heldpose;
 
 import info.mudbourn.mmscompat.client.CrossbowPose;
-import info.mudbourn.mmscompat.client.HeldPoseDelta;
 import net.bettercombat.api.WeaponAttributes;
 import net.bettercombat.logic.WeaponRegistry;
 import net.minecraft.client.Minecraft;
@@ -16,6 +15,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import strm.emfcompat.core.PoseManager;
 import strm.emfcompat.core.PoseSnapshot;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Keeps a Better Combat held pose from being overwritten by DetailedAnimations'
@@ -65,6 +67,15 @@ public class HeldPoseMixin {
      */
     private static final String SOURCE = info.mudbourn.mmscompat.client.HeldPoseSource.SOURCE;
 
+    /**
+     * Below this, the limb animation counts as stopped and Better Combat takes
+     * full authority. Not a blend threshold — the yield is all-or-nothing, because
+     * a partial handover would need DA's post-animation value, which is only
+     * readable from a second seam inside EMF's animate. That was tried in
+     * 0.9.51-0.9.53 and made things worse.
+     */
+    private static final float LIMBS_SETTLED = 0.01F;
+
     @Inject(method = "setupAnim", at = @At("RETURN"))
     private void mms$captureHeldPose(AvatarRenderState state, CallbackInfo ci) {
         Minecraft minecraft = Minecraft.getInstance();
@@ -83,7 +94,6 @@ public class HeldPoseMixin {
         // crossbow means loading. Release this source so the two never contend.
         if (CrossbowPose.apply(player, model)) {
             PoseManager.clearPoses(player.getUUID(), SOURCE);
-            HeldPoseDelta.clear(player.getUUID());
             return;
         }
 
@@ -97,36 +107,58 @@ public class HeldPoseMixin {
         // only the modded bows showed it).
         if (player.isUsingItem()) {
             PoseManager.clearPoses(player.getUUID(), SOURCE);
-            HeldPoseDelta.clear(player.getUUID());
+            return;
+        }
+
+        // DA yields only when its own locomotion animation has nothing to say.
+        // While the player is actually moving or crouching, DA's gait outranks the
+        // Better Combat pose and this stores nothing at all.
+        if (mms$locomotionActive(player, state)) {
+            PoseManager.clearPoses(player.getUUID(), SOURCE);
             return;
         }
 
         if (mms$hasCustomPose(player.getMainHandItem()) || mms$hasCustomPose(player.getOffhandItem())) {
-            // Subtract vanilla's walk swing from xRot so what is stored is the hold
-            // and not the running arms. See HeldPoseDelta for why this is a delta.
-            float walkPos = state.walkAnimationPos;
-            float walkSpeed = state.walkAnimationSpeed;
+            // Legs as well as arms: EMF Compat's Better Combat addon only ever saves
+            // the two arms, so DA was the unconditional last writer on legs and
+            // toheee1234's ~1600 leg keyframes per animation never reached the
+            // screen. Its applier already handles these four part names.
+            Map<String, PoseSnapshot> parts = new HashMap<>();
+            parts.put("left_leg", new PoseSnapshot(model.leftLeg));
+            parts.put("right_leg", new PoseSnapshot(model.rightLeg));
+            parts.put("left_pants", new PoseSnapshot(model.leftPants));
+            parts.put("right_pants", new PoseSnapshot(model.rightPants));
 
-            HeldPoseDelta.put(player.getUUID(), new HeldPoseDelta.ArmDelta(
-                    model.leftArm.xRot - HeldPoseDelta.vanillaArmSwing(walkPos, walkSpeed, false),
-                    model.leftArm.yRot,
-                    model.leftArm.zRot,
-                    model.rightArm.xRot - HeldPoseDelta.vanillaArmSwing(walkPos, walkSpeed, true),
-                    model.rightArm.yRot,
-                    model.rightArm.zRot));
-
-            // A marker with no arms. EMF Compat's applier skips null arm slots, so
-            // this stamps nothing over DA — HeldPoseAdditiveMixin does the applying.
-            // But HeldPoseUnpauseMixin only asks whether *something* is stored under
-            // this key, so the CEM animation stays running and the jem does not
-            // collapse. Storing real arms here is what caused the swing.
-            PoseManager.savePoses(player.getUUID(), SOURCE, null, null);
+            PoseManager.savePoses(player.getUUID(), SOURCE,
+                    new PoseSnapshot(model.leftArm), new PoseSnapshot(model.rightArm), parts);
         } else {
             // Dropping the weapon has to release the arms in the same frame, or
-            // the last delta is added onto DA's idle forever.
+            // the last posed snapshot is replayed over DA's idle forever.
             PoseManager.clearPoses(player.getUUID(), SOURCE);
-            HeldPoseDelta.clear(player.getUUID());
         }
+    }
+
+    /**
+     * Whether DA's locomotion animation is actively driving the limbs.
+     *
+     * <p>{@code walkAnimationSpeed} is the amplitude vanilla and DA both scale
+     * their limb swing by. It decays toward zero when the player stops, and while
+     * airborne, so a single test covers standing still, hovering and the tail of a
+     * landing — "until my arms and legs stop moving entirely" is literally this
+     * value reaching zero.
+     *
+     * <p>Switching authority exactly when it hits zero is what makes the handover
+     * invisible: DA's contribution at that instant is nothing, so there is nothing
+     * to pop away from. It also removes the reason the old absolute snapshot was
+     * wrong — the vanilla walk swing it used to capture is scaled by this same
+     * value, so at the moment of capture that contamination is zero by
+     * construction, and no delta subtraction is needed.
+     *
+     * <p>Crouching is excluded separately: it is a deliberate pose the player is
+     * holding, not an idle, and it does not move the walk animation.
+     */
+    private static boolean mms$locomotionActive(AbstractClientPlayer player, AvatarRenderState state) {
+        return player.isCrouching() || state.walkAnimationSpeed > LIMBS_SETTLED;
     }
 
     private static boolean mms$hasCustomPose(ItemStack stack) {
