@@ -1,6 +1,7 @@
 package info.mudbourn.mmscompat.mixin.heldpose;
 
 import info.mudbourn.mmscompat.client.CrossbowPose;
+import info.mudbourn.mmscompat.client.HeldPoseDelta;
 import net.bettercombat.api.WeaponAttributes;
 import net.bettercombat.logic.WeaponRegistry;
 import net.minecraft.client.Minecraft;
@@ -82,6 +83,7 @@ public class HeldPoseMixin {
         // crossbow means loading. Release this source so the two never contend.
         if (CrossbowPose.apply(player, model)) {
             PoseManager.clearPoses(player.getUUID(), SOURCE);
+            HeldPoseDelta.clear(player.getUUID());
             return;
         }
 
@@ -95,16 +97,35 @@ public class HeldPoseMixin {
         // only the modded bows showed it).
         if (player.isUsingItem()) {
             PoseManager.clearPoses(player.getUUID(), SOURCE);
+            HeldPoseDelta.clear(player.getUUID());
             return;
         }
 
         if (mms$hasCustomPose(player.getMainHandItem()) || mms$hasCustomPose(player.getOffhandItem())) {
-            PoseManager.savePoses(player.getUUID(), SOURCE,
-                    new PoseSnapshot(model.leftArm), new PoseSnapshot(model.rightArm));
+            // Subtract vanilla's walk swing from xRot so what is stored is the hold
+            // and not the running arms. See HeldPoseDelta for why this is a delta.
+            float walkPos = state.walkAnimationPos;
+            float walkSpeed = state.walkAnimationSpeed;
+
+            HeldPoseDelta.put(player.getUUID(), new HeldPoseDelta.ArmDelta(
+                    model.leftArm.xRot - HeldPoseDelta.vanillaArmSwing(walkPos, walkSpeed, false),
+                    model.leftArm.yRot,
+                    model.leftArm.zRot,
+                    model.rightArm.xRot - HeldPoseDelta.vanillaArmSwing(walkPos, walkSpeed, true),
+                    model.rightArm.yRot,
+                    model.rightArm.zRot));
+
+            // A marker with no arms. EMF Compat's applier skips null arm slots, so
+            // this stamps nothing over DA — HeldPoseAdditiveMixin does the applying.
+            // But HeldPoseUnpauseMixin only asks whether *something* is stored under
+            // this key, so the CEM animation stays running and the jem does not
+            // collapse. Storing real arms here is what caused the swing.
+            PoseManager.savePoses(player.getUUID(), SOURCE, null, null);
         } else {
             // Dropping the weapon has to release the arms in the same frame, or
-            // the last posed snapshot is replayed over DA's idle forever.
+            // the last delta is added onto DA's idle forever.
             PoseManager.clearPoses(player.getUUID(), SOURCE);
+            HeldPoseDelta.clear(player.getUUID());
         }
     }
 
