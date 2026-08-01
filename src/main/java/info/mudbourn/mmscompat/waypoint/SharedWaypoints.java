@@ -58,17 +58,57 @@ public final class SharedWaypoints {
         }
     }
 
-    /** Client -> server: publish (or update) one waypoint on the shared list. */
-    public record PublishC2S(String dimension, Entry entry) implements CustomPacketPayload {
-        public static final Type<PublishC2S> TYPE =
-                new Type<>(Identifier.fromNamespaceAndPath("mms_compat", "wp_publish"));
-        public static final StreamCodec<RegistryFriendlyByteBuf, PublishC2S> CODEC =
+    /**
+     * Server -> client: "send me your GLOBAL waypoints for this dimension."
+     *
+     * <p>Only ever sent to the player who ran {@code /mmswp globalscan}, and only
+     * if they passed the operator check. The client cannot start this exchange —
+     * that is the whole point of the redesign. Publishing used to run off a client
+     * tick loop that watched for any waypoint flipped to GLOBAL, which made every
+     * player a publisher and made Xaero's render-distance toggle mean "share this
+     * with the server" as a side effect.</p>
+     */
+    public record ScanRequestS2C(String dimension) implements CustomPacketPayload {
+        public static final Type<ScanRequestS2C> TYPE =
+                new Type<>(Identifier.fromNamespaceAndPath("mms_compat", "wp_scan_request"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, ScanRequestS2C> CODEC =
                 StreamCodec.of(
-                        (buf, p) -> { buf.writeUtf(p.dimension); Entry.write(buf, p.entry); },
-                        buf -> new PublishC2S(buf.readUtf(), Entry.read(buf)));
+                        (buf, p) -> buf.writeUtf(p.dimension),
+                        buf -> new ScanRequestS2C(buf.readUtf()));
         @Override
         public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
+
+    /**
+     * Client -> server: the answer to a {@link ScanRequestS2C} — every GLOBAL
+     * waypoint the admin holds in this dimension, in one batch.
+     *
+     * <p>The server accepts this only from an operator with a scan outstanding, so
+     * an unsolicited or replayed batch is dropped rather than trusted.</p>
+     */
+    public record ScanResultC2S(String dimension, List<Entry> entries) implements CustomPacketPayload {
+        public static final Type<ScanResultC2S> TYPE =
+                new Type<>(Identifier.fromNamespaceAndPath("mms_compat", "wp_scan_result"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, ScanResultC2S> CODEC =
+                StreamCodec.of(
+                        (buf, p) -> {
+                            buf.writeUtf(p.dimension);
+                            buf.writeVarInt(p.entries.size());
+                            for (Entry e : p.entries) Entry.write(buf, e);
+                        },
+                        buf -> {
+                            String dim = buf.readUtf();
+                            int n = buf.readVarInt();
+                            List<Entry> list = new ArrayList<>(n);
+                            for (int i = 0; i < n; i++) list.add(Entry.read(buf));
+                            return new ScanResultC2S(dim, list);
+                        });
+        @Override
+        public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    /** Hard cap on one scan batch, so a malformed client cannot flood the store. */
+    public static final int MAX_SCAN_ENTRIES = 512;
 
     /** Server -> client: the full shared list for one dimension (authoritative). */
     public record SyncS2C(String dimension, List<Entry> entries) implements CustomPacketPayload {

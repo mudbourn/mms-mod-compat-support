@@ -10,6 +10,10 @@ public class MmsModCompatSupportClient implements ClientModInitializer {
         // Unconditional: the lean mixin stands itself down when CPA is present,
         // but the config file should still be written so the knobs are visible.
         LeanTuning.load();
+        // Held-pose arm mode. Loaded unconditionally so the file exists even when
+        // the mixins are gated off, and so /mmspose can report the current mode.
+        PoseTuning.load();
+        PoseCommand.register();
         if (FabricLoader.getInstance().isModLoaded("xaerominimap")) {
             SharedWaypointClient.register();
             XaeroGlobalWaypointBridge.register();
