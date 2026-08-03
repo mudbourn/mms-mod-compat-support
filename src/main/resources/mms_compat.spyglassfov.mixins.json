@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.spyglassfov",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "SpyglassFovMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
