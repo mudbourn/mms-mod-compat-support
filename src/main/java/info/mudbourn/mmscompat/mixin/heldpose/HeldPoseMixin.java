@@ -2,6 +2,7 @@ package info.mudbourn.mmscompat.mixin.heldpose;
 
 import info.mudbourn.mmscompat.client.CrossbowPose;
 import info.mudbourn.mmscompat.client.HeldPoseDelta;
+import info.mudbourn.mmscompat.client.SpyglassPose;
 import net.bettercombat.api.WeaponAttributes;
 import net.bettercombat.logic.WeaponRegistry;
 import net.minecraft.client.Minecraft;
@@ -82,6 +83,20 @@ public class HeldPoseMixin {
         // the whole time they are held, in use or not, because "in use" for a
         // crossbow means loading. Release this source so the two never contend.
         if (CrossbowPose.apply(player, model)) {
+            // Returns before the spyglass check below, so release it here too: a
+            // crossbow in one hand and a spyglass raised in the other would
+            // otherwise leave the spyglass source stored and replayed forever.
+            SpyglassPose.release(player.getUUID());
+            PoseManager.clearPoses(player.getUUID(), SOURCE);
+            HeldPoseDelta.clear(player.getUUID());
+            return;
+        }
+
+        // The spyglass is a use-item DA has no pose for at all, so it cannot be left
+        // to the branch below: DA would win the arms and there would be nothing there
+        // to win them with. Ordered ahead of that early return for exactly that
+        // reason, and it declines every frame the spyglass is not up.
+        if (SpyglassPose.apply(player, model)) {
             PoseManager.clearPoses(player.getUUID(), SOURCE);
             HeldPoseDelta.clear(player.getUUID());
             return;

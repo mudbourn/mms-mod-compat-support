@@ -1,0 +1,10 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.scorchful",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.scorchful.ScorchfulMixinGate",
+  "mixins": ["SandPileGateMixin"],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

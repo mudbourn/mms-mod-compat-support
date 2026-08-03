@@ -45,6 +45,9 @@ dependencies {
     // EMF's EMFEntityRenderState#emfEntity() returns an ETF type, and reading the
     // UUID off it therefore needs Entity Texture Features on the classpath too.
     modCompileOnly files("libs/entity_texture_features_1.21.11-fabric-7.1.jar")
+    // SandPileGateMixin targets Scorchful's own SandAccumulation class, so the
+    // mod has to be on the compile classpath to resolve the tickChunk signature.
+    modCompileOnly files("libs/scorchful-0.16.8+1.21.11.jar")
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
