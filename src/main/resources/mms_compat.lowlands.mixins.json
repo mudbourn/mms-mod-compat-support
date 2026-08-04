@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.lowlands",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "LowlandsArmorPieceMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
