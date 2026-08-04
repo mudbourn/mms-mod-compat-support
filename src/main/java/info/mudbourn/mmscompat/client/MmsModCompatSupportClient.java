@@ -2,6 +2,7 @@ package info.mudbourn.mmscompat.client;
 
 import info.mudbourn.mmscompat.client.lean.LeanTuning;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 
 public class MmsModCompatSupportClient implements ClientModInitializer {
@@ -20,6 +21,10 @@ public class MmsModCompatSupportClient implements ClientModInitializer {
         }
         if (FabricLoader.getInstance().isModLoaded("modmetro")) {
             MetroLineSyncClient.register();
+        }
+        if (FabricLoader.getInstance().isModLoaded("particlerain")) {
+            ClientPlayConnectionEvents.DISCONNECT.register(
+                (handler, client) -> ParticleRainBiomeMemo.reset());
         }
     }
 }

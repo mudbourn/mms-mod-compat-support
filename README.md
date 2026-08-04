@@ -45,6 +45,7 @@ jobsplus-19.1.0-fabric.jar
 kielsons-api-0.8.1.jar
 mapsyncer-1.0.3-fabric-1.21.11-bugfix.jar
 modmetro-v1.jar
+particlerain-4.0.0-beta.10+1.21.11-fabric.jar
 rubies-1.0.0+1.21.11.jar
 sounds-2.4.23+edge+1.21.11-fabric.jar
 xaerominimap-fabric-1.21.11-26.4.2.jar

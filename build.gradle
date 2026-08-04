@@ -48,6 +48,10 @@ dependencies {
     // SandPileGateMixin targets Scorchful's own SandAccumulation class, so the
     // mod has to be on the compile classpath to resolve the tickChunk signature.
     modCompileOnly files("libs/scorchful-0.16.8+1.21.11.jar")
+    // BiomeMemoMixin redirects a getBiome call inside Particle Rain's own
+    // ParticleSpawner, so the mod has to be a loom dependency -- otherwise the
+    // redirect descriptor would have to be hand-written in intermediary.
+    modCompileOnly files("libs/particlerain-4.0.0-beta.10+1.21.11-fabric.jar")
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"

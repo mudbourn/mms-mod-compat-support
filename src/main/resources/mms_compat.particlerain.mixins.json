@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.particlerain",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.particlerain.ParticleRainMixinGate",
+  "mixins": [],
+  "client": ["BiomeMemoMixin"],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}
