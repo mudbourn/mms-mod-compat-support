@@ -73,12 +73,14 @@ public abstract class LowlandsArmorPieceMixin {
 
         ResourceKey<EquipmentAsset> assetKey = equippable.assetId().get();
         Identifier assetId = assetKey.identifier();
-        LowlandsArmorModel model = LowlandsArmorSets.model(assetId);
+        LowlandsArmorModel model = LowlandsArmorSets.model(assetId, slot);
         if (model == null) {
             return;
         }
 
-        model.selectSlot(slot);
+        // Transforms only — part visibility was fixed when this per-slot instance
+        // was baked. Mutating shared state here would not survive the deferred
+        // draw; see the BAKED javadoc in LowlandsArmorSets.
         model.copyTransforms(this.getArmorModel(state, slot));
 
         EquipmentClientInfo.LayerType layerType = this.usesInnerModel(slot)

@@ -6,6 +6,7 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EquipmentSlot;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -38,8 +39,22 @@ public final class LowlandsArmorSets {
 
     private static final Map<Identifier, Set> SETS = new LinkedHashMap<>();
 
-    /** Baked models, one per set. Populated on first render of that set. */
-    private static final Map<Identifier, LowlandsArmorModel> BAKED = new LinkedHashMap<>();
+    /** Cache key: a set's model for one specific armour slot. */
+    private record Baked(Identifier asset, EquipmentSlot slot) {}
+
+    /**
+     * Baked models, one per set <em>per slot</em>. Populated on first render.
+     *
+     * <p>Sharing a single instance across the four slots does not work. Rendering
+     * is deferred — {@code submitModel} only collects a node, and the draw happens
+     * at end of frame — so four submissions of the same object all render with
+     * whatever the last caller left on it. {@code HumanoidArmorLayer} submits in
+     * the order CHEST, LEGS, FEET, HEAD, so a shared instance ends up carrying
+     * HEAD's part visibility and HEAD's transforms and every piece but the helmet
+     * silently vanishes. Vanilla has the same constraint and solves it the same
+     * way, with four separate models in {@code ArmorModelSet}.
+     */
+    private static final Map<Baked, LowlandsArmorModel> BAKED = new LinkedHashMap<>();
 
     private static void add(String assetId,
                             Supplier<LayerDefinition> definition,
@@ -117,19 +132,23 @@ public final class LowlandsArmorSets {
     }
 
     /**
-     * The baked model for {@code assetId}, or null if that set is not ported.
+     * The baked model for {@code assetId} in {@code slot}, or null if that set is
+     * not ported.
      *
-     * <p>The returned instance is shared and mutated per render — callers must set
-     * slot visibility and copy transforms immediately before submitting it.
+     * <p>Part visibility is fixed at bake time and never touched again, so the
+     * instance stays valid for a deferred draw. Callers still copy transforms onto
+     * it each frame, which is safe because no other slot shares it.
      */
-    public static LowlandsArmorModel model(Identifier assetId) {
+    public static LowlandsArmorModel model(Identifier assetId, EquipmentSlot slot) {
         Set set = SETS.get(assetId);
         if (set == null) {
             return null;
         }
-        return BAKED.computeIfAbsent(assetId, id -> {
+        return BAKED.computeIfAbsent(new Baked(assetId, slot), key -> {
             ModelPart root = Minecraft.getInstance().getEntityModels().bakeLayer(set.layer());
-            return set.factory().apply(root);
+            LowlandsArmorModel model = set.factory().apply(root);
+            model.selectSlot(key.slot());
+            return model;
         });
     }
 
