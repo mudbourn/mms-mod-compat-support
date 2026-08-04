@@ -44,7 +44,8 @@
     "mms_compat.jei.mixins.json",
     "mms_compat.lean.mixins.json",
     "mms_compat.scorchful.mixins.json",
-    "mms_compat.spyglassfov.mixins.json"
+    "mms_compat.spyglassfov.mixins.json",
+    "mms_compat.emfcarry.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.0",

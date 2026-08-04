@@ -3,6 +3,7 @@ package info.mudbourn.mmscompat.mixin.heldpose;
 import info.mudbourn.mmscompat.client.CrossbowPose;
 import info.mudbourn.mmscompat.client.HeldPoseDelta;
 import info.mudbourn.mmscompat.client.SpyglassPose;
+import info.mudbourn.mmscompat.client.TridentPose;
 import net.bettercombat.api.WeaponAttributes;
 import net.bettercombat.logic.WeaponRegistry;
 import net.minecraft.client.Minecraft;
@@ -87,6 +88,7 @@ public class HeldPoseMixin {
             // crossbow in one hand and a spyglass raised in the other would
             // otherwise leave the spyglass source stored and replayed forever.
             SpyglassPose.release(player.getUUID());
+            TridentPose.release(player.getUUID());
             PoseManager.clearPoses(player.getUUID(), SOURCE);
             HeldPoseDelta.clear(player.getUUID());
             return;
@@ -97,6 +99,19 @@ public class HeldPoseMixin {
         // to win them with. Ordered ahead of that early return for exactly that
         // reason, and it declines every frame the spyglass is not up.
         if (SpyglassPose.apply(player, model)) {
+            TridentPose.release(player.getUUID());
+            PoseManager.clearPoses(player.getUUID(), SOURCE);
+            HeldPoseDelta.clear(player.getUUID());
+            return;
+        }
+
+        // Same gap, same reason: DA has no trident anywhere in player.jem, so the
+        // vanilla THROW_SPEAR wind-up is written during setupAnim and then thrown
+        // away by the CEM animation. Must sit ahead of the isUsingItem return below
+        // — charging a throw *is* using the item, and that branch would hand the
+        // arms to a DA pose that does not exist. Declines every frame no trident
+        // is being cocked back.
+        if (TridentPose.apply(player, model)) {
             PoseManager.clearPoses(player.getUUID(), SOURCE);
             HeldPoseDelta.clear(player.getUUID());
             return;

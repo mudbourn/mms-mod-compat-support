@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.emfcarry",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.emfcarry.EmfCarryOnMixinGate",
+  "mixins": [],
+  "client": ["CarryOnBodyCaptureGateMixin"],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}
