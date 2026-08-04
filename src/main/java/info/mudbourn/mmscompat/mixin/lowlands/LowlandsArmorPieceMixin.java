@@ -1,8 +1,11 @@
 package info.mudbourn.mmscompat.mixin.lowlands;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
 import info.mudbourn.mmscompat.client.lowlands.LowlandsArmorModel;
+import info.mudbourn.mmscompat.client.lowlands.LowlandsArmorPose;
 import info.mudbourn.mmscompat.client.lowlands.LowlandsArmorSets;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
@@ -37,12 +40,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * the vanilla-leather-plus-components design survives intact. A set that has not
  * been transcribed yet simply is not in the table and falls through to vanilla.
  *
- * <p>Injected at {@code HEAD} of {@code renderArmorPiece}, not {@code submit}. That
- * matters twice over: {@code submit} already carries the cemrelay pose mixin, and
- * by {@code renderArmorPiece} the slot has been resolved and the vanilla armour
- * model for it has been posed — including by that relay — so copying transforms
- * from it inherits all the existing pose work rather than competing with it. See
+ * <p>Injected at {@code HEAD} of {@code renderArmorPiece}, not {@code submit}: the
+ * slot is resolved by this point, and {@code submit} already carries the cemrelay
+ * pose mixin, so this stays out of its way. See
  * {@code mixin.cemrelay.HumanoidArmorLayerMixin}.
+ *
+ * <p>Nothing here poses anything. Submission is deferred, so all posing happens at
+ * draw time inside {@link LowlandsArmorPose} — which is the whole reason the first
+ * cut rendered frozen armour.
  *
  * <p>The submit call mirrors vanilla's own exactly, substituting only the model:
  * {@code EquipmentLayerRenderer} still resolves the layer textures from the pack's
@@ -54,9 +59,11 @@ public abstract class LowlandsArmorPieceMixin {
 
     @Shadow @Final private EquipmentLayerRenderer equipmentRenderer;
 
-    @Shadow protected abstract HumanoidModel<?> getArmorModel(HumanoidRenderState state, EquipmentSlot slot);
+    @Shadow protected abstract HumanoidModel<HumanoidRenderState> getArmorModel(HumanoidRenderState state, EquipmentSlot slot);
 
     @Shadow protected abstract boolean usesInnerModel(EquipmentSlot slot);
+
+    @Shadow protected abstract EntityModel<?> getParentModel();
 
     @Inject(method = "renderArmorPiece", at = @At("HEAD"), cancellable = true)
     private void mms$renderLowlandsPiece(PoseStack poseStack,
@@ -78,17 +85,22 @@ public abstract class LowlandsArmorPieceMixin {
             return;
         }
 
-        // Transforms only — part visibility was fixed when this per-slot instance
-        // was baked. Mutating shared state here would not survive the deferred
-        // draw; see the BAKED javadoc in LowlandsArmorSets.
-        model.copyTransforms(this.getArmorModel(state, slot));
+        // Pose at DRAW time, not here: submitModel only collects a node, and
+        // ModelFeatureRenderer calls setupAnim(state) just before drawing. Anything
+        // posed here would be copied from a model still in its rest pose.
+        //
+        // The wearer's model is handed over so the set can take its animation from
+        // the actual player rig rather than approximating it; the vanilla armour
+        // model is only the floor for when there is no CEM animation to relay.
+        HumanoidModel<HumanoidRenderState> source = this.getArmorModel(state, slot);
+        LowlandsArmorPose posed = LowlandsArmorPose.of(source, model, this.getParentModel());
 
         EquipmentClientInfo.LayerType layerType = this.usesInnerModel(slot)
             ? EquipmentClientInfo.LayerType.HUMANOID_LEGGINGS
             : EquipmentClientInfo.LayerType.HUMANOID;
 
-        this.equipmentRenderer.renderLayers(layerType, assetKey, model, state, stack,
-            poseStack, collector, light, state.outlineColor);
+        this.equipmentRenderer.renderLayers(layerType, assetKey, posed,
+            Pair.of(state, state), stack, poseStack, collector, light, state.outlineColor);
 
         ci.cancel();
     }

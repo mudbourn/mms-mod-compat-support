@@ -26,10 +26,14 @@ import net.minecraft.world.entity.EquipmentSlot;
  * brims, pauldrons, coat-tails — is nested <em>beneath</em> those six in the source
  * as well, so it follows the pose for free and needs no per-part relay.
  *
- * <p>Because the pose arrives via {@code copyTransforms}, {@link #setupAnim} is
- * deliberately empty. The source mod hand-rolled a partial humanoid animation in
- * each model, which dropped sneaking and riding; inheriting the real pose from the
- * wearer's model is both less code and more correct.
+ * <p>{@link #setupAnim} is deliberately empty, and this model is never submitted on
+ * its own. It is submitted wrapped in a {@code TransformCopyingModel}, whose own
+ * {@code setupAnim} runs at draw time and drives the pose: reset, animate the
+ * vanilla armour model, copy the result here. Submission is deferred, so anything
+ * posed before submitting is simply the rest pose and the armour renders frozen —
+ * that was the first cut's bug. The source mod hand-rolled a partial humanoid
+ * animation per model, which dropped sneaking and riding; inheriting the real pose
+ * is both less code and more correct.
  */
 public abstract class LowlandsArmorModel extends EntityModel<HumanoidRenderState> {
 
