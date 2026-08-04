@@ -6,6 +6,7 @@ import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import org.slf4j.LoggerFactory;
 
 /**
  * Poses a Lowlands set at draw time, from the vanilla armour pose and then from
@@ -98,6 +99,15 @@ public final class LowlandsArmorPose extends Model<Pair<HumanoidRenderState, Hum
 
     @Override
     public void setupAnim(Pair<HumanoidRenderState, HumanoidRenderState> state) {
+        // DIAGNOSTIC — temporary, remove with STAGE. Sneak to prove which build is
+        // actually live: hot-swapped code cannot be told apart from the shipped
+        // 0.9.73 by looking at the armour, since both stages animate. Gated on
+        // crouching rather than a frame counter so it needs no new field, which is
+        // the part of class redefinition most likely to be refused.
+        if (state.getFirst().isCrouching) {
+            LoggerFactory.getLogger("mms_compat").info("lowlands pose STAGE={}", STAGE);
+        }
+
         this.resetPose();
         if (STAGE < 1) {
             return;
