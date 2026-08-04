@@ -27,10 +27,18 @@ import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
  *       animation (DetailedAnimations via EMF), when there is any.</li>
  * </ol>
  *
- * <p>Step 3 is strictly additive. {@code CemLayerPoseRelay} is a no-op whenever EMF
- * is absent or the wearer's base model is not an animated CEM model, so without a
- * pack these sets keep exactly the vanilla pose from step 2 — the relay can improve
- * the result but cannot take anything away.
+ * <p>Step 3 must be {@code relayOver}, not {@code relay}. The plain relay bases the
+ * target on its <em>rest</em> pose and writes the result absolutely, so it discards
+ * step 2 entirely; when the wearer is momentarily unanimated it resolves to the
+ * authored rest pose and the armour renders frozen — indistinguishable from the
+ * deferred-submit bug this class was written to fix, and the regression that shipped
+ * in 0.9.72. {@code relayOver} bases it on the pose step 2 just produced, so the
+ * wearer's animation arrives as a delta and an unanimated wearer contributes
+ * nothing.
+ *
+ * <p>With that variant step 3 genuinely cannot subtract: the relay also no-ops
+ * outright whenever EMF is absent or the wearer's base model is not an animated CEM
+ * model, so the floor is exactly the vanilla pose from step 2.
  *
  * <p>Why the relay rather than copying the wearer's model directly: EMF applies CEM
  * animation from inside {@code ModelPart#render}, after {@code setupAnim} has
@@ -73,7 +81,7 @@ public final class LowlandsArmorPose extends Model<Pair<HumanoidRenderState, Hum
         this.source.setupAnim(state.getFirst());
         this.delegate.copyTransforms(this.source);
         if (this.wearer != null) {
-            CemLayerPoseRelay.relay(this.wearer, this.delegate, CemLayerPoseRelay.HUMANOID_ARMOR);
+            CemLayerPoseRelay.relayOver(this.wearer, this.delegate, CemLayerPoseRelay.HUMANOID_ARMOR);
         }
     }
 }

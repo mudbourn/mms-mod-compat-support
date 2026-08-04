@@ -161,6 +161,30 @@ public final class CemLayerPoseRelay {
     }
 
     /**
+     * As {@link #relay(Model, Model, Map)}, but preserving whatever pose the layer
+     * is already in rather than replacing it.
+     *
+     * <p>The plain relay writes {@code M = Aacc · Racc⁻¹ · Sacc} with {@code Sacc}
+     * taken from the layer's <em>rest</em> pose, so it overwrites the mapped parts
+     * outright. That is correct for a layer whose own {@code setupAnim} contributes
+     * nothing the relay should keep — a spider's bolted-on spikes, a cow's
+     * mushrooms — but it is destructive for a layer that has already been posed and
+     * wants the animation applied <em>on top</em>: when the base model happens to be
+     * sitting at rest, {@code Aacc == Racc} and {@code M} collapses to {@code Sacc},
+     * snapping the layer back to its authored rest pose and discarding that posing.
+     *
+     * <p>This variant substitutes the layer's <em>current</em> accumulation for
+     * {@code Sacc}, leaving {@code Aacc · Racc⁻¹} — the base model's animation
+     * expressed as a delta from its own rest — as the only thing applied. An
+     * unanimated base therefore contributes an identity delta and the layer keeps
+     * its existing pose exactly, which is the property the destructive form only
+     * appeared to have.
+     */
+    public static void relayOver(Model base, Model layer, Map<String, String> targetToSource) {
+        relay(base, targetToSource, true, layer);
+    }
+
+    /**
      * Copies the animated pose of {@code base} onto several layer models at once,
      * walking the base's part tree a single time.
      *
@@ -168,6 +192,11 @@ public final class CemLayerPoseRelay {
      * set of models does not have to filter it first.
      */
     public static void relay(Model base, Map<String, String> targetToSource, Model... layers) {
+        relay(base, targetToSource, false, layers);
+    }
+
+    private static void relay(Model base, Map<String, String> targetToSource,
+                              boolean over, Model... layers) {
         if (base == null || layers.length == 0 || !isAnimatedCemModel(base)) {
             return;
         }
@@ -178,21 +207,27 @@ public final class CemLayerPoseRelay {
 
         for (Model layer : layers) {
             if (layer != null) {
-                relayOnto(layer, targetToSource, animated, rest);
+                relayOnto(layer, targetToSource, animated, rest, over);
             }
         }
     }
 
     private static void relayOnto(Model layer, Map<String, String> targetToSource,
-                                  Map<String, Matrix4f> animated, Map<String, Matrix4f> rest) {
+                                  Map<String, Matrix4f> animated, Map<String, Matrix4f> rest,
+                                  boolean over) {
+        // Both accumulations are computed either way; which one is used as the
+        // target's basis is the whole difference between overwriting the layer's
+        // existing pose and carrying it along. See relayOver.
+        Map<String, Matrix4f> layerCurrent = new HashMap<>();
         Map<String, Matrix4f> layerRest = new HashMap<>();
-        accumulate(layer.root(), new Matrix4f(), new Matrix4f(), new HashMap<>(), layerRest);
+        accumulate(layer.root(), new Matrix4f(), new Matrix4f(), layerCurrent, layerRest);
+        Map<String, Matrix4f> layerBasis = over ? layerCurrent : layerRest;
 
         for (Map.Entry<String, String> entry : targetToSource.entrySet()) {
             ModelPart target = child(layer.root(), entry.getKey());
             Matrix4f sourceAnimated = animated.get(entry.getValue());
             Matrix4f sourceRest = rest.get(entry.getValue());
-            Matrix4f targetRest = layerRest.get(entry.getKey());
+            Matrix4f targetRest = layerBasis.get(entry.getKey());
             if (target == null || sourceAnimated == null || sourceRest == null || targetRest == null) {
                 // A mod update reshaped one of the models. Leave the layer stock
                 // rather than dragging it somewhere arbitrary.
