@@ -42,7 +42,8 @@ import java.util.UUID;
  * into their Xaero "MMS" set — no delta bookkeeping to corrupt.
  *
  * Publishing is admin-driven: an operator runs /mmswp globalscan, the server
- * asks that one client for its GLOBAL waypoints, and new names are indexed.
+ * asks that one client for its GLOBAL waypoints, and the batch is applied by
+ * name — new names added, known names rewritten from the scanned copy.
  * Players cannot publish, and no client tick loop watches for waypoints being
  * flipped to GLOBAL — Xaero's GLOBAL toggle is a render-distance setting, and
  * treating it as "share this" published waypoints nobody meant to share.
@@ -136,9 +137,20 @@ public final class SharedWaypointServer {
     }
 
     /**
-     * Index an admin's scan batch. New names are added; names already on the list
-     * are left alone, so a rescan never rewrites an entry somebody else owns and
-     * never moves a waypoint that has since been corrected on the server.
+     * Index an admin's scan batch. The scan is authoritative: a name already on
+     * the list is rewritten in place from the scanned copy — coordinates, colour,
+     * initials, yaw — rather than skipped.
+     *
+     * <p>Skipping was the old behaviour and it made the list unmaintainable. A
+     * waypoint that was indexed at the wrong spot, or in the wrong colour, could
+     * only be corrected by removing it and scanning again, and the same admin who
+     * had just moved their own copy would be told "0 new, 1 already indexed" with
+     * nothing changed. The scan is an operator-only command run by someone looking
+     * at the waypoints they mean to publish, so their copy is the newer truth.
+     *
+     * <p>{@code owner} is the one field a rewrite preserves. Ownership decides who
+     * may {@code /mmswp remove} an entry, so a rescan must not quietly transfer it
+     * to whoever scanned last.
      */
     private static void onScanResult(ServerPlayer player, ScanResultC2S payload) {
         String expected = pendingScans.remove(player.getUUID());
@@ -154,30 +166,49 @@ public final class SharedWaypointServer {
 
         List<Entry> list = store().computeIfAbsent(payload.dimension(), k -> new ArrayList<>());
         int added = 0;
-        int skipped = 0;
+        int updated = 0;
+        int unchanged = 0;
         for (Entry raw : payload.entries()) {
             Entry entry = new Entry(raw.name(), raw.initials(), raw.x(), raw.y(), raw.z(),
                     raw.colorIdx(), raw.yaw(), player.getUUID()).sanitized();
             if (entry.name().isEmpty()) continue;
-            if (byName(list, entry.name()) != null) {
-                skipped++;
-                continue;   // already indexed — never overwrite on a rescan
+
+            int at = indexOfName(list, entry.name());
+            if (at < 0) {
+                list.add(entry);
+                added++;
+                continue;
             }
-            list.add(entry);
-            added++;
+
+            Entry existing = list.get(at);
+            // Keep the stored name and owner: the name so the file keeps whatever
+            // casing it was indexed under, the owner so a rescan never reassigns
+            // who is allowed to remove the entry.
+            Entry merged = new Entry(existing.name(), entry.initials(),
+                    entry.x(), entry.y(), entry.z(), entry.colorIdx(), entry.yaw(),
+                    existing.owner());
+            if (merged.equals(existing)) {
+                unchanged++;
+            } else {
+                list.set(at, merged);
+                updated++;
+            }
         }
 
-        if (added > 0) {
+        if (added > 0 || updated > 0) {
             save();
             broadcast(player.level().getServer(), payload.dimension());
         }
-        int total = added;
-        int dupes = skipped;
+        int newCount = added;
+        int changedCount = updated;
+        int sameCount = unchanged;
         player.sendSystemMessage(Component.literal(
-                "Indexed " + total + " new shared waypoint" + (total == 1 ? "" : "s")
-                        + (dupes > 0 ? " (" + dupes + " already indexed)" : "") + "."));
-        LOGGER.info("'{}' globalscan in {}: {} added, {} already present",
-                player.getName().getString(), payload.dimension(), added, skipped);
+                "Indexed " + newCount + " new waypoint" + (newCount == 1 ? "" : "s")
+                        + ", updated " + changedCount
+                        + (sameCount > 0 ? " (" + sameCount + " already up to date)" : "") + "."));
+        LOGGER.info("'{}' globalscan in {}: {} scanned, {} added, {} updated, {} unchanged",
+                player.getName().getString(), payload.dimension(),
+                payload.entries().size(), added, updated, unchanged);
     }
 
     private static int remove(CommandSourceStack source, String name) {
@@ -218,10 +249,15 @@ public final class SharedWaypointServer {
     }
 
     private static Entry byName(List<Entry> list, String name) {
-        for (Entry e : list) {
-            if (e.name().equalsIgnoreCase(name)) return e;
+        int at = indexOfName(list, name);
+        return at < 0 ? null : list.get(at);
+    }
+
+    private static int indexOfName(List<Entry> list, String name) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).name().equalsIgnoreCase(name)) return i;
         }
-        return null;
+        return -1;
     }
 
     // ── persistence ──

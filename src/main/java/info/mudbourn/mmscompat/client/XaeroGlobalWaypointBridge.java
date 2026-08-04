@@ -39,6 +39,21 @@ import xaero.hud.minimap.world.MinimapWorld;
  * see — waypoints they made, or ones shared with them — which is a deliberate act
  * with a person behind it.
  *
+ * <h2>Every set is scanned, including MMS</h2>
+ *
+ * <p>The scan used to skip the shared "MMS" set outright, on the theory that a
+ * server-fed set should never feed back. That quietly broke publishing: MMS is a
+ * real Xaero set, so it can be the <em>selected</em> one, and Xaero files every
+ * newly made waypoint into the selected set. Waypoints made that way were
+ * invisible to the scan and could never be indexed no matter how many times an
+ * admin ran the command.
+ *
+ * <p>What keeps mirrors from feeding back is the GLOBAL filter below, not a set
+ * name: {@link SharedWaypointClient} mirrors server entries at the default LOCAL
+ * visibility, so a plain mirror is never a scan candidate. Flipping a mirrored
+ * waypoint to GLOBAL is therefore the explicit "re-publish this one, with my
+ * edits" gesture — the server overwrites its stored copy from it.
+ *
  * <h2>Copy, never move</h2>
  *
  * <p>Scanning does not touch the player's own waypoints. They stay in their set,
@@ -66,9 +81,6 @@ public final class XaeroGlobalWaypointBridge {
         MinimapWorld world = session == null ? null : session.getWorldManager().getCurrentWorld();
         if (world != null) {
             for (WaypointSet set : world.getIterableWaypointSets()) {
-                if (SharedWaypoints.SET_NAME.equals(set.getName())) {
-                    continue; // server-fed set: mirror only, never a scan source
-                }
                 for (Waypoint w : set.getWaypoints()) {
                     if (w.getPurpose() != WaypointPurpose.NORMAL) continue;   // no deathpoints
                     if (w.isTemporary() || w.isDestination()) continue;       // no one-off markers

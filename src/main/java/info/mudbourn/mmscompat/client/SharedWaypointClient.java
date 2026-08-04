@@ -18,7 +18,6 @@ import xaero.hud.minimap.waypoint.WaypointPurpose;
 import xaero.hud.minimap.waypoint.set.WaypointSet;
 import xaero.hud.minimap.world.MinimapWorld;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,9 +37,10 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <h2>The MMS set is not wiped</h2>
  *
- * <p>Reconciliation is additive. It adds shared entries that are missing, moves
- * ones the server has relocated, and removes only names it put there itself and
- * the server has since dropped. Anything else in the set is left alone.
+ * <p>Reconciliation adds shared entries that are missing and corrects the ones
+ * already present — in place, by name — to the server's coordinates, colour,
+ * initials and yaw. It removes only names the server knew and has since dropped.
+ * A name the server has never heard of is left alone entirely.
  *
  * <p>This matters because the MMS set is a real Xaero set, so it can be the
  * <em>selected</em> set — and Xaero files a newly made waypoint into whichever
@@ -107,73 +107,77 @@ public final class SharedWaypointClient {
 
         // Publishing copies rather than moves (see XaeroGlobalWaypointBridge), so
         // a player's own GLOBAL waypoint comes back down in the shared list while
-        // they still hold it. Mirroring it as well would show it twice, so skip
-        // any entry whose name the player already has in one of their own sets.
-        // If they later delete their copy, the shared one reappears on the next
-        // reconcile — the mirror stays self-healing.
+        // they still hold it. Creating a second copy would show it twice, so a
+        // name the player holds in one of their own sets is never *added* to the
+        // MMS set. It is still corrected if it is already in there — see below.
         Set<String> ownNames = ownWaypointNames(world);
-        List<Entry> wanted = new ArrayList<>();
-        for (Entry e : serverList) {
-            if (!ownNames.contains(e.name().toLowerCase(Locale.ROOT))) {
-                wanted.add(e);
-            }
-        }
 
         WaypointSet set = world.getWaypointSet(SharedWaypoints.SET_NAME);
         if (set == null) {
-            if (wanted.isEmpty()) return;
+            if (serverList.isEmpty()) return;
             set = WaypointSet.Builder.begin().setName(SharedWaypoints.SET_NAME).build();
             world.addWaypointSet(set);
         }
 
         Set<String> mirrored = MIRRORED.computeIfAbsent(dimension, k -> new HashSet<>());
         Map<String, Entry> wantedByName = new HashMap<>();
-        for (Entry e : wanted) {
+        for (Entry e : serverList) {
             wantedByName.put(e.name().toLowerCase(Locale.ROOT), e);
         }
 
         int added = 0;
+        int moved = 0;
         int dropped = 0;
-        Set<String> movedKeys = new HashSet<>();
 
-        // Pass 1 — drop or correct what we previously mirrored. Waypoints we did
-        // not put here are skipped outright, which is what keeps a player's own
-        // waypoint alive when the MMS set happens to be their selected set.
+        // Pass 1 — reconcile what is already in the set, by name.
+        //
+        // Anything matching a shared entry is corrected in place to the server's
+        // coordinates, colour, initials and yaw. Matching by name rather than by
+        // our own provenance record is what makes this self-healing: MIRRORED
+        // starts empty every session, and the old code only ever touched names it
+        // had added during *this* session, so a waypoint the server had since
+        // moved stayed wrong at its old spot forever — and an admin's own
+        // waypoint that got published could never be reconciled with the shared
+        // copy at all. Updating in place also means Xaero keeps the same waypoint
+        // object, so a player's per-waypoint settings survive the correction.
+        //
+        // Adopting a name this way does put it under the mirror's control for the
+        // rest of the session, so /mmswp remove will later take it out of the set.
+        // That is the intended reading: a waypoint sitting in the shared set under
+        // a shared name *is* the shared waypoint. A name the server does not know
+        // is never touched, which is what keeps a waypoint the player just made in
+        // the MMS set — Xaero files new waypoints into the selected set — alive.
         var iter = set.getWaypoints().iterator();
         while (iter.hasNext()) {
             Waypoint w = iter.next();
             String key = w.getName().toLowerCase(Locale.ROOT);
-            if (!mirrored.contains(key)) continue;
+            Entry want = wantedByName.remove(key);
 
-            Entry want = wantedByName.get(key);
             if (want == null) {
-                iter.remove();          // unpublished server-side, or the player now holds their own
-                mirrored.remove(key);
-                dropped++;
-            } else if (w.getX() != want.x() || w.getY() != want.y() || w.getZ() != want.z()) {
-                iter.remove();          // re-added below at the server's coordinates
-                movedKeys.add(key);
-            } else {
-                wantedByName.remove(key); // already correct, nothing to add
+                if (mirrored.remove(key)) {
+                    iter.remove();  // unpublished server-side
+                    dropped++;
+                }
+                continue;
             }
+
+            mirrored.add(key);
+            if (applyTo(w, want)) moved++;
         }
 
-        // Pass 2 — add everything still missing, including the moved ones.
+        // Pass 2 — add shared entries the set does not have yet.
         for (Entry e : wantedByName.values()) {
             String key = e.name().toLowerCase(Locale.ROOT);
-            // A name the player already uses inside the MMS set is theirs; adding
-            // the shared one too would leave two waypoints stacked on one name.
-            if (hasWaypoint(set, key)) continue;
+            if (ownNames.contains(key)) continue;   // player holds their own copy elsewhere
             Waypoint w = new Waypoint(e.x(), e.y(), e.z(), e.name(), e.initials(),
                     WaypointColor.fromIndex(e.colorIdx()), WaypointPurpose.NORMAL);
             w.setYaw(e.yaw());
             w.setRotation(true);
             set.add(w);
             mirrored.add(key);
-            if (!movedKeys.contains(key)) added++;
+            added++;
         }
 
-        int moved = movedKeys.size();
         if (added == 0 && moved == 0 && dropped == 0) return;
 
         try {
@@ -181,15 +185,29 @@ public final class SharedWaypointClient {
         } catch (Exception e) {
             LOGGER.error("failed to save Xaero world after shared waypoint sync", e);
         }
-        LOGGER.info("shared waypoint sync for {}: {} added, {} moved, {} removed (set '{}')",
+        LOGGER.info("shared waypoint sync for {}: {} added, {} corrected, {} removed (set '{}')",
                 dimension, added, moved, dropped, SharedWaypoints.SET_NAME);
     }
 
-    private static boolean hasWaypoint(WaypointSet set, String lowerName) {
-        for (Waypoint w : set.getWaypoints()) {
-            if (w.getName().toLowerCase(Locale.ROOT).equals(lowerName)) return true;
-        }
-        return false;
+    /**
+     * Bring one mirrored waypoint in line with the server's copy, in place.
+     * Returns true if anything actually changed.
+     *
+     * <p>Visibility is deliberately not written. It is the player's own
+     * render-distance setting, and it is also what {@link XaeroGlobalWaypointBridge}
+     * reads to decide what a scan publishes — forcing mirrors to GLOBAL would make
+     * every mirror a scan candidate and let a stale client push old coordinates
+     * back onto the server.
+     */
+    private static boolean applyTo(Waypoint w, Entry e) {
+        boolean changed = false;
+        if (w.getX() != e.x()) { w.setX(e.x()); changed = true; }
+        if (w.getY() != e.y()) { w.setY(e.y()); changed = true; }
+        if (w.getZ() != e.z()) { w.setZ(e.z()); changed = true; }
+        if (w.getColor() != e.colorIdx()) { w.setColor(e.colorIdx()); changed = true; }
+        if (!e.initials().equals(w.getSymbol())) { w.setSymbol(e.initials()); changed = true; }
+        if (w.getYaw() != e.yaw()) { w.setYaw(e.yaw()); changed = true; }
+        return changed;
     }
 
     /** Lowercased names of every waypoint the player holds outside the shared set. */
