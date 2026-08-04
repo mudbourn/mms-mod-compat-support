@@ -75,11 +75,38 @@ public final class LowlandsArmorPose extends Model<Pair<HumanoidRenderState, Hum
         return new LowlandsArmorPose(source, delegate, wearer);
     }
 
+    /**
+     * DIAGNOSTIC — temporary. How far down the pose pipeline to go.
+     *
+     * <p>All 23 sets render mangled, which puts the fault in this shared path
+     * rather than in any one set's transcribed geometry — but the path has three
+     * stages and the symptom does not say which one. Rather than guess a fourth
+     * time, each stage is switchable so a hotswap can walk them:
+     *
+     * <ul>
+     *   <li>{@code 0} — rest pose only. The authored geometry, untouched. If this
+     *       is already wrong, the transcription is at fault and posing is innocent.</li>
+     *   <li>{@code 1} — plus the vanilla armour pose. If 0 is right and this is
+     *       wrong, {@code copyTransforms} is mismatching the two part trees.</li>
+     *   <li>{@code 2} — plus the CEM relay. If 1 is right and this is wrong, the
+     *       relay's delta is the culprit; that is the stage 0.9.73 added.</li>
+     * </ul>
+     *
+     * <p>Remove this field and inline stage 2 once the stage is identified.
+     */
+    private static final int STAGE = 0;
+
     @Override
     public void setupAnim(Pair<HumanoidRenderState, HumanoidRenderState> state) {
         this.resetPose();
+        if (STAGE < 1) {
+            return;
+        }
         this.source.setupAnim(state.getFirst());
         this.delegate.copyTransforms(this.source);
+        if (STAGE < 2) {
+            return;
+        }
         if (this.wearer != null) {
             CemLayerPoseRelay.relayOver(this.wearer, this.delegate, CemLayerPoseRelay.HUMANOID_ARMOR);
         }
