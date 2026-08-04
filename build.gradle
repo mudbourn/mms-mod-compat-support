@@ -99,3 +99,23 @@ def checkMixinPackages = tasks.register('checkMixinPackages', Exec) {
 }
 
 tasks.named('build') { dependsOn checkMixinPackages }
+
+// Hotswap support for the "MMS Dev" client.
+//
+// The client runs the pack's mods under intermediary names, but this project
+// compiles against Mojmap -- so build/classes/java/main cannot be swapped in
+// directly, its references would not resolve. remapJar produces correctly named
+// classes, but HotswapAgent watches directories rather than jars, so unpack it.
+//
+// Driven by mms-pack/mms-hotswap-watch.sh, which runs this under
+// `gradlew --continuous`; HotswapAgent's autoHotswap then picks up the rewritten
+// class files and redefines them in the running client.
+tasks.register('hotswapClasses', Copy) {
+    description = 'Unpacks the remapped jar into a class dir HotswapAgent can watch.'
+    dependsOn tasks.named('remapJar')
+    from { zipTree(tasks.named('remapJar').get().archiveFile) }
+    into layout.buildDirectory.dir('hotswap/classes')
+    // resources are reloaded by the game, not by class redefinition, and the
+    // nested jars would confuse the watcher
+    exclude 'META-INF/jars/**'
+}
