@@ -25,9 +25,9 @@ import java.util.function.Supplier;
  * <p>Models are baked lazily on first use and cached. Baking touches
  * {@code Minecraft.getInstance()}, so nothing here may run off the render thread.
  *
- * <p><b>Status: 1 of 23 sets ported.</b> The remaining 22 are mechanical
- * transcriptions of the same shape as {@link ModelMercenarySwordsman}; the rows
- * are commented out below in the order they should be worked, cheapest first.
+ * <p><b>Status: all 23 sets ported, none verified in game.</b> Highlander has no
+ * leggings piece and Swamplandfolks no boots — that is the source mod's own gap,
+ * matching {@code LowlandsVanity}, not a missing row here.
  */
 public final class LowlandsArmorSets {
 
@@ -49,37 +49,59 @@ public final class LowlandsArmorSets {
     }
 
     static {
-        add("lowlands_clothing:mercenary_swordman",
-            ModelMercenarySwordsman::createBodyLayer, ModelMercenarySwordsman::new);
-
-        // ── Remaining 22, cheapest first (part count / box count / atlas size) ──
-        // penitant                    6 / 8  / 64x64
-        // axolotl_knight              8 / 14 / 80x80
-        // mountainmen__clothes        8 / 11 / 80x80
-        // snowtigerarmor              8 / 11 / 80x80   (source: Modelsnowtigerarmorv01)
-        // bret_fight_armor            9 / 13 / 80x80
-        // gatekeeperarmorb            9 / 11 / 80x80   (source: ModelGatekeeper_corrected)
-        // plaguedoctor                9 / 13 / 96x96   (source: ModelPlaguedoctor_v01)
-        // gamemaster_outfit          10 / 10 / 80x80
-        // guard_captain_uniform_r    11 / 13 / 96x96
-        // norse_ravager_armor        11 / 17 / 80x80   (source: ModelNorsian_armor_corected)
-        // highlands_suitb            12 / 14 / 80x80   (no leggings piece)
-        // maskerade_armor            12 / 19 / 96x96   (source: Modelmaskerade_armor_u)
-        // swampfolk_outfit           13 / 13 / 80x80   (no boots piece)
-        // bret_corsair_o__armor_v2   14 / 15 / 96x96
-        // executioner_armor          14 / 16 / 64x64   (source: Modelexecutionerclothes)
-        // wingedcavaleryarmor        14 / 17 / 80x80
-        // ratcatcherc01              16 / 18 / 80x80
-        // waldknightarmor            16 / 19 / 80x80
-        // furnace_master_armor       16 / 28 / 96x96   (source: Modelfurnace_master_armor_v01)
-        // siege_armor                17 / 20 / 96x96   (source: ModelSiegeArmorv4)
-        // scaphander                 20 / 26 / 96x96   (source: ModelDepth_scaphander)
-        // netherborn_pirate          21 / 22 / 144x144 (source: ModelHellborn_Pirate)
+        // All 23 sets, in the order they appear in LowlandsVanity's kit table.
         //
         // The source jar keeps dead variants alongside the live model for several
         // sets — Modelsnowtigerarmor vs …v01, ModelSiegeArmor/v2/v3/v4, and so on.
-        // The "source:" note above is the one the item's client extension actually
-        // instantiates; the others are abandoned drafts and must not be used.
+        // Each generated class names the source it was transcribed from in its
+        // javadoc; that is the one the item's client extension actually
+        // instantiates, and the others are abandoned drafts.
+        add("lowlands_clothing:axolotl_knight",
+            ModelAxolotlKnight::createBodyLayer, ModelAxolotlKnight::new);
+        add("lowlands_clothing:bret_fight_armor",
+            ModelBret::createBodyLayer, ModelBret::new);
+        add("lowlands_clothing:bret_corsair_o__armor_v2",
+            ModelBretCorsair::createBodyLayer, ModelBretCorsair::new);
+        add("lowlands_clothing:scaphander",
+            ModelDepthScaphander::createBodyLayer, ModelDepthScaphander::new);
+        add("lowlands_clothing:executioner_armor",
+            ModelExecutioner::createBodyLayer, ModelExecutioner::new);
+        add("lowlands_clothing:furnace_master_armor",
+            ModelFurnaceMaster::createBodyLayer, ModelFurnaceMaster::new);
+        add("lowlands_clothing:gamemaster_outfit",
+            ModelGamekeeper::createBodyLayer, ModelGamekeeper::new);
+        add("lowlands_clothing:gatekeeperarmorb",
+            ModelGateSentry::createBodyLayer, ModelGateSentry::new);
+        add("lowlands_clothing:guard_captain_uniform_r",
+            ModelGuardCaptain::createBodyLayer, ModelGuardCaptain::new);
+        add("lowlands_clothing:highlands_suitb",
+            ModelHighlander::createBodyLayer, ModelHighlander::new);
+        add("lowlands_clothing:maskerade_armor",
+            ModelMasquerade::createBodyLayer, ModelMasquerade::new);
+        add("lowlands_clothing:mercenary_swordman",
+            ModelMercenarySwordsman::createBodyLayer, ModelMercenarySwordsman::new);
+        add("lowlands_clothing:mountainmen__clothes",
+            ModelMountainmen::createBodyLayer, ModelMountainmen::new);
+        add("lowlands_clothing:netherborn_pirate",
+            ModelNetherbornPirate::createBodyLayer, ModelNetherbornPirate::new);
+        add("lowlands_clothing:norse_ravager_armor",
+            ModelNorsianKnight::createBodyLayer, ModelNorsianKnight::new);
+        add("lowlands_clothing:penitant",
+            ModelPenitent::createBodyLayer, ModelPenitent::new);
+        add("lowlands_clothing:plaguedoctor",
+            ModelPlagueDoctor::createBodyLayer, ModelPlagueDoctor::new);
+        add("lowlands_clothing:ratcatcherc01",
+            ModelRatcatcher::createBodyLayer, ModelRatcatcher::new);
+        add("lowlands_clothing:siege_armor",
+            ModelSiege::createBodyLayer, ModelSiege::new);
+        add("lowlands_clothing:snowtigerarmor",
+            ModelSnowTiger::createBodyLayer, ModelSnowTiger::new);
+        add("lowlands_clothing:swampfolk_outfit",
+            ModelSwamplandfolks::createBodyLayer, ModelSwamplandfolks::new);
+        add("lowlands_clothing:waldknightarmor",
+            ModelWaldKnight::createBodyLayer, ModelWaldKnight::new);
+        add("lowlands_clothing:wingedcavaleryarmor",
+            ModelWingedCavalery::createBodyLayer, ModelWingedCavalery::new);
     }
 
     /** Registers every ported set's model layer. Call once, from client init. */
