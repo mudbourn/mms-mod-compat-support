@@ -46,9 +46,14 @@ import strm.emfcompat.core.PoseSnapshot;
  *
  * <h2>What it captures</h2>
  *
- * <p>Both arms, whenever the held weapon declares a {@code pose} or an
- * {@code off_hand_pose}, whether or not it is two-handed — a one-handed weapon
- * with a custom idle has exactly the same problem. The snapshot is taken at
+ * <p>Whenever the held weapon declares a {@code pose} or an {@code off_hand_pose},
+ * whether or not it is two-handed — a one-handed weapon with a custom idle has
+ * exactly the same problem.
+ *
+ * <p>How many arms depends on the pose:
+ * {@link info.mudbourn.mmscompat.client.HeldPoseArms} names the handful that read
+ * as carried one-handed, and those keep only the right arm so DA still swings the
+ * left. Everything else takes both, as it always did. The snapshot is taken at
  * {@code RETURN} of {@code setupAnim}, matching the addon's own injection point
  * and priority, which is late enough that PAL has applied the pose.
  *
@@ -131,7 +136,16 @@ public class HeldPoseMixin {
             return;
         }
 
-        if (mms$hasCustomPose(player.getMainHandItem()) || mms$hasCustomPose(player.getOffhandItem())) {
+        String pose = mms$customPose(player.getMainHandItem());
+        if (pose == null) {
+            pose = mms$customPose(player.getOffhandItem());
+        }
+
+        if (pose != null) {
+            // A two-handed weapon that reads as carried one-handed only gets the
+            // right arm; DA keeps the left and swings it. See HeldPoseArms.
+            boolean bothArms = info.mudbourn.mmscompat.client.HeldPoseArms.usesBothArms(pose);
+
             if (info.mudbourn.mmscompat.client.PoseTuning.additiveArms) {
                 // Subtract vanilla's walk swing from xRot so what is stored is the
                 // hold and not the running arms. See HeldPoseDelta for why this is
@@ -139,10 +153,14 @@ public class HeldPoseMixin {
                 float walkPos = state.walkAnimationPos;
                 float walkSpeed = state.walkAnimationSpeed;
 
+                // A zero delta on the left arm is the additive spelling of "DA keeps
+                // this arm": HeldPoseAdditiveMixin adds it unconditionally, so the
+                // arm has to be handed back with an offset of nothing rather than by
+                // being left out.
                 HeldPoseDelta.put(player.getUUID(), new HeldPoseDelta.ArmDelta(
-                        model.leftArm.xRot - HeldPoseDelta.vanillaArmSwing(walkPos, walkSpeed, false),
-                        model.leftArm.yRot,
-                        model.leftArm.zRot,
+                        bothArms ? model.leftArm.xRot - HeldPoseDelta.vanillaArmSwing(walkPos, walkSpeed, false) : 0.0F,
+                        bothArms ? model.leftArm.yRot : 0.0F,
+                        bothArms ? model.leftArm.zRot : 0.0F,
                         model.rightArm.xRot - HeldPoseDelta.vanillaArmSwing(walkPos, walkSpeed, true),
                         model.rightArm.yRot,
                         model.rightArm.zRot));
@@ -154,8 +172,11 @@ public class HeldPoseMixin {
                 // the jem does not collapse. Storing real arms here caused the swing.
                 PoseManager.savePoses(player.getUUID(), SOURCE, null, null);
             } else {
+                // A null arm slot is skipped by EMF Compat's applier, which is
+                // exactly "leave this arm to whatever animated it".
                 PoseManager.savePoses(player.getUUID(), SOURCE,
-                        new PoseSnapshot(model.leftArm), new PoseSnapshot(model.rightArm));
+                        bothArms ? new PoseSnapshot(model.leftArm) : null,
+                        new PoseSnapshot(model.rightArm));
             }
         } else {
             // Dropping the weapon has to release the arms in the same frame, or
@@ -165,15 +186,28 @@ public class HeldPoseMixin {
         }
     }
 
-    private static boolean mms$hasCustomPose(ItemStack stack) {
+    /**
+     * The pose id this stack contributes, or null if it declares none. Returns the
+     * id rather than a yes/no because {@link info.mudbourn.mmscompat.client.HeldPoseArms}
+     * needs it to decide how many arms the hold takes; the null/non-null answer is
+     * the same gate as before.
+     *
+     * <p>{@code pose} is preferred over {@code off_hand_pose} when both are present:
+     * the main-hand hold is the one being described, and the off-hand pose is a
+     * modifier on it.
+     */
+    private static String mms$customPose(ItemStack stack) {
         if (stack.isEmpty()) {
-            return false;
+            return null;
         }
         WeaponAttributes attributes = WeaponRegistry.getAttributes(stack);
         if (attributes == null) {
-            return false;
+            return null;
         }
-        return mms$isPose(attributes.pose()) || mms$isPose(attributes.offHandPose());
+        if (mms$isPose(attributes.pose())) {
+            return attributes.pose();
+        }
+        return mms$isPose(attributes.offHandPose()) ? attributes.offHandPose() : null;
     }
 
     /**

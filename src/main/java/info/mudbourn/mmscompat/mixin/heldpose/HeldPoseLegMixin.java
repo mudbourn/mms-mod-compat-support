@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Lets a Better Combat animation own the legs while the player is standing still,
- * and hands them back to DetailedAnimations the moment the player is doing
+ * Lets a Better Combat <em>swing</em> own the legs while the player is standing
+ * still, and hands them back to DetailedAnimations the moment the player is doing
  * anything that has its own footwork.
  *
  * <h2>Why legs need a producer at all</h2>
@@ -32,18 +32,24 @@ import java.util.UUID;
  *
  * <h2>When it captures</h2>
  *
- * <p>Whenever a Better Combat animation is actually driving the model — either a
- * swing is playing, or {@link HeldPoseMixin} decided this frame that the held item
- * has a pose worth preserving. Reusing that second decision rather than re-deriving
- * it keeps one definition of "a posed weapon is in hand": all of the exclusions that
- * mixin already makes (crossbow, spyglass, trident, any item in use) come along for
- * free, because each of them clears {@code mms_held_pose} on its way out.
+ * <p>Only while a swing is playing. {@code better_combat} is the addon's own key,
+ * stored for exactly the duration of an attack and cleared otherwise, so its
+ * presence is the honest probe for that and costs no extra dependency.
  *
- * <p>That ordering is why this mixin outranks {@link HeldPoseMixin} in priority.
- * Both inject at {@code RETURN} of the same method, and a later-applied mixin's
- * callback lands after an earlier one's, so the higher number runs second and reads
- * a store that is already current for this frame instead of lagging it by one.
- * Nothing here writes to the model, so running last is otherwise harmless.
+ * <p>An idle hold deliberately does <em>not</em> qualify, and that is the fix this
+ * gate encodes. Through 0.9.83 it also captured whenever {@link HeldPoseMixin} had
+ * stored a hold, on the reasoning that a posed weapon is a posed weapon. But a hold
+ * is an <em>arm</em> statement — where the weapon sits — and the pose animations
+ * carry a full stance underneath it. Reading legs out of one froze the player's
+ * stance the whole time a spear was carried, replacing DA's idle for no gain: the
+ * weapon looks identical either way, because nothing about the hold is below the
+ * waist. A swing is different; its footwork is the animation.
+ *
+ * <p>Priority still outranks {@link HeldPoseMixin} even though the read of its
+ * store is gone. Both inject at {@code RETURN} of the same method, and a
+ * later-applied mixin's callback lands after an earlier one's, so the higher number
+ * runs second; that ordering costs nothing here and keeps the two producers'
+ * relationship stable if this ever reads from that store again.
  *
  * <h2>When it yields</h2>
  *
@@ -89,8 +95,7 @@ public class HeldPoseLegMixin {
         // "an attack animation is playing" and costs no extra dependency. The
         // second half is HeldPoseMixin's verdict for this frame; see the class
         // doc for why that is a read and not a re-derivation.
-        boolean posed = PoseManager.getSavedPoses(uuid, BETTER_COMBAT_SOURCE) != null
-                || PoseManager.getSavedPoses(uuid, HeldPoseSource.SOURCE) != null;
+        boolean posed = PoseManager.getSavedPoses(uuid, BETTER_COMBAT_SOURCE) != null;
 
         boolean locomotionActive = player.isCrouching()
                 || player.isInWater()
