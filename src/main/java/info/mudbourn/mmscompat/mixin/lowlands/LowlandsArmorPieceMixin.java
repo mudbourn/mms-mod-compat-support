@@ -3,6 +3,7 @@ package info.mudbourn.mmscompat.mixin.lowlands;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import info.mudbourn.mmscompat.client.lowlands.LowlandsArmorModel;
+import info.mudbourn.mmscompat.duck.FirstPersonSelfDuck;
 import info.mudbourn.mmscompat.client.lowlands.LowlandsArmorPose;
 import info.mudbourn.mmscompat.client.lowlands.LowlandsArmorSets;
 import net.minecraft.client.model.EntityModel;
@@ -88,6 +89,13 @@ public abstract class LowlandsArmorPieceMixin {
                                          int light,
                                          HumanoidRenderState state,
                                          CallbackInfo ci) {
+        // Asked here rather than left to mixin.headhide: that mixin shares this exact
+        // seam and also cancels, so only one of the two ever runs, and it is this one.
+        if (FirstPersonSelfDuck.hidesHeadPiece(state, slot)) {
+            ci.cancel();
+            return;
+        }
+
         Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
         if (equippable == null || equippable.assetId().isEmpty()) {
             return;

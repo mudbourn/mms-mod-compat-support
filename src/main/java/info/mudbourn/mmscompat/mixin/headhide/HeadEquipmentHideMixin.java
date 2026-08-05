@@ -27,12 +27,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * blocks worn on the head take a different route, {@code CustomHeadLayer},
  * which First-person Model already cancels for the camera entity.
  *
- * <p>Priority is above default so this HEAD injection is applied last and
- * therefore runs first, ahead of {@code mixin.lowlands.LowlandsArmorPieceMixin}
- * on the same seam — that one cancels the call when it takes over the draw, so
- * losing the race would let Lowlands helmets through the one hole this is meant
- * to close. Both mixins are ours, so the ordering is settled here rather than
- * left to load order.
+ * <p>{@code mixin.lowlands.LowlandsArmorPieceMixin} sits on this same seam and
+ * also cancels, and in practice it runs first — the raised priority here did
+ * not settle the race the way it was written to. Every Lowlands and Weaver's
+ * helmet was drawn and this injection never reached, while every other helmet
+ * hid correctly. The ordering is no longer relied on at all: both mixins ask
+ * {@link FirstPersonSelfDuck#hidesHeadPiece} for themselves, so whichever wins
+ * the seam gives the same answer. The priority is kept only because dropping it
+ * would change apply order for no gain.
  *
  * <p>First person only, and only for the camera entity: {@code getCameraType()}
  * is re-read on every extraction, so switching to third person restores the
@@ -49,7 +51,7 @@ public abstract class HeadEquipmentHideMixin {
                                            int light,
                                            HumanoidRenderState state,
                                            CallbackInfo ci) {
-        if (slot == EquipmentSlot.HEAD && ((FirstPersonSelfDuck) state).mmsCompat$isFirstPersonSelf()) {
+        if (FirstPersonSelfDuck.hidesHeadPiece(state, slot)) {
             ci.cancel();
         }
     }

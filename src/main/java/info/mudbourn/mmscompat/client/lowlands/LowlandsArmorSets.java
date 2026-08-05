@@ -30,10 +30,15 @@ import java.util.function.Supplier;
  * <p>Models are baked lazily on first use and cached. Baking touches
  * {@code Minecraft.getInstance()}, so nothing here may run off the render thread.
  *
- * <p><b>Status: all 23 Lowlands sets and 8 Weaver's Paradise sets ported, none
- * verified in game.</b> Highlander has no leggings piece and Swamplandfolks no
- * boots — that is the source mod's own gap, matching {@code LowlandsVanity}, not a
- * missing row here.
+ * <p><b>Status: all 23 Lowlands sets and 8 Weaver's Paradise sets ported, and
+ * confirmed rendering in game.</b> Highlander has no leggings piece and
+ * Swamplandfolks no boots — that is the source mod's own gap, matching
+ * {@code LowlandsVanity}, not a missing row here.
+ *
+ * <p>Known open issue: both mods' sets show z-fighting artifacts in places. It
+ * predates the Weaver's Paradise rows and affects the Lowlands sets equally, so it
+ * is not the {@code TextureLayout.SINGLE} path — likely coincident surfaces in the
+ * source geometry, which no amount of layer selection here can separate.
  */
 public final class LowlandsArmorSets {
 

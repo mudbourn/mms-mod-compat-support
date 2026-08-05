@@ -1,5 +1,8 @@
 package info.mudbourn.mmscompat.duck;
 
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.world.entity.EquipmentSlot;
+
 /**
  * Marks a render state as "this is the camera entity, drawn in first person".
  *
@@ -21,4 +24,20 @@ public interface FirstPersonSelfDuck {
     boolean mmsCompat$isFirstPersonSelf();
 
     void mmsCompat$setFirstPersonSelf(boolean firstPersonSelf);
+
+    /**
+     * Whether this draw is a head piece on the first-person camera entity, and so
+     * must not be drawn at all.
+     *
+     * <p>Asked by every mixin that can draw head equipment, not just the one that
+     * hides it. Two of them share the {@code renderArmorPiece} HEAD seam and both
+     * cancel, so whichever is applied last silences the other — and the ported-set
+     * mixin was winning, which is why Lowlands and Weaver's helmets stayed on
+     * screen while every ordinary helmet vanished. Each asks for itself instead of
+     * relying on an ordering neither of them can see.
+     */
+    static boolean hidesHeadPiece(LivingEntityRenderState state, EquipmentSlot slot) {
+        return slot == EquipmentSlot.HEAD
+            && ((FirstPersonSelfDuck) state).mmsCompat$isFirstPersonSelf();
+    }
 }
