@@ -4,8 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "plugin": "info.mudbourn.mmscompat.mixin.neasprint.NeaSprintGate",
   "client": [
-    "NeaSprintMixin",
-    "NeaHeldItemWhitelistMixin"
+    "NeaSprintMixin"
   ],
   "injectors": {
     "defaultRequire": 1
