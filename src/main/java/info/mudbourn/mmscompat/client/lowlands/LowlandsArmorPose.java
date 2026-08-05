@@ -6,47 +6,46 @@ import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
-import org.slf4j.LoggerFactory;
 
 /**
- * Poses a Lowlands set at draw time, from the vanilla armour pose and then from
- * the wearer's CEM animation on top.
+ * Poses a Lowlands set at draw time by copying the vanilla armour model.
  *
- * <p>This is Fabric's {@code TransformCopyingModel} with one extra step. It exists
- * because submission is deferred: {@code ModelFeatureRenderer} calls
+ * <p>This is Fabric's {@code TransformCopyingModel} with one condition added. It
+ * exists because submission is deferred: {@code ModelFeatureRenderer} calls
  * {@code setupAnim(state)} on the submitted model immediately before drawing it, so
- * anything posed at submit time is copied from a model still in its rest pose and
- * the armour renders frozen. Everything therefore happens here, in this order:
+ * anything posed at submit time would be copied from a model still in its rest pose.
  *
- * <ol>
- *   <li>{@code resetPose()} — back to the authored rest pose. This model wraps the
- *       delegate's own root, so it resets the delegate. Part visibility set at bake
- *       time survives, because {@code resetPose} does not touch {@code visible}.</li>
- *   <li>{@code source.setupAnim(state)} then {@code copyTransforms} — the vanilla
- *       humanoid pose: walk, sneak, ride, arm swing.</li>
- *   <li>{@link CemLayerPoseRelay} from the wearer's own model — resource-pack
- *       animation (DetailedAnimations via EMF), when there is any.</li>
- * </ol>
+ * <h2>Where the pose comes from</h2>
  *
- * <p>Step 3 must be {@code relayOver}, not {@code relay}. The plain relay bases the
- * target on its <em>rest</em> pose and writes the result absolutely, so it discards
- * step 2 entirely; when the wearer is momentarily unanimated it resolves to the
- * authored rest pose and the armour renders frozen — indistinguishable from the
- * deferred-submit bug this class was written to fix, and the regression that shipped
- * in 0.9.72. {@code relayOver} bases it on the pose step 2 just produced, so the
- * wearer's animation arrives as a delta and an unanimated wearer contributes
- * nothing.
+ * <p>{@code source} — the vanilla armour model for this slot — is already posed by
+ * the time this runs, by {@code mixin.cemrelay.HumanoidArmorLayerMixin}, which
+ * relays the wearer's CEM animation onto all four slot models at {@code submit}.
+ * So the whole job here is to copy it.
  *
- * <p>With that variant step 3 genuinely cannot subtract: the relay also no-ops
- * outright whenever EMF is absent or the wearer's base model is not an animated CEM
- * model, so the floor is exactly the vanilla pose from step 2.
+ * <p>The one thing that must <em>not</em> happen is calling
+ * {@code source.setupAnim(state)} first. {@code HumanoidModel#setupAnim} writes limb
+ * angles absolutely, so it overwrites the relayed pose with a vanilla reconstruction
+ * one line before the copy — which is why the sets tracked vanilla walk cycles and
+ * ignored DetailedAnimations entirely, most visibly by continuing to swing their
+ * limbs in mid-air where DA eases them to a stop.
  *
- * <p>Why the relay rather than copying the wearer's model directly: EMF applies CEM
- * animation from inside {@code ModelPart#render}, after {@code setupAnim} has
- * returned, so a plain copy of the parent's parts gets the vanilla pose and not the
- * animated one. The relay reconstructs the animated frame instead, and absorbs the
- * pivot and naming mismatches between two unrelated part trees. See
- * {@code CemLayerPoseRelay} for the matrix it solves.
+ * <p>It is still needed as a floor, though: on a client with no EMF, or a wearer
+ * whose base model carries no CEM animation, the relay is a no-op and {@code source}
+ * is never posed by anyone. {@link CemLayerPoseRelay#isAnimatedCemModel} is the same
+ * predicate the relay gates itself on, so the two agree by construction — if the
+ * relay posed {@code source}, this copies it; if it declined, this poses
+ * {@code source} the vanilla way and copies that.
+ *
+ * <h2>History</h2>
+ *
+ * <p>Earlier versions of this class relayed from the wearer's model directly, on the
+ * theory that the armour was rendering frozen. It was not: until 0.9.76 the mixin
+ * that diverts the draw here failed to apply at all (see
+ * {@code LowlandsArmorPieceMixin}), so none of this code had ever run and the sets
+ * were being drawn by the stock equipment renderer. The frozen-armour symptom that
+ * motivated {@code relayOver}, and the deferred-submit reasoning built on top of it,
+ * were describing a code path that was not executing. Both are gone; what remains is
+ * the copy and its fallback.
  */
 public final class LowlandsArmorPose extends Model<Pair<HumanoidRenderState, HumanoidRenderState>> {
 
@@ -66,9 +65,11 @@ public final class LowlandsArmorPose extends Model<Pair<HumanoidRenderState, Hum
     /**
      * Wraps {@code delegate} so it poses itself when drawn.
      *
-     * @param source   the vanilla armour model for this slot, supplying the base pose
+     * @param source   the vanilla armour model for this slot, already relayed
      * @param delegate the Lowlands model actually being drawn
-     * @param wearer   the wearer's base model, or null to skip the CEM relay
+     * @param wearer   the wearer's base model, used only to decide whether the
+     *                 relay will have posed {@code source}; null forces the
+     *                 vanilla floor
      */
     public static LowlandsArmorPose of(HumanoidModel<HumanoidRenderState> source,
                                        LowlandsArmorModel delegate,
@@ -76,49 +77,19 @@ public final class LowlandsArmorPose extends Model<Pair<HumanoidRenderState, Hum
         return new LowlandsArmorPose(source, delegate, wearer);
     }
 
-    /**
-     * DIAGNOSTIC — temporary. How far down the pose pipeline to go.
-     *
-     * <p>All 23 sets render mangled, which puts the fault in this shared path
-     * rather than in any one set's transcribed geometry — but the path has three
-     * stages and the symptom does not say which one. Rather than guess a fourth
-     * time, each stage is switchable so a hotswap can walk them:
-     *
-     * <ul>
-     *   <li>{@code 0} — rest pose only. The authored geometry, untouched. If this
-     *       is already wrong, the transcription is at fault and posing is innocent.</li>
-     *   <li>{@code 1} — plus the vanilla armour pose. If 0 is right and this is
-     *       wrong, {@code copyTransforms} is mismatching the two part trees.</li>
-     *   <li>{@code 2} — plus the CEM relay. If 1 is right and this is wrong, the
-     *       relay's delta is the culprit; that is the stage 0.9.73 added.</li>
-     * </ul>
-     *
-     * <p>Remove this field and inline stage 2 once the stage is identified.
-     */
-    private static final int STAGE = 0;
-
     @Override
     public void setupAnim(Pair<HumanoidRenderState, HumanoidRenderState> state) {
-        // DIAGNOSTIC — temporary, remove with STAGE. Sneak to prove which build is
-        // actually live: hot-swapped code cannot be told apart from the shipped
-        // 0.9.73 by looking at the armour, since both stages animate. Gated on
-        // crouching rather than a frame counter so it needs no new field, which is
-        // the part of class redefinition most likely to be refused.
-        if (state.getFirst().isCrouching) {
-            LoggerFactory.getLogger("mms_compat").info("lowlands pose STAGE={}", STAGE);
-        }
-
         this.resetPose();
-        if (STAGE < 1) {
-            return;
+        if (this.wearer == null || !CemLayerPoseRelay.isAnimatedCemModel(this.wearer)) {
+            this.source.setupAnim(state.getFirst());
         }
-        this.source.setupAnim(state.getFirst());
         this.delegate.copyTransforms(this.source);
-        if (STAGE < 2) {
-            return;
-        }
-        if (this.wearer != null) {
-            CemLayerPoseRelay.relayOver(this.wearer, this.delegate, CemLayerPoseRelay.HUMANOID_ARMOR);
-        }
+
+        // The limb poses above come from the relayed vanilla armour model, but the
+        // root does not: the relay never folds the root in, and source's root is
+        // unanimated. DA puts the swim and crawl body transform in the root, so
+        // without this the set swims with its limbs while its body stays upright.
+        // No-ops when the wearer is not an animated CEM model.
+        CemLayerPoseRelay.relayRoot(this.wearer, this.delegate);
     }
 }

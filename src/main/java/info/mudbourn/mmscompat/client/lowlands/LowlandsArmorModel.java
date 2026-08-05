@@ -18,8 +18,10 @@ import net.minecraft.world.entity.EquipmentSlot;
  * class for it.
  *
  * <p>Part naming is load-bearing. Fabric's {@code Model#copyTransforms} — which is
- * how the worn set inherits the wearer's pose — matches the <em>direct children of
- * the root</em> by name against the source model, so the six root parts must carry
+ * how the worn set inherits the wearer's pose — matches parts <em>by name at any
+ * depth</em> against the source model (it builds a recursive name map with
+ * {@code putIfAbsent}, so the shallowest part of a given name wins), so the six root
+ * parts must carry
  * vanilla {@code HumanoidModel} names ({@code head}, {@code body}, {@code right_arm},
  * {@code left_arm}, {@code right_leg}, {@code left_leg}) rather than the source
  * mod's {@code Head}/{@code Body}/{@code RightArm}/… Every set's extra geometry —

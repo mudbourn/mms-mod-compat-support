@@ -105,13 +105,13 @@ public class HeldPoseMixin {
             return;
         }
 
-        // Same gap, same reason: DA has no trident anywhere in player.jem, so the
-        // vanilla THROW_SPEAR wind-up is written during setupAnim and then thrown
-        // away by the CEM animation. Must sit ahead of the isUsingItem return below
-        // — charging a throw *is* using the item, and that branch would hand the
-        // arms to a DA pose that does not exist. Declines every frame no trident
-        // is being cocked back.
-        if (TridentPose.apply(player, model)) {
+        // Same gap, same reason: DA has no trident or spear anywhere in player.jem,
+        // so the vanilla THROW_TRIDENT / SPEAR wind-up is written during setupAnim
+        // and then thrown away by the CEM animation. Must sit ahead of the
+        // isUsingItem return below — charging a throw *is* using the item, and that
+        // branch would hand the arms to a DA pose that does not exist. Declines
+        // every frame nothing is being cocked back.
+        if (TridentPose.apply(player, model, state)) {
             PoseManager.clearPoses(player.getUUID(), SOURCE);
             HeldPoseDelta.clear(player.getUUID());
             return;

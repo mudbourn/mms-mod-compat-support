@@ -6,6 +6,7 @@ import info.mudbourn.mmscompat.client.lowlands.LowlandsArmorModel;
 import info.mudbourn.mmscompat.client.lowlands.LowlandsArmorPose;
 import info.mudbourn.mmscompat.client.lowlands.LowlandsArmorSets;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
@@ -22,6 +23,7 @@ import net.minecraft.world.item.equipment.Equippable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -63,7 +65,20 @@ public abstract class LowlandsArmorPieceMixin {
 
     @Shadow protected abstract boolean usesInnerModel(EquipmentSlot slot);
 
-    @Shadow protected abstract EntityModel<?> getParentModel();
+    /**
+     * The wearer's own model, reached by cast rather than {@code @Shadow}.
+     *
+     * <p>{@code getParentModel()} is declared on {@link RenderLayer}, the
+     * superclass, not on the layer this mixin targets. Mixin resolves
+     * {@code @Shadow} members against the target class itself, so shadowing it
+     * threw {@code InvalidMixinException} at apply time and silently disabled
+     * this entire mixin. It is {@code public} on {@code RenderLayer}, so a cast
+     * reaches it with no shadow at all.
+     */
+    @Unique
+    private EntityModel<?> mms$parentModel() {
+        return ((RenderLayer<?, ?>) (Object) this).getParentModel();
+    }
 
     @Inject(method = "renderArmorPiece", at = @At("HEAD"), cancellable = true)
     private void mms$renderLowlandsPiece(PoseStack poseStack,
@@ -81,6 +96,7 @@ public abstract class LowlandsArmorPieceMixin {
         ResourceKey<EquipmentAsset> assetKey = equippable.assetId().get();
         Identifier assetId = assetKey.identifier();
         LowlandsArmorModel model = LowlandsArmorSets.model(assetId, slot);
+
         if (model == null) {
             return;
         }
@@ -93,7 +109,7 @@ public abstract class LowlandsArmorPieceMixin {
         // the actual player rig rather than approximating it; the vanilla armour
         // model is only the floor for when there is no CEM animation to relay.
         HumanoidModel<HumanoidRenderState> source = this.getArmorModel(state, slot);
-        LowlandsArmorPose posed = LowlandsArmorPose.of(source, model, this.getParentModel());
+        LowlandsArmorPose posed = LowlandsArmorPose.of(source, model, this.mms$parentModel());
 
         EquipmentClientInfo.LayerType layerType = this.usesInnerModel(slot)
             ? EquipmentClientInfo.LayerType.HUMANOID_LEGGINGS

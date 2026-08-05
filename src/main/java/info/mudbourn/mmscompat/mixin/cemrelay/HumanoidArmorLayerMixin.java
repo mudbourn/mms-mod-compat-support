@@ -2,12 +2,14 @@ package info.mudbourn.mmscompat.mixin.cemrelay;
 
 import info.mudbourn.mmscompat.client.CemLayerPoseRelay;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.entity.ArmorModelSet;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -55,11 +57,24 @@ public abstract class HumanoidArmorLayerMixin {
 
     @Shadow @Final private ArmorModelSet<?> babyModelSet;
 
-    @Shadow protected abstract EntityModel<?> getParentModel();
+    /**
+     * The wearer's own model, reached by cast rather than {@code @Shadow}.
+     *
+     * <p>{@code getParentModel()} is declared on {@link RenderLayer}, the
+     * superclass, not on the layer this mixin targets. Mixin resolves
+     * {@code @Shadow} members against the target class itself, so shadowing it
+     * threw {@code InvalidMixinException} at apply time and silently disabled
+     * this entire mixin. It is {@code public} on {@code RenderLayer}, so a cast
+     * reaches it with no shadow at all.
+     */
+    @Unique
+    private EntityModel<?> mms$parentModel() {
+        return ((RenderLayer<?, ?>) (Object) this).getParentModel();
+    }
 
     @Inject(method = "submit", at = @At("HEAD"))
     private void mms$relayArmorPose(CallbackInfo ci) {
-        EntityModel<?> parent = this.getParentModel();
+        EntityModel<?> parent = this.mms$parentModel();
         mms$relaySet(parent, this.modelSet);
         mms$relaySet(parent, this.babyModelSet);
     }

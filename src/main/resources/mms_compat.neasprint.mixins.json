@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.neasprint",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.neasprint.NeaSprintGate",
+  "client": [
+    "NeaSprintMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

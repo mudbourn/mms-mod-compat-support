@@ -185,6 +185,43 @@ public final class CemLayerPoseRelay {
     }
 
     /**
+     * Copies the base model's animated <em>root</em> transform onto the layer's root.
+     *
+     * <p>Deliberately not part of {@link #relay}, which walks the root's children and
+     * never folds the root in — a jem-backed layer animates its own root, and doing
+     * both would compound. This is for a layer that has no jem at all, where the root
+     * transform is otherwise supplied by nobody.
+     *
+     * <p>It matters because DetailedAnimations puts the swim and crawl body transform
+     * in the root: {@code player.jem} drives {@code root.rx/ry/tx/ty/tz} from its
+     * {@code var.r*} terms, and the four armour jems mirror it through
+     * {@code var.pr*}. A layer that copies only limb poses therefore swims with the
+     * limbs while the body stays upright.
+     *
+     * <p>The armour jems offset the mirrored root slightly — {@code var.prty}
+     * subtracts 2 while sneaking and a further 0.1 — which this does not reproduce;
+     * it takes the wearer's root as-is. Worth revisiting if sneaking sits visibly
+     * high, but the swim case does not involve either term.
+     */
+    public static void relayRoot(Model base, Model layer) {
+        if (base == null || layer == null || !isAnimatedCemModel(base)) {
+            return;
+        }
+        ModelPart from = base.root();
+        ModelPart to = layer.root();
+
+        to.x = from.x;
+        to.y = from.y;
+        to.z = from.z;
+        to.xRot = from.xRot;
+        to.yRot = from.yRot;
+        to.zRot = from.zRot;
+        to.xScale = from.xScale;
+        to.yScale = from.yScale;
+        to.zScale = from.zScale;
+    }
+
+    /**
      * Copies the animated pose of {@code base} onto several layer models at once,
      * walking the base's part tree a single time.
      *
@@ -330,7 +367,7 @@ public final class CemLayerPoseRelay {
      * an animation. A CEM model without animations poses identically to vanilla,
      * so relaying from it would be work with no visible effect.
      */
-    private static boolean isAnimatedCemModel(Model model) {
+    public static boolean isAnimatedCemModel(Model model) {
         if (!resolve()) {
             return false;
         }
