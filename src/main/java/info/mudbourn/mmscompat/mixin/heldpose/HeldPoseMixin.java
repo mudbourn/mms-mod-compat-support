@@ -122,6 +122,18 @@ public class HeldPoseMixin {
             return;
         }
 
+        // An inspect outranks the idle hold, and standing down is how that is
+        // enforced — PoseManager merges sources in HashMap order, so competing for
+        // the slot would settle the contest by string hash rather than by intent.
+        // InspectAnimGate has already ruled out every state where an inspect must
+        // not play, so reaching here means the inspect is legitimately running.
+        if (info.mudbourn.mmscompat.client.InspectAnimGate.isInspecting(player,
+                info.mudbourn.mmscompat.client.InspectAnimPoseBridge.animationName(state))) {
+            PoseManager.clearPoses(player.getUUID(), SOURCE);
+            HeldPoseDelta.clear(player.getUUID());
+            return;
+        }
+
         // An idle hold is exactly that — idle. While the item is actually in use,
         // DetailedAnimations owns the arms: its BowShootingPose and BlockingPose are
         // full-body use animations, and replaying the resting hold over them erases

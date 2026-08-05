@@ -50,6 +50,16 @@ public abstract class InspectAnimPoseCaptureMixin {
             return;
         }
 
+        // An inspect is an idle flourish, so anything with a real animation of its
+        // own outranks it. Vetoing the render state rather than declining to
+        // capture is what also stops the held item spinning; see
+        // InspectAnimPoseBridge#suppress.
+        if (info.mudbourn.mmscompat.client.InspectAnimGate.suppressed(player)) {
+            InspectAnimPoseBridge.suppress(state);
+            InspectAnimPoseBridge.clear(player.getUUID());
+            return;
+        }
+
         PlayerModel self = (PlayerModel) (Object) this;
         // FLOURISH passes the item hand to hand, so both arms are posed. The
         // rest touch only the main arm — leave the other under EMF's control
