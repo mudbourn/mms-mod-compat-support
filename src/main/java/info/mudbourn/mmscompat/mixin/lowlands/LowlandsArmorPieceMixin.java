@@ -111,8 +111,7 @@ public abstract class LowlandsArmorPieceMixin {
         // the actual player rig rather than approximating it; the vanilla armour
         // model is only the floor for when there is no CEM animation to relay.
         HumanoidModel<HumanoidRenderState> source = this.getArmorModel(state, slot);
-        LowlandsArmorPose posed = LowlandsArmorPose.of(source, model, this.mms$parentModel());
-        posed.capture(state);
+        LowlandsArmorPose posed = LowlandsArmorPose.of(source, model, this.mms$parentModel(), state);
 
         EquipmentClientInfo.LayerType layerType = this.usesInnerModel(slot)
             ? EquipmentClientInfo.LayerType.HUMANOID_LEGGINGS

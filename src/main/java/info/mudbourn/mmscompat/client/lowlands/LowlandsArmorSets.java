@@ -155,6 +155,9 @@ public final class LowlandsArmorSets {
     /** Drops baked models so a resource reload rebuilds them. */
     public static void invalidate() {
         BAKED.clear();
+        // Pooled poses are keyed on the baked models and hold their part references,
+        // so they have to go with them or they would replay onto a dead part tree.
+        LowlandsArmorPose.invalidate();
     }
 
     private LowlandsArmorSets() {}
