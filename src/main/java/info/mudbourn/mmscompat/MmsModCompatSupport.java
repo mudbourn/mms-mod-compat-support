@@ -20,6 +20,7 @@ public class MmsModCompatSupport implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        VanityMarker.register();
         // Creative-menu embargo strip
         CreativeEmbargo.register();
         info.mudbourn.mmscompat.waypoint.SharedWaypointServer.register();

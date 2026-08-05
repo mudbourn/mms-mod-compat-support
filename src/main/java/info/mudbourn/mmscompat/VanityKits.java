@@ -90,6 +90,47 @@ public final class VanityKits {
         )));
     }
 
+    /**
+     * A four-piece set handed out as leather bases wearing another mod's equipment
+     * asset, rather than as that mod's own items.
+     *
+     * <p>This is the only way a vanity piece can be truly inert. {@link VanityUtil}
+     * can strip everything that lives in a component — it replaces
+     * {@code ATTRIBUTE_MODIFIERS} wholesale, so armour, toughness, weight and any
+     * mod-added attribute go with it — but a great deal of armour behaviour is not a
+     * component at all. Mutant Skeleton's quick draw, Drift Leggings' gravity,
+     * Frostiful's cold protection and vanilla's own turtle-helmet water breathing are
+     * all hardcoded checks of the form "is the worn item this item". Nothing written
+     * onto the stack can answer no to that. Handing out a different item can.
+     *
+     * <p>Safe only because every asset used here draws through the stock
+     * {@code humanoid}/{@code humanoid_leggings} layers, which were checked one by
+     * one. A set with a custom armour model would render as flat vanilla-shaped slabs
+     * this way — the mistake the Lowlands port already made once. Re-check before
+     * adding a row.
+     *
+     * @param namespace the mod supplying both the asset and the item model
+     * @param asset     equipment asset name — <em>not</em> always the item prefix;
+     *                  Expanded Weaponry's {@code heavy_golden_*} items wear
+     *                  {@code heavy_gold}, and Frostiful's {@code fur_padded_chainmail_*}
+     *                  wear {@code fur_lined_chainmail}
+     * @param prefix    the mod's item id prefix, for the sprite and the name
+     */
+    private static void addSkinSet(String id, String display, String namespace, String asset, String prefix) {
+        add(new Kit(id, display, List.of(
+            skin(EquipmentSlot.HEAD,  "minecraft:leather_helmet",     namespace, asset, prefix + "_helmet"),
+            skin(EquipmentSlot.CHEST, "minecraft:leather_chestplate", namespace, asset, prefix + "_chestplate"),
+            skin(EquipmentSlot.LEGS,  "minecraft:leather_leggings",   namespace, asset, prefix + "_leggings"),
+            skin(EquipmentSlot.FEET,  "minecraft:leather_boots",      namespace, asset, prefix + "_boots")
+        )));
+    }
+
+    /** One leather base wearing {@code namespace:asset}, named and sprited as the real item. */
+    private static Piece skin(EquipmentSlot slot, String base, String namespace, String asset, String item) {
+        return new Piece(slot, base, namespace + ":" + asset, namespace + ":" + item,
+            "item." + namespace + "." + item);
+    }
+
     static {
         // ── Vanilla ──────────────────────────────────────────────────────────
         addSet("leather",   "Leather",   "minecraft:leather");
@@ -134,9 +175,15 @@ public final class VanityKits {
             invisible(EquipmentSlot.FEET,  "minecraft:leather_boots",      "boots")
         )));
 
+        // The elytra stays a real elytra and is still fully inert: gliding is the
+        // GLIDER marker component, which VanityUtil removes, while the wings are the
+        // "wings" layer of its equipment asset, which it keeps. Skinning it onto a
+        // leather chestplate would have worked too, but there is nothing to gain by
+        // it once the component is gone.
         add(new Kit("end_treasures", "End Treasures", List.of(
             Piece.of(EquipmentSlot.CHEST, "minecraft:elytra"),
-            Piece.of(EquipmentSlot.LEGS,  "enderscape:drift_leggings")
+            skin(EquipmentSlot.LEGS, "minecraft:leather_leggings",
+                "enderscape", "drift_leggings", "drift_leggings")
         )));
 
         add(new Kit("ice_skates", "Ice Skates", List.of(
@@ -148,11 +195,18 @@ public final class VanityKits {
         // slot is vanilla's turtle shell, which is why this set spans two sources.
         // This replaced a shell-only "turtle" kit — the helmet alone was a strict
         // subset of this, so keeping both meant two kits and one of them a trap.
+        // The head is a leather helmet wearing vanilla's own turtle_scute asset, not a
+        // turtle helmet: water breathing is a hardcoded check for the item in the head
+        // slot, so only not being that item removes it.
         add(new Kit("turtle_armor", "Turtle Armor", List.of(
-            Piece.of(EquipmentSlot.HEAD,  "minecraft:turtle_helmet"),
-            Piece.of(EquipmentSlot.CHEST, "scorchful:turtle_chestplate"),
-            Piece.of(EquipmentSlot.LEGS,  "scorchful:turtle_leggings"),
-            Piece.of(EquipmentSlot.FEET,  "scorchful:turtle_boots")
+            new Piece(EquipmentSlot.HEAD, "minecraft:leather_helmet",
+                "minecraft:turtle_scute", "minecraft:turtle_helmet", "item.minecraft.turtle_helmet"),
+            skin(EquipmentSlot.CHEST, "minecraft:leather_chestplate",
+                "scorchful", "turtle", "turtle_chestplate"),
+            skin(EquipmentSlot.LEGS, "minecraft:leather_leggings",
+                "scorchful", "turtle", "turtle_leggings"),
+            skin(EquipmentSlot.FEET, "minecraft:leather_boots",
+                "scorchful", "turtle", "turtle_boots")
         )));
 
         add(new Kit("nether_treasures", "Nether Treasures", List.of(
@@ -163,38 +217,47 @@ public final class VanityKits {
         // Ordinary four-piece sets that were already in the game but had no kit.
 
         // Aerial Hell
-        addSet("ruby",         "Ruby",             "aerialhell:ruby");
-        addSet("azurite",      "Azurite Crystal",  "aerialhell:azurite");
-        addSet("magmatic_gel", "Magmatic Gel",     "aerialhell:magmatic_gel");
-        addSet("volucite",     "Volucite",         "aerialhell:volucite");
-        addSet("obsidian",     "Obsidian",         "aerialhell:obsidian");
-        addSet("lunatic",      "Lunar",            "aerialhell:lunatic");
-        addSet("arsonist",     "Arsonist",         "aerialhell:arsonist");
-        addSet("shadow",       "Shadow",           "aerialhell:shadow");
-        add(new Kit("blue_meanie", "Blue Meanie",
-            List.of(Piece.of(EquipmentSlot.HEAD, "aerialhell:blue_meanie_cap"))));
+        addSkinSet("ruby",         "Ruby",            "aerialhell", "ruby",         "ruby");
+        addSkinSet("azurite",      "Azurite Crystal", "aerialhell", "azurite",      "azurite");
+        addSkinSet("magmatic_gel", "Magmatic Gel",    "aerialhell", "magmatic_gel", "magmatic_gel");
+        addSkinSet("volucite",     "Volucite",        "aerialhell", "volucite",     "volucite");
+        addSkinSet("obsidian",     "Obsidian",        "aerialhell", "obsidian",     "obsidian");
+        addSkinSet("lunatic",      "Lunar",           "aerialhell", "lunatic",      "lunatic");
+        addSkinSet("arsonist",     "Arsonist",        "aerialhell", "arsonist",     "arsonist");
+        addSkinSet("shadow",       "Shadow",          "aerialhell", "shadow",       "shadow");
+        // No blue_meanie kit: the cap is not equippable, which is also why Aerial Hell
+        // ships no equipment asset for it. It was briefly listed here as a head piece,
+        // which would have handed out an item that cannot be worn.
 
         // Enderscape
-        addSet("shadoline", "Shadoline", "enderscape:shadoline");
+        addSkinSet("shadoline", "Shadoline", "enderscape", "shadoline", "shadoline");
 
-        // Expanded Weaponry
-        addSet("heavy_copper",    "Heavy Copper",    "expanded_weaponry:heavy_copper");
-        addSet("heavy_iron",      "Heavy Iron",      "expanded_weaponry:heavy_iron");
-        addSet("heavy_golden",    "Heavy Gold",      "expanded_weaponry:heavy_golden");
-        addSet("heavy_diamond",   "Heavy Diamond",   "expanded_weaponry:heavy_diamond");
-        addSet("heavy_netherite", "Heavy Netherite", "expanded_weaponry:heavy_netherite");
+        // Expanded Weaponry. Note heavy_golden_* items wear the heavy_gold asset.
+        addSkinSet("heavy_copper",    "Heavy Copper",    "expanded_weaponry", "heavy_copper",    "heavy_copper");
+        addSkinSet("heavy_iron",      "Heavy Iron",      "expanded_weaponry", "heavy_iron",      "heavy_iron");
+        addSkinSet("heavy_golden",    "Heavy Gold",      "expanded_weaponry", "heavy_gold",      "heavy_golden");
+        addSkinSet("heavy_diamond",   "Heavy Diamond",   "expanded_weaponry", "heavy_diamond",   "heavy_diamond");
+        addSkinSet("heavy_netherite", "Heavy Netherite", "expanded_weaponry", "heavy_netherite", "heavy_netherite");
 
-        // Frostiful
-        addSet("fur",                   "Fur",                   "frostiful:fur");
-        addSet("fur_padded_chainmail",  "Fur Padded Chainmail",  "frostiful:fur_padded_chainmail");
+        // Frostiful. Note fur_padded_chainmail_* items wear the fur_lined_chainmail asset.
+        addSkinSet("fur",                  "Fur",                  "frostiful", "fur",                 "fur");
+        addSkinSet("fur_padded_chainmail", "Fur Padded Chainmail", "frostiful", "fur_lined_chainmail", "fur_padded_chainmail");
         add(new Kit("frostology", "Cloak of Frostology",
             List.of(Piece.of(EquipmentSlot.CHEST, "frostiful:frostology_cloak"))));
 
-        // Mutant Monsters ships no helmet for this set, so it is three pieces.
+        // Mutant Skeleton's three worn pieces skin cleanly. The head slot does not:
+        // the skull is a *block* (lang key block.mutantmonsters.mutant_skeleton_skull),
+        // worn like a vanilla mob head and drawn from its block model rather than an
+        // equipment layer, so a leather helmet cannot wear it. It stays the real item
+        // and keeps whatever the mod hangs off it.
         add(new Kit("mutant_skeleton", "Mutant Skeleton", List.of(
-            Piece.of(EquipmentSlot.CHEST, "mutantmonsters:mutant_skeleton_chestplate"),
-            Piece.of(EquipmentSlot.LEGS,  "mutantmonsters:mutant_skeleton_leggings"),
-            Piece.of(EquipmentSlot.FEET,  "mutantmonsters:mutant_skeleton_boots")
+            Piece.of(EquipmentSlot.HEAD, "mutantmonsters:mutant_skeleton_skull"),
+            skin(EquipmentSlot.CHEST, "minecraft:leather_chestplate",
+                "mutantmonsters", "mutant_skeleton", "mutant_skeleton_chestplate"),
+            skin(EquipmentSlot.LEGS, "minecraft:leather_leggings",
+                "mutantmonsters", "mutant_skeleton", "mutant_skeleton_leggings"),
+            skin(EquipmentSlot.FEET, "minecraft:leather_boots",
+                "mutantmonsters", "mutant_skeleton", "mutant_skeleton_boots")
         )));
     }
 

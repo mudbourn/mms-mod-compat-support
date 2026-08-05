@@ -7,7 +7,8 @@
     "SkeletonArmorQuickDrawMixin",
     "SkeletonArmorInfinityMixin",
     "AttachmentBuilderIdentifierMixin",
-    "CreeperMinionShoulderSyncMixin"
+    "CreeperMinionShoulderSyncMixin",
+    "SkeletonSkullVanityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
