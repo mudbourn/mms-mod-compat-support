@@ -146,6 +146,9 @@ public final class VanityKits {
         // ── Clothing of the Lowlands (resource-pack skins) ───────────────────
         LowlandsVanity.register();
 
+        // ── Weavers Paradise (resource-pack skins) ───────────────────────────
+        WeaversVanity.register();
+
         // ── Curated cross-mod kits ───────────────────────────────────────────
         // Themed sets whose pieces come from several mods, or from items that are
         // not obviously armour at all. These are the ones a player would never

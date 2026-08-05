@@ -113,7 +113,14 @@ public abstract class LowlandsArmorPieceMixin {
         HumanoidModel<HumanoidRenderState> source = this.getArmorModel(state, slot);
         LowlandsArmorPose posed = LowlandsArmorPose.of(source, model, this.mms$parentModel(), state);
 
-        EquipmentClientInfo.LayerType layerType = this.usesInnerModel(slot)
+        // Vanilla's slot rule still decides *when* the inner layer applies; the model
+        // decides whether its set has an inner layer at all. A set authored as one
+        // whole-body atlas has no humanoid_leggings entry in its equipment json, so
+        // asking for that layer resolves nothing and the leggings piece disappears.
+        boolean inner = model.textureLayout() == LowlandsArmorModel.TextureLayout.INNER_OUTER
+            && this.usesInnerModel(slot);
+
+        EquipmentClientInfo.LayerType layerType = inner
             ? EquipmentClientInfo.LayerType.HUMANOID_LEGGINGS
             : EquipmentClientInfo.LayerType.HUMANOID;
 

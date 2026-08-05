@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.etfnbt",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.etfnbt.EtfNbtMixinGate",
+  "mixins": [],
+  "client": ["NbtFastPathMixin"],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

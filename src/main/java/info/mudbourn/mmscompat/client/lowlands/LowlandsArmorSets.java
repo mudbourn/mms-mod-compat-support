@@ -14,7 +14,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * The table of ported Clothing of the Lowlands sets, keyed by equipment asset id.
+ * The table of ported armour sets, keyed by equipment asset id.
+ *
+ * <p>Named for Clothing of the Lowlands, which it was built for, but nothing in it
+ * is specific to that mod: a set qualifies if it ships custom geometry the vanilla
+ * equipment renderer cannot draw. Weaver's Paradise sets are registered here too.
  *
  * <p>One row per set. The key is the same {@code equippable.asset_id} that
  * {@code LowlandsVanity} already stamps onto the vanity stacks, so the server-side
@@ -26,9 +30,10 @@ import java.util.function.Supplier;
  * <p>Models are baked lazily on first use and cached. Baking touches
  * {@code Minecraft.getInstance()}, so nothing here may run off the render thread.
  *
- * <p><b>Status: all 23 sets ported, none verified in game.</b> Highlander has no
- * leggings piece and Swamplandfolks no boots — that is the source mod's own gap,
- * matching {@code LowlandsVanity}, not a missing row here.
+ * <p><b>Status: all 23 Lowlands sets and 8 Weaver's Paradise sets ported, none
+ * verified in game.</b> Highlander has no leggings piece and Swamplandfolks no
+ * boots — that is the source mod's own gap, matching {@code LowlandsVanity}, not a
+ * missing row here.
  */
 public final class LowlandsArmorSets {
 
@@ -117,6 +122,37 @@ public final class LowlandsArmorSets {
             ModelWaldKnight::createBodyLayer, ModelWaldKnight::new);
         add("lowlands_clothing:wingedcavaleryarmor",
             ModelWingedCavalery::createBodyLayer, ModelWingedCavalery::new);
+
+        // Weaver's Paradise cosplay sets. Nothing about this table is specific to
+        // Clothing of the Lowlands — a set needs custom geometry and an asset id,
+        // and these have both. They differ from the Lowlands rows in two ways, each
+        // handled by a model-level override rather than by a branch here: they carry
+        // one whole-body atlas (TextureLayout.SINGLE) and all but one model boots
+        // separately (nested right_boot/left_boot parts).
+        //
+        // Which part is the boot was read off the source's own registration order in
+        // WeaversParadiseClient — a leggings block then a boots block — not off the
+        // part names, which lie: Bridget calls its boot part "RightLeg" and its
+        // leggings part "RightLegPants".
+        //
+        // Mikkela alone has no boot geometry and is a three-piece set. Its kit row
+        // must not include boots.
+        add("weaversparadise:astolfo_armor",
+            ModelAstolfo::createBodyLayer, ModelAstolfo::new);
+        add("weaversparadise:bridget_clothing",
+            ModelBridget::createBodyLayer, ModelBridget::new);
+        add("weaversparadise:felix_clothing",
+            ModelFelix::createBodyLayer, ModelFelix::new);
+        add("weaversparadise:gabriel_armor",
+            ModelGabriel::createBodyLayer, ModelGabriel::new);
+        add("weaversparadise:giselle_armor",
+            ModelGiselle::createBodyLayer, ModelGiselle::new);
+        add("weaversparadise:griffith_armor",
+            ModelGriffith::createBodyLayer, ModelGriffith::new);
+        add("weaversparadise:mikkela_armor",
+            ModelMikkela::createBodyLayer, ModelMikkela::new);
+        add("weaversparadise:niko_armor",
+            ModelNiko::createBodyLayer, ModelNiko::new);
     }
 
     /** Registers every ported set's model layer. Call once, from client init. */

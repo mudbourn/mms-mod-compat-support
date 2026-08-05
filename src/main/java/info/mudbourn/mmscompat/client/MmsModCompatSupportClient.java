@@ -16,6 +16,10 @@ public class MmsModCompatSupportClient implements ClientModInitializer {
         // the mixins are gated off, and so /mmspose can report the current mode.
         PoseTuning.load();
         PoseCommand.register();
+        // ETF NBT fast path. Loaded unconditionally so the file and /mmsnbt exist
+        // even without ETF installed; the mixin itself is gated on the mod.
+        info.mudbourn.mmscompat.client.etfnbt.NbtTuning.load();
+        info.mudbourn.mmscompat.client.etfnbt.NbtCommand.register();
         // Clothing of the Lowlands vanity sets carry custom geometry, so the model
         // layers have to exist before anything wearing one is rendered. Registered
         // unconditionally: the sets are keyed by equipment asset id, and a player
