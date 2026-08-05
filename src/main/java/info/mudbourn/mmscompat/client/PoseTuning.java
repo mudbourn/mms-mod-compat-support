@@ -57,18 +57,19 @@ public final class PoseTuning {
     public static boolean additiveArms = false;
 
     /**
-     * How long, in milliseconds, the arms take to settle back into
-     * DetailedAnimations after a pose source releases them. Zero disables the blend
-     * and restores the hard cut. See {@code PoseRelease}.
+     * How long, in milliseconds, the arms take to ease across a change of pose
+     * authority — into a held pose, out of a swing or a roll, or from one source
+     * straight to another. Zero disables the blend and restores the hard cut. See
+     * {@code PoseBlend}.
      */
-    public static int releaseEaseMs = 150;
+    public static int transitionEaseMs = 150;
 
     private PoseTuning() {
     }
 
     private static final class Data {
         boolean additive_arms = false;
-        int release_ease_ms = 150;
+        int transition_ease_ms = 150;
     }
 
     public static void load() {
@@ -80,19 +81,19 @@ public final class PoseTuning {
             Data data = GSON.fromJson(reader, Data.class);
             if (data != null) {
                 additiveArms = data.additive_arms;
-                releaseEaseMs = data.release_ease_ms;
+                transitionEaseMs = data.transition_ease_ms;
             }
         } catch (Exception e) {
             LOG.error("[mms_compat] failed to read {}; keeping defaults", FILE.getName(), e);
         }
-        LOG.info("[mms_compat] held-pose arm mode: {}, release ease {}ms",
-                additiveArms ? "additive" : "absolute", releaseEaseMs);
+        LOG.info("[mms_compat] held-pose arm mode: {}, handover ease {}ms",
+                additiveArms ? "additive" : "absolute", transitionEaseMs);
     }
 
     public static void save() {
         Data data = new Data();
         data.additive_arms = additiveArms;
-        data.release_ease_ms = releaseEaseMs;
+        data.transition_ease_ms = transitionEaseMs;
         try {
             File parent = FILE.getParentFile();
             if (parent != null) {

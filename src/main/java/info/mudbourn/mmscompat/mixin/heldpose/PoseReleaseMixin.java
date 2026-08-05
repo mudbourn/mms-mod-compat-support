@@ -1,7 +1,7 @@
 package info.mudbourn.mmscompat.mixin.heldpose;
 
 import info.mudbourn.mmscompat.client.PlayerAnimLayerProbe;
-import info.mudbourn.mmscompat.client.PoseRelease;
+import info.mudbourn.mmscompat.client.PoseBlend;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.Avatar;
@@ -16,60 +16,59 @@ import traben.entity_model_features.models.animation.state.EMFEntityRenderState;
 import traben.entity_model_features.models.parts.EMFModelPartRoot;
 import traben.entity_model_features.models.parts.EMFModelPartVanilla;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
- * Runs the arm release blend, at the end of EMF's animation.
+ * Drives the arm blend, at the end of EMF's animation.
  *
- * <h2>Where the two cases are read</h2>
+ * <h2>What it feeds in</h2>
  *
- * <p>"Owned" is the union of every authority that can hold the arms, because the
- * blend should look the same however the pose was being driven:
+ * <p>{@link PoseBlend} needs two things per frame: who owns the arms, and what they
+ * are being set to. Both are read here, and both are read in a way that does not
+ * depend on whether EMF Compat's restore has already run at this shared injection
+ * point — a question this package documents contradictory rules for and therefore
+ * refuses to rely on.
  *
  * <ul>
- *   <li>A {@code PoseManager} entry with either arm set — Better Combat swings, this
- *       mod's held poses, Inspect Animations, and anything else that registers a
- *       source. The anchor comes straight off the {@code PoseSnapshot}, which is
- *       what makes it independent of whether EMF Compat's restore has already run;
- *       see {@link PoseRelease}.</li>
- *   <li>Combat Roll's PAL layer, which stores nothing and has to be sampled off the
- *       model. This is the case the request was actually about — the end of a roll
- *       being visible because it cuts rather than settles.</li>
+ *   <li><b>Owner</b> is the set of {@code PoseManager} source keys currently holding
+ *       an arm, joined into one token. Every authority that goes through the store —
+ *       Better Combat swings, this mod's held poses, Inspect Animations — is
+ *       identified by construction, and a source added later is picked up with no
+ *       change here. Combat Roll drives its animation through Player Animation Lib
+ *       and stores nothing, so it is asked for separately; without that it would be
+ *       indistinguishable from DetailedAnimations and the end of a roll would not
+ *       ease, which is the case this easing was first asked for.</li>
+ *   <li><b>Target</b> comes from the store for an arm some source claimed, since the
+ *       snapshot is what the restore is going to write whenever it runs, and off the
+ *       model for an arm nobody claimed, where DA's animation has just landed and the
+ *       restore has nothing to say.</li>
  * </ul>
  *
- * <p>A Better Combat swing satisfies both, and the store is preferred; that is the
- * ordering-proof path, so it should win whenever it is available.
+ * <p>The owner token deliberately ignores <em>which</em> arms each source holds and
+ * what it is holding them at. A source that keeps ownership across a change of pose —
+ * a posed weapon swapped for another posed weapon — is one continuous authority as
+ * far as this is concerned, and its own animation is expected to be continuous. It is
+ * the handover between authorities that nobody was smoothing.
  *
- * <h2>Priority</h2>
- *
- * <p>Low, to run late at this shared injection point — but the correctness of the
- * blend does not depend on that, which is the point of anchoring to the store. If
- * this runs before EMF Compat's restore, the restore then overwrites the blended
- * arms on an owned frame, which is fine because an owned frame is not being blended;
- * on an unowned frame the restore has nothing to write and the blend survives
- * either way.
- *
- * <p>First person is skipped for the same reason the rest of this package skips it.
+ * <p>First person is skipped for the same reason the rest of this package skips it:
+ * {@code EMFModelPartRootMixin} does not restore poses there, and the first-person
+ * path owns the held-item arm.
  */
 @Mixin(value = EMFModelPartRoot.class, priority = 300, remap = false)
 public class PoseReleaseMixin {
 
     @Inject(method = "animate", at = @At("RETURN"))
-    private void mms$easeArmRelease(CallbackInfo ci) {
+    private void mms$easeArmHandover(CallbackInfo ci) {
         EMFEntityRenderState state = EMFAnimationEntityContext.getEmfState();
         if (state == null || state.emfEntity() == null) {
             return;
         }
         UUID uuid = state.emfEntity().etf$getUuid();
         if (uuid == null || strm.emfcompat.core.EMFCompatCore.isLocalPlayerInFirstPerson(uuid)) {
-            return;
-        }
-
-        SavedPoses saved = PoseManager.getSavedPoses(uuid);
-        if (saved != null && saved.leftArm() != null && saved.rightArm() != null) {
-            PoseRelease.owned(uuid,
-                    saved.leftArm().xRot, saved.leftArm().yRot, saved.leftArm().zRot,
-                    saved.rightArm().xRot, saved.rightArm().yRot, saved.rightArm().zRot);
             return;
         }
 
@@ -91,21 +90,43 @@ public class PoseReleaseMixin {
             return;
         }
 
-        if (mms$rolling(uuid)) {
-            PoseRelease.owned(uuid,
-                    left.xRot, left.yRot, left.zRot,
-                    right.xRot, right.yRot, right.zRot);
-            return;
-        }
-
-        PoseRelease.releasing(uuid, left, right);
+        Map<String, SavedPoses> bySource = PoseManager.entitySavedPosesBySource.get(uuid);
+        PoseBlend.frame(uuid, mms$owner(uuid, bySource),
+                PoseManager.getSavedPoses(uuid), bySource, left, right);
     }
 
     /**
-     * Combat Roll drives its animation through Player Animation Lib and never
-     * touches {@code PoseManager}, so the only honest question is whether its layer
-     * is active. Asking the player's {@code RollManager} instead would be wrong for
-     * every player but the local one.
+     * A stable token for whoever holds the arms this frame.
+     *
+     * <p>Sorted, because {@code PoseManager} stores sources in a {@code HashMap} and
+     * iteration order is not a fact about who owns anything — an unsorted join would
+     * spuriously change token, and so start a transition, on a rehash.
+     */
+    private static String mms$owner(UUID uuid, Map<String, SavedPoses> bySource) {
+        List<String> owners = new ArrayList<>(2);
+        if (bySource != null) {
+            for (Map.Entry<String, SavedPoses> entry : bySource.entrySet()) {
+                SavedPoses saved = entry.getValue();
+                if (saved != null && (saved.leftArm() != null || saved.rightArm() != null)) {
+                    owners.add(entry.getKey());
+                }
+            }
+        }
+        if (mms$rolling(uuid)) {
+            owners.add(PoseBlend.COMBAT_ROLL);
+        }
+        if (owners.isEmpty()) {
+            return PoseBlend.DETAILED_ANIMATIONS;
+        }
+        Collections.sort(owners);
+        return String.join("+", owners);
+    }
+
+    /**
+     * Combat Roll drives its animation through Player Animation Lib and never touches
+     * {@code PoseManager}, so the only honest question is whether its layer is active.
+     * Asking the player's {@code RollManager} instead would be wrong for every player
+     * but the local one.
      */
     private static boolean mms$rolling(UUID uuid) {
         Minecraft mc = Minecraft.getInstance();

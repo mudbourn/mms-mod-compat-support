@@ -75,16 +75,16 @@ public final class PoseCommand {
 
     private static int reportEase(FabricClientCommandSource source) {
         source.sendFeedback(Component.literal(
-                "Arm release ease: " + PoseTuning.releaseEaseMs + "ms"
-                        + (PoseTuning.releaseEaseMs == 0 ? " (hard cut)" : "")));
+                "Arm handover ease: " + PoseTuning.transitionEaseMs + "ms"
+                        + (PoseTuning.transitionEaseMs == 0 ? " (hard cut)" : "")));
         return 1;
     }
 
     private static int setEase(FabricClientCommandSource source, int milliseconds) {
-        PoseTuning.releaseEaseMs = milliseconds;
+        PoseTuning.transitionEaseMs = milliseconds;
         PoseTuning.save();
         source.sendFeedback(Component.literal(
-                "Arm release ease: " + milliseconds + "ms (takes effect immediately)."));
+                "Arm handover ease: " + milliseconds + "ms (takes effect immediately)."));
         return 1;
     }
 
