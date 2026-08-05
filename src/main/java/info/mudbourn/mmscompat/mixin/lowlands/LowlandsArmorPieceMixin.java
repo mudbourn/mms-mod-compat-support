@@ -101,15 +101,18 @@ public abstract class LowlandsArmorPieceMixin {
             return;
         }
 
-        // Pose at DRAW time, not here: submitModel only collects a node, and
-        // ModelFeatureRenderer calls setupAnim(state) just before drawing. Anything
-        // posed here would be copied from a model still in its rest pose.
+        // Read the pose HERE, not at draw time. The cemrelay mixin has already posed
+        // the vanilla armour model at submit HEAD, so it is correct at this instant —
+        // but it and the wearer's model are single shared instances that every other
+        // armour-wearing entity re-poses before the deferred draw runs. Copying from
+        // them later reads whoever wrote last, which is the detached-armour bug.
         //
         // The wearer's model is handed over so the set can take its animation from
         // the actual player rig rather than approximating it; the vanilla armour
         // model is only the floor for when there is no CEM animation to relay.
         HumanoidModel<HumanoidRenderState> source = this.getArmorModel(state, slot);
         LowlandsArmorPose posed = LowlandsArmorPose.of(source, model, this.mms$parentModel());
+        posed.capture(state);
 
         EquipmentClientInfo.LayerType layerType = this.usesInnerModel(slot)
             ? EquipmentClientInfo.LayerType.HUMANOID_LEGGINGS

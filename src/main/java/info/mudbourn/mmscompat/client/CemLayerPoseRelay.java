@@ -344,6 +344,16 @@ public final class CemLayerPoseRelay {
         part.zRot = angles.z;
     }
 
+    /**
+     * The first part named {@code name} at any depth under {@code root}, or null.
+     *
+     * <p>Depth-first and shallowest-wins along each branch, matching how
+     * {@code Model#copyTransforms} builds its name map.
+     */
+    public static ModelPart findChild(ModelPart root, String name) {
+        return child(root, name);
+    }
+
     private static ModelPart child(ModelPart root, String name) {
         for (Map.Entry<String, ModelPart> entry : children(root).entrySet()) {
             if (entry.getKey().equals(name)) {
