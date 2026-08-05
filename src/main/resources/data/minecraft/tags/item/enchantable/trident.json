@@ -1,0 +1,6 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "#mms_compat:throwable_weapons", "required": false }
+  ]
+}

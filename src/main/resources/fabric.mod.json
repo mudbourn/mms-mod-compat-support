@@ -47,7 +47,9 @@
     "mms_compat.scorchful.mixins.json",
     "mms_compat.spyglassfov.mixins.json",
     "mms_compat.emfcarry.mixins.json",
-    "mms_compat.particlerain.mixins.json"
+    "mms_compat.particlerain.mixins.json",
+    "mms_compat.throwable.mixins.json",
+    "mms_compat.crawl.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.0",

@@ -21,6 +21,12 @@ public class MmsModCompatSupportClient implements ClientModInitializer {
         // unconditionally: the sets are keyed by equipment asset id, and a player
         // who never sees one just pays for a few unused baked models.
         LowlandsArmorSets.registerModelLayers();
+        // Thrown weapons draw their own item model, so there is no model layer to
+        // bake — just the renderer, which has to be present wherever the entity
+        // type is, i.e. always.
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
+                info.mudbourn.mmscompat.throwable.MmsThrowables.THROWN_WEAPON,
+                info.mudbourn.mmscompat.client.throwable.ThrownWeaponRenderer::new);
         if (FabricLoader.getInstance().isModLoaded("xaerominimap")) {
             SharedWaypointClient.register();
             XaeroGlobalWaypointBridge.register();
