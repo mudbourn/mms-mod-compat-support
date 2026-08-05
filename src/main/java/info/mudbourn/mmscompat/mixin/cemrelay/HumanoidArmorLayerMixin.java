@@ -1,6 +1,10 @@
 package info.mudbourn.mmscompat.mixin.cemrelay;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import info.mudbourn.mmscompat.client.ArmBlendBridge;
 import info.mudbourn.mmscompat.client.CemLayerPoseRelay;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.model.Model;
@@ -72,11 +76,33 @@ public abstract class HumanoidArmorLayerMixin {
         return ((RenderLayer<?, ?>) (Object) this).getParentModel();
     }
 
-    @Inject(method = "submit", at = @At("HEAD"))
-    private void mms$relayArmorPose(CallbackInfo ci) {
+    /**
+     * The descriptor is spelled out because the class is generic: erasure leaves both
+     * the real {@code submit(.., HumanoidRenderState, ..)} and a synthetic bridge
+     * taking {@code EntityRenderState}, and a bare {@code "submit"} would match both.
+     * Only the real one is wanted — the bridge just delegates to it, so injecting
+     * there too would relay twice per layer.
+     */
+    @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;"
+            + "Lnet/minecraft/client/renderer/SubmitNodeCollector;I"
+            + "Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;FF)V",
+            at = @At("HEAD"))
+    private void mms$relayArmorPose(PoseStack poseStack, SubmitNodeCollector collector,
+                                    int light, HumanoidRenderState state,
+                                    float yRot, float xRot, CallbackInfo ci) {
         EntityModel<?> parent = this.mms$parentModel();
-        mms$relaySet(parent, this.modelSet);
-        mms$relaySet(parent, this.babyModelSet);
+
+        // The arms are relayed from wherever the wearer's model has them right now,
+        // and right now is before the draw phase where PoseBlend runs — so mid-ease
+        // they hold the target rather than the blend, and the armour cuts while the
+        // body underneath it eases. Borrow the last drawn arms for the relay only.
+        float[] displaced = ArmBlendBridge.apply(parent, state);
+        try {
+            mms$relaySet(parent, this.modelSet);
+            mms$relaySet(parent, this.babyModelSet);
+        } finally {
+            ArmBlendBridge.restore(parent, displaced);
+        }
     }
 
     private static void mms$relaySet(EntityModel<?> parent, ArmorModelSet<?> set) {

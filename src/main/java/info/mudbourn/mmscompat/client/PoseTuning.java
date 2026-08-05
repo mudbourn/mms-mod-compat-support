@@ -61,15 +61,20 @@ public final class PoseTuning {
      * authority — into a held pose, out of a swing or a roll, or from one source
      * straight to another. Zero disables the blend and restores the hard cut. See
      * {@code PoseBlend}.
+     *
+     * <p>150 shipped first and reads as too fast — long enough to prove the blend is
+     * there, short enough that the eye still catches the arrival as an event. This is
+     * a judgement call with no right answer, so it is a config value and
+     * {@code /mmspose ease <ms>} changes it live; the default is only where to start.
      */
-    public static int transitionEaseMs = 150;
+    public static int transitionEaseMs = 260;
 
     private PoseTuning() {
     }
 
     private static final class Data {
         boolean additive_arms = false;
-        int transition_ease_ms = 150;
+        int transition_ease_ms = 260;
     }
 
     public static void load() {

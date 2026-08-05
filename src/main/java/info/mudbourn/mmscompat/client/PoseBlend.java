@@ -232,6 +232,33 @@ public final class PoseBlend {
         }
     }
 
+    /**
+     * The arm rotations this player was last drawn with, but only while a transition
+     * is actually running: {@code {leftX, leftY, leftZ, rightX, rightY, rightZ}}, or
+     * null when the arms are settled.
+     *
+     * <p>For consumers that read the wearer's pose <em>earlier in the frame</em> than
+     * {@link #frame} runs, and so cannot see this frame's blend. {@code frame} is
+     * driven from {@code EMFModelPartRoot#animate}, which EMF calls from inside
+     * {@code ModelPart#render} — i.e. during the deferred draw, after every layer has
+     * already submitted. Anything posing off the wearer at submit time therefore reads
+     * the unblended pose and cuts where the body eases; see {@code ArmBlendBridge}.
+     *
+     * <p>Null while settled on purpose. It confines the whole mechanism, and its one
+     * frame of lag, to the transition — outside one, the arms already hold the target
+     * and every reader is correct without help.
+     */
+    public static float[] blendedArms(UUID uuid) {
+        State state = STATES.get(uuid);
+        if (state == null || state.fromLeft == null || state.left == null) {
+            return null;
+        }
+        return new float[] {
+                state.left.xRot(), state.left.yRot(), state.left.zRot(),
+                state.right.xRot(), state.right.yRot(), state.right.zRot()
+        };
+    }
+
     /** Drops any anchor for this player, so the next frame starts clean. */
     public static void forget(UUID uuid) {
         STATES.remove(uuid);
