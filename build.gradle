@@ -48,6 +48,12 @@ dependencies {
     // SandPileGateMixin targets Scorchful's own SandAccumulation class, so the
     // mod has to be on the compile classpath to resolve the tickChunk signature.
     modCompileOnly files("libs/scorchful-0.16.8+1.21.11.jar")
+    // NeaHeldItemWhitelistMixin has to name BasicAnimation in its own signature to
+    // read which animation is being judged, and the concrete animation classes to
+    // decide. NEA was previously reached only through a hand-written intermediary
+    // string in NeaSprintMixin, which needs no classpath — this does.
+    modCompileOnly files("libs/notenoughanimations-fabric-1.12.4-mc1.21.11.jar")
+    modCompileOnly files("libs/emf_compat_not_enough_animations_1.21.11_1.2.0.jar")
     // BiomeMemoMixin redirects a getBiome call inside Particle Rain's own
     // ParticleSpawner, so the mod has to be a loom dependency -- otherwise the
     // redirect descriptor would have to be hand-written in intermediary.
