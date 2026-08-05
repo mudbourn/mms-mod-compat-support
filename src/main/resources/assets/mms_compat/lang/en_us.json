@@ -26,5 +26,9 @@
   "mms_compat.absolutrevive.downed": "%s is down!",
   "subtitles.mms_compat.stone_impact": "Stone strikes",
   "subtitles.mms_compat.tuna_swing": "Fish swishes",
-  "subtitles.mms_compat.tuna_slam": "Fish slams"
+  "subtitles.mms_compat.tuna_slam": "Fish slams",
+  "item.mms_compat.invisible_helmet": "Invisible Helmet",
+  "item.mms_compat.invisible_chestplate": "Invisible Chestplate",
+  "item.mms_compat.invisible_leggings": "Invisible Leggings",
+  "item.mms_compat.invisible_boots": "Invisible Boots"
 }

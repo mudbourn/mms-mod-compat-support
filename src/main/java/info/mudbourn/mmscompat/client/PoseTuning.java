@@ -62,19 +62,22 @@ public final class PoseTuning {
      * straight to another. Zero disables the blend and restores the hard cut. See
      * {@code PoseBlend}.
      *
-     * <p>150 shipped first and reads as too fast — long enough to prove the blend is
-     * there, short enough that the eye still catches the arrival as an event. This is
-     * a judgement call with no right answer, so it is a config value and
-     * {@code /mmspose ease <ms>} changes it live; the default is only where to start.
+     * <p>Defaults to off. 150 shipped first and read as too fast; 260 was tried and
+     * was worse still, because the problem was never the duration. A hard cut looks
+     * <em>more</em> correct than any ease tested so far, which is not what a blend
+     * between two valid poses can do — an interpolation can look slow or abrupt, but
+     * it cannot look wrong unless one of its two endpoints is wrong. Until that is
+     * understood the blend stays off, and {@code /mmspose ease <ms>} turns it on for
+     * whoever is investigating it.
      */
-    public static int transitionEaseMs = 260;
+    public static int transitionEaseMs = 0;
 
     private PoseTuning() {
     }
 
     private static final class Data {
         boolean additive_arms = false;
-        int transition_ease_ms = 260;
+        int transition_ease_ms = 0;
     }
 
     public static void load() {

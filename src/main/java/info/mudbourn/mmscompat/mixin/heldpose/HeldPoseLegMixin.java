@@ -15,7 +15,9 @@ import strm.emfcompat.core.PoseSnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Lets a Better Combat <em>swing</em> own the legs while the player is standing
@@ -55,16 +57,32 @@ import java.util.UUID;
  *
  * <p>{@code walkAnimationSpeed} is the amplitude vanilla and DA both scale limb
  * swing by. It decays to zero when the player stops and while airborne, so one test
- * covers standing still, hovering and the tail of a landing. Switching authority at
- * the moment it reaches zero is what makes the handover invisible: DA's contribution
- * is nothing at that instant, so there is nothing to pop away from.
+ * covers standing still, hovering and the tail of a landing. It gates <em>taking</em>
+ * the legs: authority is never seized mid-stride, where DA's contribution is large
+ * and the grab would be the pop.
  *
- * <p>Two states need testing separately because they do not move that value:
- * crouching is a held pose rather than an idle, and water has its own leg cycle that
- * runs whether or not the player is making headway — treading water is stationary by
- * that measure but is emphatically not standing. Any contact with water yields, which
- * also covers standing in the shallows; DA's idle legs there are a far smaller
- * artefact than a dry-land stance played while submerged.
+ * <p>It deliberately does not gate <em>keeping</em> them. Through 0.9.99 it did, and
+ * the two ends of the same swing then ran on different clocks: the arms are held for
+ * exactly the addon's swing, while the legs were re-decided every frame and dropped
+ * the instant the player drifted off the spot. Nudging a movement key mid-attack put
+ * the top half in the attack and the bottom half back in DA's walk — the visible
+ * break being chased. Once taken, the legs are now held until the swing itself ends,
+ * so both halves change authority on the same frame.
+ *
+ * <p>The cost of that is real and is the trade being made: releasing at the end of a
+ * swing no longer waits for a moment when DA has nothing to say, so a swing that ends
+ * while the player is moving hands the legs back to a non-zero walk cycle and pops.
+ * The old gate bought that away by desynchronising the halves. Nothing here blends —
+ * {@code PoseBlend} is arms-only, and off by default — so the pop is not smoothed;
+ * it is simply preferred to the mismatch.
+ *
+ * <p>Two states still yield outright, because they do not move that value and their
+ * conflict is with the pose itself rather than its timing: crouching is a held pose
+ * rather than an idle, and water has its own leg cycle that runs whether or not the
+ * player is making headway — treading water is stationary by that measure but is
+ * emphatically not standing. Any contact with water yields, which also covers
+ * standing in the shallows; DA's idle legs there are a far smaller artefact than a
+ * dry-land stance played while submerged.
  */
 @Mixin(value = PlayerModel.class, priority = 3000)
 public class HeldPoseLegMixin {
@@ -76,6 +94,17 @@ public class HeldPoseLegMixin {
 
     /** Below this the limb animation counts as stopped and the pose takes over. */
     private static final float LIMBS_SETTLED = 0.01F;
+
+    /**
+     * Players whose legs this currently owns, so the settle test can gate taking
+     * them without also gating keeping them.
+     *
+     * <p>An entry lives only as long as one swing: every path that stops capturing
+     * removes it, and the common one — {@code better_combat} gone, i.e. not swinging —
+     * runs on nearly every frame for nearly every player. Nothing accumulates for a
+     * player who logs out mid-swing beyond the next frame they are not rendered.
+     */
+    private static final Set<UUID> HOLDING = ConcurrentHashMap.newKeySet();
 
     @Inject(method = "setupAnim", at = @At("RETURN"))
     private void mms$captureHeldPoseLegs(AvatarRenderState state, CallbackInfo ci) {
@@ -97,15 +126,26 @@ public class HeldPoseLegMixin {
         // doc for why that is a read and not a re-derivation.
         boolean posed = PoseManager.getSavedPoses(uuid, BETTER_COMBAT_SOURCE) != null;
 
-        boolean locomotionActive = player.isCrouching()
+        // These conflict with the pose itself, not merely with the moment of
+        // handover, so they end the capture whenever they turn up.
+        boolean conflictingStance = player.isCrouching()
                 || player.isInWater()
-                || player.isVisuallySwimming()
-                || state.walkAnimationSpeed > LIMBS_SETTLED;
+                || player.isVisuallySwimming();
 
-        if (!posed || locomotionActive) {
+        if (!posed || conflictingStance) {
+            HOLDING.remove(uuid);
             PoseManager.clearPoses(uuid, SOURCE);
             return;
         }
+
+        // The settle test applies only to acquiring. Once the legs are held they stay
+        // held for the rest of the swing, so they change authority on the same frame
+        // the arms do; see the class doc for what that trades away.
+        if (!HOLDING.contains(uuid) && state.walkAnimationSpeed > LIMBS_SETTLED) {
+            PoseManager.clearPoses(uuid, SOURCE);
+            return;
+        }
+        HOLDING.add(uuid);
 
         PlayerModel model = (PlayerModel) (Object) this;
 
