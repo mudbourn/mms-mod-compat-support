@@ -52,11 +52,23 @@ public final class HeldPoseArms {
             // anchor, Expanded Weaponry hammers, heavy axes
             "bettercombat:pose_two_handed_heavy",
             // large tuna, Expanded Weaponry greatswords, claymores
-            "bettercombat:pose_two_handed_sword",
-            // scythes. Moved here from the both-arms default after a Weapons
-            // Expanded update changed how they are carried. Only
-            // bettercombat:scythe declares this pose, so nothing else moves with
-            // it — unlike the polearm pose, which spears, pikes and glaives share.
+            "bettercombat:pose_two_handed_sword");
+
+    /**
+     * Poses that should not be preserved at all, so DetailedAnimations keeps both
+     * arms and the weapon is carried exactly as if it declared no pose.
+     *
+     * <p>Only the scythe. It went through both other settings first — both arms, then
+     * right arm only — and the right-arm carry was correct for idling, running and
+     * jump-running before this. This is not a bug fix on top of that; it is a
+     * deliberate look, so the scythe idles like a one-handed weapon rather than
+     * being carried.
+     *
+     * <p>This affects the idle hold and nothing else. Swings are stored by the Better
+     * Combat addon under its own {@code better_combat} key, which this mod never
+     * writes or clears, so the scythe's attack animations are untouched.
+     */
+    private static final Set<String> UNPOSED = Set.of(
             "bettercombat:pose_two_handed_scythe");
 
     private HeldPoseArms() {
@@ -69,5 +81,15 @@ public final class HeldPoseArms {
      */
     public static boolean usesBothArms(String pose) {
         return pose == null || !ONE_ARMED.contains(pose);
+    }
+
+    /**
+     * Whether this pose should be discarded rather than preserved, leaving both arms
+     * to DetailedAnimations.
+     *
+     * @param pose the resolved {@code WeaponAttributes#pose}, or null
+     */
+    public static boolean unposed(String pose) {
+        return pose != null && UNPOSED.contains(pose);
     }
 }

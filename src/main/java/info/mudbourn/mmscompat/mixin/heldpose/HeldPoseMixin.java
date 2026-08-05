@@ -153,6 +153,16 @@ public class HeldPoseMixin {
             pose = mms$customPose(player.getOffhandItem());
         }
 
+        // Some weapons are deliberately carried with no hold at all — the scythe
+        // idles like a one-handed weapon. Releasing here rather than declining to
+        // capture is the same path a weapon with no pose takes, so DA gets both
+        // arms and nothing is left in the store to replay.
+        if (info.mudbourn.mmscompat.client.HeldPoseArms.unposed(pose)) {
+            PoseManager.clearPoses(player.getUUID(), SOURCE);
+            HeldPoseDelta.clear(player.getUUID());
+            return;
+        }
+
         if (pose != null) {
             // A two-handed weapon that reads as carried one-handed only gets the
             // right arm; DA keeps the left and swings it. See HeldPoseArms.
