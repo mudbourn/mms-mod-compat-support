@@ -25,10 +25,15 @@ import java.util.Set;
  *
  * <p>Everything not listed keeps both arms, which is the behaviour that shipped.
  * That is deliberate: an unrecognised pose is far more likely to be a genuine
- * two-handed hold — Basic Weapons' spears, pikes and glaives all resolve to
- * {@code pose_two_handed_polearm}, and katanas and scythes have poses of their own —
- * than a one-handed carry, and a wrong guess in that direction only costs an arm
- * that DA would have swung.
+ * two-handed hold than a one-handed carry, and a wrong guess in that direction only
+ * costs an arm that DA would have swung. Basic Weapons' spears, pikes and glaives
+ * all resolve to {@code pose_two_handed_polearm}, and katanas have a pose of their
+ * own.
+ *
+ * <p>Because this is a judgement rather than a derivation, it tracks the mods: a
+ * weapon can change hands across an update without its pose id changing, so an
+ * entry moving between the list and the default is expected maintenance and not a
+ * sign the mechanism is wrong.
  *
  * <h2>Which arm survives</h2>
  *
@@ -47,7 +52,12 @@ public final class HeldPoseArms {
             // anchor, Expanded Weaponry hammers, heavy axes
             "bettercombat:pose_two_handed_heavy",
             // large tuna, Expanded Weaponry greatswords, claymores
-            "bettercombat:pose_two_handed_sword");
+            "bettercombat:pose_two_handed_sword",
+            // scythes. Moved here from the both-arms default after a Weapons
+            // Expanded update changed how they are carried. Only
+            // bettercombat:scythe declares this pose, so nothing else moves with
+            // it — unlike the polearm pose, which spears, pikes and glaives share.
+            "bettercombat:pose_two_handed_scythe");
 
     private HeldPoseArms() {
     }

@@ -56,11 +56,19 @@ public final class PoseTuning {
     /** Add the hold on top of DA's arms instead of replacing them. */
     public static boolean additiveArms = false;
 
+    /**
+     * How long, in milliseconds, the arms take to settle back into
+     * DetailedAnimations after a pose source releases them. Zero disables the blend
+     * and restores the hard cut. See {@code PoseRelease}.
+     */
+    public static int releaseEaseMs = 150;
+
     private PoseTuning() {
     }
 
     private static final class Data {
         boolean additive_arms = false;
+        int release_ease_ms = 150;
     }
 
     public static void load() {
@@ -72,16 +80,19 @@ public final class PoseTuning {
             Data data = GSON.fromJson(reader, Data.class);
             if (data != null) {
                 additiveArms = data.additive_arms;
+                releaseEaseMs = data.release_ease_ms;
             }
         } catch (Exception e) {
             LOG.error("[mms_compat] failed to read {}; keeping defaults", FILE.getName(), e);
         }
-        LOG.info("[mms_compat] held-pose arm mode: {}", additiveArms ? "additive" : "absolute");
+        LOG.info("[mms_compat] held-pose arm mode: {}, release ease {}ms",
+                additiveArms ? "additive" : "absolute", releaseEaseMs);
     }
 
     public static void save() {
         Data data = new Data();
         data.additive_arms = additiveArms;
+        data.release_ease_ms = releaseEaseMs;
         try {
             File parent = FILE.getParentFile();
             if (parent != null) {
