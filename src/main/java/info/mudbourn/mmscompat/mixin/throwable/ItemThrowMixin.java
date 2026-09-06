@@ -125,6 +125,7 @@ public abstract class ItemThrowMixin {
                 ThrownWeaponEntity weapon = Projectile.spawnProjectileFromRotation(
                         ThrownWeaponEntity::new, serverLevel, thrown, player,
                         0.0F, MmsThrowables.PROJECTILE_SHOOT_POWER, 1.0F);
+                weapon.setChargeScale(MmsThrowables.chargeScale(charge));
                 if (player.hasInfiniteMaterials()) {
                     weapon.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
                 }

@@ -77,6 +77,13 @@ public final class MmsThrowables {
     /** Minimum ticks a throw has to be wound up before it will release. */
     public static final int THROW_THRESHOLD_TIME = 10;
 
+    /**
+     * Wind-up, in ticks, at which a throw counts as fully drawn. Matches a bow's
+     * time to full pull, so a maxed pike and a maxed bow feel like the same
+     * commitment. Beyond this the charge scale is clamped to 1.
+     */
+    public static final int FULL_CHARGE_TIME = 20;
+
     /** Launch speed. A trident leaves the hand at 2.5; a pike is longer and heavier. */
     public static final float PROJECTILE_SHOOT_POWER = 2.3F;
 
@@ -106,5 +113,32 @@ public final class MmsThrowables {
         });
         // A weapon with no attack damage at all still has to hurt for something.
         return Math.max(damage[0], 1.0F);
+    }
+
+    /**
+     * Impact damage scaled by how long the throw was wound up.
+     *
+     * <p>The weak end is {@link #throwDamage(ItemStack)} — the weapon's own
+     * attack-damage modifier, the same figure a barely-past-threshold throw dealt
+     * before charge mattered. The strong end, at full draw, is {@code 1.25×} the
+     * weapon's displayed melee damage, where "melee damage" is the modifier plus
+     * the player's base attack of 1 that a swing carries. A committed throw is
+     * meant to hit harder than a swing; a flicked one still hits for the old,
+     * unimpressive number, so nothing regresses for a panic toss.
+     *
+     * @param chargeScale 0 at the throw threshold, 1 at {@link #FULL_CHARGE_TIME}.
+     */
+    public static float throwDamage(ItemStack stack, float chargeScale) {
+        float base = throwDamage(stack);
+        float fullDraw = (base + 1.0F) * 1.25F;
+        float t = Math.max(0.0F, Math.min(1.0F, chargeScale));
+        return base + (fullDraw - base) * t;
+    }
+
+    /** Fraction of full draw, 0 at {@link #THROW_THRESHOLD_TIME}, 1 at {@link #FULL_CHARGE_TIME}. */
+    public static float chargeScale(int charge) {
+        float span = FULL_CHARGE_TIME - THROW_THRESHOLD_TIME;
+        float t = (charge - THROW_THRESHOLD_TIME) / span;
+        return Math.max(0.0F, Math.min(1.0F, t));
     }
 }

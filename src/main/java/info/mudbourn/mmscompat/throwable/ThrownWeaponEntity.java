@@ -65,6 +65,14 @@ public class ThrownWeaponEntity extends AbstractArrow {
     private boolean dealtDamage;
     public int clientSideReturnTickCount;
 
+    /**
+     * How hard this throw was wound up, 0..1. Server-only — it is consumed the
+     * instant the weapon hits something and never needs to reach the client.
+     * Defaults to full so a weapon reloaded from a save (already in flight, its
+     * charge long spent) is never accidentally weakened.
+     */
+    private float chargeScale = 1.0F;
+
     public ThrownWeaponEntity(EntityType<? extends ThrownWeaponEntity> entityType, Level level) {
         super(entityType, level);
     }
@@ -81,6 +89,11 @@ public class ThrownWeaponEntity extends AbstractArrow {
         super.defineSynchedData(builder);
         builder.define(ID_LOYALTY, (byte) 0);
         builder.define(ID_WEAPON, ItemStack.EMPTY);
+    }
+
+    /** Records how far the throw was drawn; scales impact damage. See {@link #onHitEntity}. */
+    public void setChargeScale(float chargeScale) {
+        this.chargeScale = chargeScale;
     }
 
     /** The stack the client should draw. Server-side callers want {@link #getWeaponItem()}. */
@@ -148,8 +161,9 @@ public class ThrownWeaponEntity extends AbstractArrow {
     protected void onHitEntity(EntityHitResult hitResult) {
         Entity target = hitResult.getEntity();
         // Scaled off the weapon rather than the trident's flat 8, so a wooden
-        // pike and a netherite one are not the same projectile.
-        float damage = MmsThrowables.throwDamage(this.getWeaponItem());
+        // pike and a netherite one are not the same projectile — and further by
+        // how far the throw was drawn, up to 1.25x the weapon's melee damage.
+        float damage = MmsThrowables.throwDamage(this.getWeaponItem(), this.chargeScale);
         Entity owner = this.getOwner();
         DamageSource source = this.damageSources().trident(this, owner == null ? this : owner);
         if (this.level() instanceof ServerLevel serverLevel) {
@@ -230,6 +244,7 @@ public class ThrownWeaponEntity extends AbstractArrow {
     protected void readAdditionalSaveData(ValueInput input) {
         super.readAdditionalSaveData(input);
         this.dealtDamage = input.getBooleanOr("DealtDamage", false);
+        this.chargeScale = input.getFloatOr("ChargeScale", 1.0F);
         this.entityData.set(ID_LOYALTY, this.getLoyaltyFromItem(this.getPickupItemStackOrigin()));
         this.entityData.set(ID_WEAPON, this.getPickupItemStackOrigin().copy());
     }
@@ -238,6 +253,7 @@ public class ThrownWeaponEntity extends AbstractArrow {
     protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
         output.putBoolean("DealtDamage", this.dealtDamage);
+        output.putFloat("ChargeScale", this.chargeScale);
     }
 
     private byte getLoyaltyFromItem(ItemStack stack) {

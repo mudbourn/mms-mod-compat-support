@@ -72,6 +72,12 @@ public class HeldPoseMixin {
      */
     private static final String SOURCE = info.mudbourn.mmscompat.client.HeldPoseSource.SOURCE;
 
+    /**
+     * The Better Combat addon's own key, read only as a probe for "a swing is
+     * playing" — the same honest test {@link HeldPoseLegMixin} uses.
+     */
+    private static final String BETTER_COMBAT_SOURCE = "better_combat";
+
     @Inject(method = "setupAnim", at = @At("RETURN"))
     private void mms$captureHeldPose(AvatarRenderState state, CallbackInfo ci) {
         Minecraft minecraft = Minecraft.getInstance();
@@ -129,6 +135,22 @@ public class HeldPoseMixin {
         // not play, so reaching here means the inspect is legitimately running.
         if (info.mudbourn.mmscompat.client.InspectAnimGate.isInspecting(player,
                 info.mudbourn.mmscompat.client.InspectAnimPoseBridge.animationName(state))) {
+            PoseManager.clearPoses(player.getUUID(), SOURCE);
+            HeldPoseDelta.clear(player.getUUID());
+            return;
+        }
+
+        // A melee swing belongs to the Better Combat addon, which stashes both arms
+        // under its own "better_combat" key for exactly the swing's duration. An idle
+        // hold must stand down while one plays, or the two producers race for the
+        // arms: getSavedPoses(uuid) merges sources with the last non-null writer
+        // winning per arm in HashMap iteration order, so the idle snapshot captured
+        // here can overwrite the swing's arm. EMF Compat applies that merged result
+        // only to the third-person model — it skips the local first-person pass — so
+        // the stomp is invisible to the swinger and mangles the swing for everyone
+        // else, which is exactly the remote-only "swing yields to idle" report. This
+        // is the arm counterpart to the gate HeldPoseLegMixin already runs on legs.
+        if (PoseManager.getSavedPoses(player.getUUID(), BETTER_COMBAT_SOURCE) != null) {
             PoseManager.clearPoses(player.getUUID(), SOURCE);
             HeldPoseDelta.clear(player.getUUID());
             return;
