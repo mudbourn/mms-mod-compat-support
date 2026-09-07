@@ -1,6 +1,6 @@
 package info.mudbourn.mmscompat.mixin.frostiful;
 
-import info.mudbourn.mmscompat.VanityMarker;
+import info.mudbourn.mmsvanity.VanityMarker;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;

@@ -3,9 +3,7 @@
   "package": "info.mudbourn.mmscompat.mixin.headhide",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "HeadEquipmentHideMixin",
-    "LivingEntityRenderStateMixin",
-    "LivingEntityRendererMixin"
+    "HeadEquipmentHideMixin"
   ],
   "injectors": {
     "defaultRequire": 1

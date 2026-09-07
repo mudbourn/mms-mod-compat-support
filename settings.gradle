@@ -5,3 +5,8 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+// The vanity subsystem and its shared render infra live in sibling repos, wired
+// in as composite builds so an edit upstream rebuilds here without a jar copy.
+includeBuild '../mms-render-common'
+includeBuild '../mms-vanity'

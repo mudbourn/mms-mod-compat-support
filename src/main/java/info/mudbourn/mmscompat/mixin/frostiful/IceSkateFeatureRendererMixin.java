@@ -1,7 +1,7 @@
 package info.mudbourn.mmscompat.mixin.frostiful;
 
 import com.github.thedeathlycow.frostiful.client.render.model.IceSkateModel;
-import info.mudbourn.mmscompat.client.CemLayerPoseRelay;
+import info.mudbourn.mmsrendercommon.client.CemLayerPoseRelay;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import org.spongepowered.asm.mixin.Final;

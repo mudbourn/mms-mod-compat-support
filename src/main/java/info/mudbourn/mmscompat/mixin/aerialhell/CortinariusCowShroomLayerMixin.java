@@ -2,7 +2,7 @@ package info.mudbourn.mmscompat.mixin.aerialhell;
 
 import fr.factionbedrock.aerialhell.Client.EntityModels.CortinariusCowShroomModel;
 import fr.factionbedrock.aerialhell.Client.EntityRender.Layers.CortinariusCowShroomLayer;
-import info.mudbourn.mmscompat.client.CemLayerPoseRelay;
+import info.mudbourn.mmsrendercommon.client.CemLayerPoseRelay;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import org.spongepowered.asm.mixin.Final;

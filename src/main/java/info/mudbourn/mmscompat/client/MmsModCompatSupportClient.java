@@ -1,7 +1,6 @@
 package info.mudbourn.mmscompat.client;
 
 import info.mudbourn.mmscompat.client.lean.LeanTuning;
-import info.mudbourn.mmscompat.client.lowlands.LowlandsArmorSets;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -20,11 +19,6 @@ public class MmsModCompatSupportClient implements ClientModInitializer {
         // even without ETF installed; the mixin itself is gated on the mod.
         info.mudbourn.mmscompat.client.etfnbt.NbtTuning.load();
         info.mudbourn.mmscompat.client.etfnbt.NbtCommand.register();
-        // Clothing of the Lowlands vanity sets carry custom geometry, so the model
-        // layers have to exist before anything wearing one is rendered. Registered
-        // unconditionally: the sets are keyed by equipment asset id, and a player
-        // who never sees one just pays for a few unused baked models.
-        LowlandsArmorSets.registerModelLayers();
         // Thrown weapons draw their own item model, so there is no model layer to
         // bake — just the renderer, which has to be present wherever the entity
         // type is, i.e. always.

@@ -3,7 +3,7 @@ package info.mudbourn.mmscompat.mixin.mutantmonsters;
 import fuzs.mutantmonsters.handler.PlayerEventsHandler;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.MutableInt;
-import info.mudbourn.mmscompat.VanityMarker;
+import info.mudbourn.mmsvanity.VanityMarker;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;

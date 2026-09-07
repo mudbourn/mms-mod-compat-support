@@ -1,7 +1,7 @@
 package info.mudbourn.mmscompat.mixin.headhide;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import info.mudbourn.mmscompat.duck.FirstPersonSelfDuck;
+import info.mudbourn.mmsrendercommon.duck.FirstPersonSelfDuck;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
