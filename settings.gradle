@@ -10,3 +10,4 @@ pluginManagement {
 // in as composite builds so an edit upstream rebuilds here without a jar copy.
 includeBuild '../mms-render-common'
 includeBuild '../mms-vanity'
+includeBuild '../mms-animation'

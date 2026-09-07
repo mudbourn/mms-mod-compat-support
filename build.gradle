@@ -59,6 +59,7 @@ dependencies {
     // (see settings.gradle).
     modImplementation "info.mudbourn:mms-render-common:${project.render_common_version}"
     modImplementation "info.mudbourn:mms-vanity:${project.vanity_version}"
+    modImplementation "info.mudbourn:mms-animation:${project.anim_version}"
     modCompileOnly "maven.modrinth:combat-amenities:3.1.7-1.21.11"
     modCompileOnly "maven.modrinth:trinkets-updated:3.11.0-beta.2+1.21.11"
     modCompileOnly "maven.modrinth:cardinal-components-api:7.3.1"

@@ -26,26 +26,18 @@
     "mms_compat.furnish.mixins.json",
     "mms_compat.jobsplus.mixins.json",
     "mms_compat.xaero.mixins.json",
-    "mms_compat.cpa.mixins.json",
     "mms_compat.mapsync.mixins.json",
     "mms_compat.apoli.mixins.json",
-    "mms_compat.inspectanim.mixins.json",
     "mms_compat.aerialhell.mixins.json",
-    "mms_compat.neasprint.mixins.json",
     "mms_compat.mutantmonsters.mixins.json",
     "mms_compat.expandedweaponry.mixins.json",
     "mms_compat.biscuitroll.mixins.json",
     "mms_compat.computerpc.mixins.json",
     "mms_compat.frostiful.mixins.json",
-    "mms_compat.heldpose.mixins.json",
     "mms_compat.jei.mixins.json",
-    "mms_compat.lean.mixins.json",
     "mms_compat.scorchful.mixins.json",
-    "mms_compat.spyglassfov.mixins.json",
-    "mms_compat.emfcarry.mixins.json",
     "mms_compat.particlerain.mixins.json",
     "mms_compat.throwable.mixins.json",
-    "mms_compat.crawl.mixins.json",
     "mms_compat.headhide.mixins.json",
     "mms_compat.etfnbt.mixins.json"
   ],
@@ -55,6 +47,7 @@
     "java": ">=21",
     "fabric-api": "*",
     "mms_render_common": "*",
-    "mms_vanity": "*"
+    "mms_vanity": "*",
+    "mms_anim": "*"
   }
 }
