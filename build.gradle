@@ -19,7 +19,6 @@ dependencies {
     modCompileOnly files("libs/furnish-31.jar")
     modCompileOnly files("libs/jobsplus-19.1.0-fabric.jar")
     modCompileOnly files("libs/arc-19.1.1-fabric.jar")
-    modCompileOnly files("libs/modmetro-v1.jar")
     modCompileOnly files("libs/rubies-1.0.0+1.21.11.jar")
     modCompileOnly files("libs/xaerominimap-fabric-1.21.11-26.4.2.jar")
     modCompileOnly files("libs/mapsyncer-1.0.3-fabric-1.21.11-bugfix.jar")
@@ -90,9 +89,8 @@ jar {
 // Mixin claims every class under a config's `package` and refuses to load
 // anything there as a normal class (IllegalClassLoadError). A plain helper put
 // in a mixin package compiles and packages cleanly and only explodes the first
-// time it is touched at runtime — which for MetroRailPath in 0.7.0 meant a
-// server crash on the first follower-cart tick, in production. Fail the build
-// instead.
+// time it is touched at runtime, as a class-load crash in production. Fail the
+// build instead.
 def checkMixinPackages = tasks.register('checkMixinPackages', Exec) {
     dependsOn tasks.named('remapJar')
     doFirst {

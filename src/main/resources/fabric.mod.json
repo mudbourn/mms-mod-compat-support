@@ -3,7 +3,7 @@
   "id": "mms_compat",
   "version": "${version}",
   "name": "MMS Mod Compat Support",
-  "description": "Server-wide mod compat patches for MMSLive01. Creative-tab dedup, REI null-filter fix, CA+Trinkets bridge, AR item-drop suppression, creative embargo, vanity armor, Jobs+ lang fix, ModMetro seating + localization.",
+  "description": "Server-wide mod compat patches for MMSLive01. Creative-tab dedup, REI null-filter fix, CA+Trinkets bridge, AR item-drop suppression, creative embargo, vanity armor, Jobs+ lang fix.",
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -25,8 +25,6 @@
     "mms_compat.jeg.mixins.json",
     "mms_compat.furnish.mixins.json",
     "mms_compat.jobsplus.mixins.json",
-    "mms_compat.metro.mixins.json",
-    "mms_compat.metrofix.mixins.json",
     "mms_compat.xaero.mixins.json",
     "mms_compat.cpa.mixins.json",
     "mms_compat.mapsync.mixins.json",
