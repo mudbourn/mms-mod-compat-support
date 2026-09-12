@@ -8,6 +8,10 @@ pluginManagement {
 
 // The vanity subsystem and its shared render infra live in sibling repos, wired
 // in as composite builds so an edit upstream rebuilds here without a jar copy.
-includeBuild '../mms-render-common'
-includeBuild '../mms-vanity'
-includeBuild '../mms-animation'
+// Locally they sit next to this repo ('..'); CI checks them out into a
+// workspace subdir and overrides the root with -PmmsSiblingRoot, since
+// actions/checkout cannot write above $GITHUB_WORKSPACE.
+def siblingRoot = providers.gradleProperty('mmsSiblingRoot').getOrElse('..')
+includeBuild "$siblingRoot/mms-render-common"
+includeBuild "$siblingRoot/mms-vanity"
+includeBuild "$siblingRoot/mms-animation"

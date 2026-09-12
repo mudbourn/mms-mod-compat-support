@@ -131,6 +131,27 @@ jobs:
           fi
           echo "All referenced jars present."
 
+      # The unpublished info.mudbourn:* deps (render-common, vanity, animation)
+      # resolve only through the composite includeBuild in settings.gradle, so
+      # the sibling source trees must be present. actions/checkout refuses paths
+      # above $GITHUB_WORKSPACE, so they land in .siblings/ and settings.gradle
+      # is pointed there with -PmmsSiblingRoot. vanity and animation themselves
+      # includeBuild '../mms-render-common', which resolves correctly among
+      # these siblings.
+      - name: Check out sibling composite builds
+        uses: actions/checkout@v5
+        with:
+          repository: mudbourn/mms-render-common
+          path: .siblings/mms-render-common
+      - uses: actions/checkout@v5
+        with:
+          repository: mudbourn/mms-vanity
+          path: .siblings/mms-vanity
+      - uses: actions/checkout@v5
+        with:
+          repository: mudbourn/mms-animation
+          path: .siblings/mms-animation
+
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
@@ -138,8 +159,24 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # Fabric Loom reads a mod dependency's remapped jar at *configuration*
+      # time, before any task runs. With the siblings wired in as composite
+      # builds that jar does not exist yet on a clean checkout, so configuring
+      # this project (or mms-vanity) fails before it can build its own
+      # dependency. Build the siblings bottom-up first so each jar is present
+      # when the next project configures: render-common, then vanity and
+      # animation (which each includeBuild '../mms-render-common'), then here.
+      - name: Build sibling jars (bottom-up)
+        run: |
+          set -euo pipefail
+          for m in mms-render-common mms-vanity mms-animation; do
+            echo "::group::build $m"
+            (cd ".siblings/$m" && ./gradlew build --no-daemon --stacktrace)
+            echo "::endgroup::"
+          done
+
       - name: Build
-        run: ./gradlew build --no-daemon --stacktrace
+        run: ./gradlew build --no-daemon --stacktrace -PmmsSiblingRoot=.siblings
 
       - name: Collect artifacts
         run: |
