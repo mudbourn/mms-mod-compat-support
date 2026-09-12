@@ -39,7 +39,8 @@
     "mms_compat.particlerain.mixins.json",
     "mms_compat.throwable.mixins.json",
     "mms_compat.headhide.mixins.json",
-    "mms_compat.etfnbt.mixins.json"
+    "mms_compat.etfnbt.mixins.json",
+    "mms_compat.cosycritters.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.0",

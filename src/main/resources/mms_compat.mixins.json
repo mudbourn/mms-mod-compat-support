@@ -5,7 +5,8 @@
   "mixins": [
     "CreativeTabDedupMixin",
     "ArrowFlightMixin",
-    "MobEmbargoedEquipmentMixin"
+    "MobEmbargoedEquipmentMixin",
+    "SoundLibraryReleaseGuardMixin"
   ],
   "injectors": {
     "defaultRequire": 1

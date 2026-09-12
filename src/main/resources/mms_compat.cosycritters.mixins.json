@@ -1,0 +1,10 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.cosycritters",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.cosycritters.CosyCrittersMixinGate",
+  "client": ["CosyCrittersTickLevelGuardMixin"],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
