@@ -47,7 +47,9 @@
     "java": ">=21",
     "fabric-api": "*",
     "mms_render_common": "*",
-    "mms_vanity": "*",
+    "mms_vanity": "*"
+  },
+  "suggests": {
     "mms_anim": "*"
   }
 }
