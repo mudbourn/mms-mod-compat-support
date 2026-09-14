@@ -1,8 +1,0 @@
-{
-  "job": "jobsplus:hunter",
-  "icon": {
-    "id": "minecraft:bow"
-  },
-  "price": 5,
-  "required_level": 5
-}
