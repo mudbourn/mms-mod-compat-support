@@ -33,7 +33,7 @@ dependencies {
     // build.gradle was already tracked, so the edit missed the commit and the tree
     // could not compile.
     modCompileOnly files("libs/bettercombat-fabric-3.1.0+1.21.11.jar")
-    modCompileOnly files("libs/emf_compat_core_1.21.11_1.0.0.jar")
+    modCompileOnly files("libs/emf_compat_core_1.21.11_2.0.0.jar")
     modCompileOnly files("libs/aerialhell-0.7.7.7_fabric1.21.11.jar")
     modCompileOnly files("libs/frostiful-2.4.0+1.21.11.jar")
     // HeldPoseUnpauseMixin targets EMF's own EMFAnimationEntityContext, not the
