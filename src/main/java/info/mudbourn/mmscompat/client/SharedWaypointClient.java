@@ -101,7 +101,12 @@ public final class SharedWaypointClient {
         MinimapWorld world = session.getWorldManager().getCurrentWorld();
         if (world == null) return;
 
-        String dimension = client.player.level().dimension().identifier().toString();
+        // Key the list off the Xaero world we are about to mutate, not the player's
+        // vanilla dimension. During a portal transition the two disagree for a tick,
+        // and choosing the list by player dimension while writing into Xaero's
+        // current world mirrors the nether list into the overworld set and back.
+        if (world.getDimId() == null) return;
+        String dimension = world.getDimId().identifier().toString();
         List<Entry> serverList = CACHE.get(dimension);
         if (serverList == null) return; // no server data (yet) — leave whatever exists alone
 
