@@ -38,10 +38,10 @@ dependencies {
     modCompileOnly files("libs/frostiful-2.4.0+1.21.11.jar")
     // HeldPoseUnpauseMixin targets EMF's own EMFAnimationEntityContext, not the
     // compat layer, so EMF itself has to be on the compile classpath.
-    modCompileOnly files("libs/entity_model_features-3.2.4-1.21.11-fabric.jar")
+    modCompileOnly files("libs/entity_model_features-3.3.5-1.21.11-fabric.jar")
     // EMF's EMFEntityRenderState#emfEntity() returns an ETF type, and reading the
     // UUID off it therefore needs Entity Texture Features on the classpath too.
-    modCompileOnly files("libs/entity_texture_features_1.21.11-fabric-7.1.jar")
+    modCompileOnly files("libs/entity_texture_features-7.2.1-1.21.11-fabric.jar")
     // SandPileGateMixin targets Scorchful's own SandAccumulation class, so the
     // mod has to be on the compile classpath to resolve the tickChunk signature.
     modCompileOnly files("libs/scorchful-0.16.8+1.21.11.jar")
