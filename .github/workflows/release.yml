@@ -152,6 +152,37 @@ jobs:
           repository: mudbourn/mms-animation
           path: .siblings/mms-animation
 
+      # A sibling that declares its own compile-only libs/ jars (mms-animation
+      # binds Better Combat, EMF Compat, EMF and ETF) needs them staged into its
+      # own tree: Loom computes their checksum at configuration time, so a
+      # missing jar kills the sibling build before any task runs. Drive the copy
+      # off each sibling's build.gradle, pulling from the pool already staged
+      # above, with a per-sibling mms-libs folder as fallback.
+      - name: Stage sibling libs/
+        run: |
+          set -euo pipefail
+          for m in mms-render-common mms-vanity mms-animation; do
+            gradle_file=".siblings/$m/build.gradle"
+            [ -f "$gradle_file" ] || continue
+            refs=$(grep -oE 'files\("libs/[^"]+\.jar"\)' "$gradle_file" \
+                   | sed -E 's|files\("libs/||; s|"\)||' || true)
+            [ -n "$refs" ] || continue
+            mkdir -p ".siblings/$m/libs"
+            while read -r jar; do
+              [ -n "$jar" ] || continue
+              if [ -f "libs/$jar" ]; then
+                cp "libs/$jar" ".siblings/$m/libs/"
+              elif [ -f ".mms-libs/$m/$jar" ]; then
+                cp ".mms-libs/$m/$jar" ".siblings/$m/libs/"
+              else
+                echo "MISSING sibling lib: $m -> $jar"
+                echo "mms-libs provides neither libs/$jar nor .mms-libs/$m/$jar."
+                exit 1
+              fi
+            done <<< "$refs"
+            echo "Staged $(ls ".siblings/$m/libs" | wc -l) jars for $m."
+          done
+
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
