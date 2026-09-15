@@ -69,22 +69,6 @@ public class CreativeEmbargo {
         Identifier.parse("weaponsexpanded:netherite_hammer"),
         // weaponsexpanded longbow (1)
         Identifier.parse("weaponsexpanded:longbow"),
-        // jobsplustools longswords (7)
-        Identifier.parse("jobsplustools:copper_longsword"),
-        Identifier.parse("jobsplustools:diamond_longsword"),
-        Identifier.parse("jobsplustools:golden_longsword"),
-        Identifier.parse("jobsplustools:iron_longsword"),
-        Identifier.parse("jobsplustools:netherite_longsword"),
-        Identifier.parse("jobsplustools:stone_longsword"),
-        Identifier.parse("jobsplustools:wooden_longsword"),
-        // jobsplustools compound bows (7)
-        Identifier.parse("jobsplustools:copper_compound_bow"),
-        Identifier.parse("jobsplustools:diamond_compound_bow"),
-        Identifier.parse("jobsplustools:golden_compound_bow"),
-        Identifier.parse("jobsplustools:iron_compound_bow"),
-        Identifier.parse("jobsplustools:netherite_compound_bow"),
-        Identifier.parse("jobsplustools:stone_compound_bow"),
-        Identifier.parse("jobsplustools:wooden_compound_bow"),
         // === JEG guns, ammo, throwables, spawn eggs (61) ===
         Identifier.parse("jeg:abstract_gun"),
         Identifier.parse("jeg:assault_rifle"),
@@ -147,7 +131,7 @@ public class CreativeEmbargo {
         Identifier.parse("jeg:typhoonee"),
         Identifier.parse("jeg:water_bomb"),
         Identifier.parse("jeg:waterpipe_shotgun")
-        // total: 118 (57 weapon-dups + 61 JEG)
+        // total: 104 (43 weapon-dups + 61 JEG)
     );
 
     public static void register() {
