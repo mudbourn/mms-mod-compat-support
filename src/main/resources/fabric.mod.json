@@ -50,6 +50,9 @@
     "mms_vanity": "*"
   },
   "suggests": {
-    "mms_anim": "*"
+    "mms_anim": "*",
+    "leawind_third_person": ">=3.0.0-beta.1",
+    "perspective_api": "*",
+    "cinematic_respawn": "*"
   }
 }

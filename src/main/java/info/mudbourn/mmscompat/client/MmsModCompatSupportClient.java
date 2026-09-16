@@ -25,5 +25,15 @@ public class MmsModCompatSupportClient implements ClientModInitializer {
             ClientPlayConnectionEvents.DISCONNECT.register(
                 (handler, client) -> ParticleRainBiomeMemo.reset());
         }
+        // Camera Glue (was the standalone camera-glue mod): force first person
+        // during Cinematic Respawn death sequences so Third Person's camera does
+        // not fight the cinematic. Only wire it up when all three mods it bridges
+        // are present — the guard keeps CameraGlue and its third-party imports
+        // from being linked otherwise.
+        if (FabricLoader.getInstance().isModLoaded("leawind_third_person")
+                && FabricLoader.getInstance().isModLoaded("perspective_api")
+                && FabricLoader.getInstance().isModLoaded("cinematic_respawn")) {
+            info.mudbourn.mmscompat.client.camera.CameraGlue.register();
+        }
     }
 }

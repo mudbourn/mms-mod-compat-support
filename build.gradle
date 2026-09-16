@@ -52,6 +52,13 @@ dependencies {
     // CosyCrittersTickLevelGuardMixin targets Cosy Critters' own CosyCritters
     // class, so the mod has to be on the compile classpath to resolve onTick.
     modCompileOnly files("libs/cosycritters-0.3.3+1.21.11-fabric.jar")
+    // Camera Glue (embedded from the former camera-glue mod) bridges Leawind's
+    // Third Person, Perspective API and Cinematic Respawn; compileOnly because
+    // all three are optional at runtime and CameraGlue is invoked only when
+    // FabricLoader reports them present.
+    modCompileOnly files("libs/leawind_third_person-3.0.0-beta.2+fabric-1.21.11.jar")
+    modCompileOnly files("libs/perspective_api-1.3.2-beta+fabric-1.21.11.jar")
+    modCompileOnly files("libs/cinematic_respawn-1.21.11-fabric-1.2.0.jar")
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
