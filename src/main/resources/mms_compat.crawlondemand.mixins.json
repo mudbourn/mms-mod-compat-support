@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.crawlondemand",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.crawlondemand.CrawlOnDemandMixinGate",
+  "client": [
+    "ClientCrawlGateMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
