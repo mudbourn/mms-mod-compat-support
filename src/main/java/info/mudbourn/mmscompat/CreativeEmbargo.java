@@ -43,14 +43,14 @@ public class CreativeEmbargo {
         Identifier.parse("expanded_weaponry:golden_dagger"),
         Identifier.parse("expanded_weaponry:diamond_dagger"),
         Identifier.parse("expanded_weaponry:netherite_dagger"),
-        // weaponsexpanded longswords (7)
-        Identifier.parse("weaponsexpanded:wooden_longsword"),
-        Identifier.parse("weaponsexpanded:stone_longsword"),
-        Identifier.parse("weaponsexpanded:copper_longsword"),
-        Identifier.parse("weaponsexpanded:iron_longsword"),
-        Identifier.parse("weaponsexpanded:golden_longsword"),
-        Identifier.parse("weaponsexpanded:diamond_longsword"),
-        Identifier.parse("weaponsexpanded:netherite_longsword"),
+        // weaponsexpanded hatchets (7)
+        Identifier.parse("weaponsexpanded:wooden_hatchet"),
+        Identifier.parse("weaponsexpanded:stone_hatchet"),
+        Identifier.parse("weaponsexpanded:copper_hatchet"),
+        Identifier.parse("weaponsexpanded:iron_hatchet"),
+        Identifier.parse("weaponsexpanded:golden_hatchet"),
+        Identifier.parse("weaponsexpanded:diamond_hatchet"),
+        Identifier.parse("weaponsexpanded:netherite_hatchet"),
         // weaponsexpanded greatswords (7)
         Identifier.parse("weaponsexpanded:wooden_greatsword"),
         Identifier.parse("weaponsexpanded:stone_greatsword"),
