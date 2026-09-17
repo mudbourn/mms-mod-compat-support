@@ -11,12 +11,6 @@ public class MmsModCompatSupportClient implements ClientModInitializer {
         // even without ETF installed; the mixin itself is gated on the mod.
         info.mudbourn.mmscompat.client.etfnbt.NbtTuning.load();
         info.mudbourn.mmscompat.client.etfnbt.NbtCommand.register();
-        // Thrown weapons draw their own item model, so there is no model layer to
-        // bake — just the renderer, which has to be present wherever the entity
-        // type is, i.e. always.
-        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
-                info.mudbourn.mmscompat.throwable.MmsThrowables.THROWN_WEAPON,
-                info.mudbourn.mmscompat.client.throwable.ThrownWeaponRenderer::new);
         if (FabricLoader.getInstance().isModLoaded("xaerominimap")) {
             SharedWaypointClient.register();
             XaeroGlobalWaypointBridge.register();

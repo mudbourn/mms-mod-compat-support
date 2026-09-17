@@ -19,7 +19,6 @@
   "mixins": [
     "mms_compat.mixins.json",
     "mms_compat.rei.mixins.json",
-    "mms_compat.rubies.mixins.json",
     "mms_compat.ca.mixins.json",
     "mms_compat.ar.mixins.json",
     "mms_compat.jeg.mixins.json",
@@ -29,14 +28,12 @@
     "mms_compat.apoli.mixins.json",
     "mms_compat.aerialhell.mixins.json",
     "mms_compat.mutantmonsters.mixins.json",
-    "mms_compat.expandedweaponry.mixins.json",
     "mms_compat.biscuitroll.mixins.json",
     "mms_compat.computerpc.mixins.json",
     "mms_compat.frostiful.mixins.json",
     "mms_compat.jei.mixins.json",
     "mms_compat.scorchful.mixins.json",
     "mms_compat.particlerain.mixins.json",
-    "mms_compat.throwable.mixins.json",
     "mms_compat.headhide.mixins.json",
     "mms_compat.etfnbt.mixins.json",
     "mms_compat.cosycritters.mixins.json",
@@ -48,7 +45,8 @@
     "java": ">=21",
     "fabric-api": "*",
     "mms_render_common": "*",
-    "mms_vanity": "*"
+    "mms_vanity": "*",
+    "mms_weapons": "*"
   },
   "suggests": {
     "mms_anim": "*",
