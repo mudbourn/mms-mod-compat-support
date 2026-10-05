@@ -16,8 +16,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * <ul>
  *   <li>Longbow arrows drop less, so the longbow is worth carrying over a plain
- *       bow for long shots. Paired with the velocity bump in
- *       {@code LongbowVelocityMixin}, this is what makes it a sniping weapon.</li>
+ *       bow for long shots.</li>
  *   <li>A player wearing the mutant skeleton skull gets reduced drag on
  *       crossbow bolts. Mutant Monsters gives the skull a multishot buff that
  *       only bows can use — crossbows never fire the arrow-loose event it hangs
