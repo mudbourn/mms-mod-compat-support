@@ -7,6 +7,9 @@
     "EntityEquipmentTrinketsMixin",
     "EquipmentOwnerInitMixin"
   ],
+  "client": [
+    "CreativeSlotPayloadMixin"
+  ],
   "injectors": {
     "defaultRequire": 0
   }
