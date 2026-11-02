@@ -86,7 +86,7 @@ public final class SharedWaypointClient {
         int[] counts = new int[3];
         for (WaypointSet set : world.getIterableWaypointSets()) {
             Map<String, Entry> wanted = wantedBySet.remove(set.getName());
-            reconcileExisting(set, wanted == null ? Map.of() : wanted, mirrored, counts);
+            reconcileExisting(set, wanted == null ? new HashMap<>() : wanted, mirrored, counts);
             if (wanted != null) addMissing(world, set, wanted, mirrored, counts);
         }
         for (Map.Entry<String, Map<String, Entry>> e : wantedBySet.entrySet()) {
