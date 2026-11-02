@@ -1,5 +1,6 @@
 package info.mudbourn.mmscompat;
 
+import info.mudbourn.mmscompat.ca.CaCreativeSlotLock;
 import info.mudbourn.mmscompat.carpet.CarpetPayloadRegistration;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -18,6 +19,12 @@ public class MmsModCompatSupport implements ModInitializer {
         // Carpet hello payload registration
         if (FabricLoader.getInstance().isModLoaded("carpet")) {
             CarpetPayloadRegistration.register();
+        }
+
+        // Combat Amenities creative slot packet lock
+        if (FabricLoader.getInstance().isModLoaded("combatamenities")
+            && FabricLoader.getInstance().isModLoaded("trinkets")) {
+            CaCreativeSlotLock.register();
         }
 
         // Xaero's World Map chunk sync (server-side packet handler)

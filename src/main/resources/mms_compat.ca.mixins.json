@@ -8,9 +8,6 @@
     "EquipmentOwnerInitMixin",
     "InventoryMenuSlotOrderMixin"
   ],
-  "client": [
-    "CreativeSlotPayloadMixin"
-  ],
   "injectors": {
     "defaultRequire": 0
   }
