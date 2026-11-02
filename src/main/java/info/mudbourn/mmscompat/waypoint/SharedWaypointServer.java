@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import info.mudbourn.mmscompat.waypoint.SharedWaypoints.Entry;
 import info.mudbourn.mmscompat.waypoint.SharedWaypoints.ScanRequestS2C;
 import info.mudbourn.mmscompat.waypoint.SharedWaypoints.ScanResultC2S;
@@ -15,9 +17,12 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,45 +33,28 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Server half of the shared-waypoint sync.
- *
- * Keeps the authoritative per-dimension shared list in
- * config/mms_compat/shared_waypoints.json, accepts publishes from any player
- * (dedupe/replace by name), and broadcasts the affected dimension's full
- * list to everyone. Full-list sync means clients can idempotently mirror it
- * into their Xaero "MMS" set — no delta bookkeeping to corrupt.
- *
- * Publishing is admin-driven: an operator runs /mmswp globalscan, the server
- * asks that one client for its GLOBAL waypoints, and the batch is applied by
- * name — new names added, known names rewritten from the scanned copy.
- * Players cannot publish, and no client tick loop watches for waypoints being
- * flipped to GLOBAL — Xaero's GLOBAL toggle is a render-distance setting, and
- * treating it as "share this" published waypoints nobody meant to share.
- *
- * Removal is deliberately narrow: /mmswp remove <name> works for the
- * waypoint's owner or permission level 2+. Client-side deletions are NOT
- * mirrored (a stale client must never be able to mass-delete the list).
+ * Server half of the shared-waypoint sync. Keeps the authoritative
+ * per-dimension list in config/mms_compat/shared_waypoints.json, each entry
+ * tagged with its Xaero waypoint set, and broadcasts full lists to clients.
  */
 public final class SharedWaypointServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("mms_compat_wp_server");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    /** dimension id -> entries; insertion-ordered for stable files. */
+    private record PendingScan(String dimension, String set) {}
+
     private static Map<String, List<Entry>> store = null;
 
-    /**
-     * Players with a {@link ScanRequestS2C} outstanding, and the dimension it was
-     * issued for. A scan result is only honoured while the sender appears here, so
-     * a client cannot publish by sending an unsolicited batch. Cleared on receipt
-     * and on disconnect.
-     */
-    private static final Map<UUID, String> pendingScans = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final Map<UUID, PendingScan> pendingScans = new ConcurrentHashMap<>();
 
     private SharedWaypointServer() {}
 
@@ -78,7 +66,6 @@ public final class SharedWaypointServer {
         ServerPlayNetworking.registerGlobalReceiver(ScanResultC2S.TYPE, (payload, context) ->
                 context.server().execute(() -> onScanResult(context.player(), payload)));
 
-        // full sync on join, every dimension
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             for (Map.Entry<String, List<Entry>> e : store().entrySet()) {
                 sender.sendPacket(new SyncS2C(e.getKey(), e.getValue()));
@@ -90,71 +77,75 @@ public final class SharedWaypointServer {
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 dispatcher.register(Commands.literal("mmswp")
-                        .then(Commands.literal("list").executes(ctx -> {
-                            listWaypoints(ctx.getSource());
-                            return 1;
-                        }))
+                        .then(Commands.literal("list")
+                                .executes(ctx -> list(ctx.getSource(), null))
+                                .then(setArgument()
+                                        .executes(ctx -> list(ctx.getSource(), set(ctx)))))
                         .then(Commands.literal("globalscan")
                                 .requires(SharedWaypointServer::isOperator)
-                                .executes(ctx -> globalScan(ctx.getSource())))
+                                .executes(ctx -> globalScan(ctx.getSource(), ""))
+                                .then(Commands.argument("set", StringArgumentType.string())
+                                        .executes(ctx -> globalScan(ctx.getSource(), set(ctx)))))
                         .then(Commands.literal("remove")
                                 .then(Commands.argument("name", StringArgumentType.greedyString())
-                                        .executes(ctx -> remove(ctx.getSource(),
-                                                StringArgumentType.getString(ctx, "name")))))));
+                                        .executes(ctx -> remove(ctx.getSource(), null, name(ctx)))))
+                        .then(Commands.literal("removefrom")
+                                .then(setArgument()
+                                        .then(Commands.argument("name", StringArgumentType.greedyString())
+                                                .executes(ctx -> remove(ctx.getSource(), set(ctx), name(ctx))))))));
 
         LOGGER.info("[mms_compat] shared waypoint server registered");
     }
 
-    private static boolean isOperator(CommandSourceStack source) {
-        return source.permissions().hasPermission(
-                new net.minecraft.server.permissions.Permission.HasCommandLevel(
-                        net.minecraft.server.permissions.PermissionLevel.byId(2)));
+    private static RequiredArgumentBuilder<CommandSourceStack, String> setArgument() {
+        return Commands.argument("set", StringArgumentType.string())
+                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                        setsIn(dimensionOf(ctx.getSource())).stream().map(SharedWaypointServer::quoted),
+                        builder));
     }
 
-    /**
-     * Ask the calling operator's client for its GLOBAL waypoints in this
-     * dimension. The scan indexes whatever that admin can already see — waypoints
-     * they made themselves, or ones shared with them — which is why it is scoped
-     * to one player rather than crawling every client.
-     */
-    private static int globalScan(CommandSourceStack source) {
+    private static String quoted(String set) {
+        return StringArgumentType.escapeIfRequired(set);
+    }
+
+    private static String set(CommandContext<CommandSourceStack> ctx) {
+        return StringArgumentType.getString(ctx, "set");
+    }
+
+    private static String name(CommandContext<CommandSourceStack> ctx) {
+        return StringArgumentType.getString(ctx, "name");
+    }
+
+    private static String dimensionOf(CommandSourceStack source) {
+        return source.getLevel().dimension().identifier().toString();
+    }
+
+    private static boolean isOperator(CommandSourceStack source) {
+        return source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2)));
+    }
+
+    private static int globalScan(CommandSourceStack source, String set) {
         ServerPlayer player = source.getPlayer();
         if (player == null) {
             source.sendFailure(Component.literal("/mmswp globalscan must be run by a player."));
             return 0;
         }
         if (!ServerPlayNetworking.canSend(player, ScanRequestS2C.TYPE)) {
-            source.sendFailure(Component.literal(
-                    "Your client does not have the MMS waypoint sync — nothing to scan."));
+            source.sendFailure(Component.literal("Your client does not have the MMS waypoint sync, nothing to scan."));
             return 0;
         }
         String dimension = player.level().dimension().identifier().toString();
-        pendingScans.put(player.getUUID(), dimension);
-        ServerPlayNetworking.send(player, new ScanRequestS2C(dimension));
-        source.sendSuccess(() -> Component.literal(
-                "Scanning your global waypoints in " + dimension + "…"), false);
+        pendingScans.put(player.getUUID(), new PendingScan(dimension, set));
+        ServerPlayNetworking.send(player, new ScanRequestS2C(dimension, set));
+        String scope = set.isEmpty() ? "all sets" : "set \"" + set + "\"";
+        source.sendSuccess(() -> Component.literal("Scanning your global waypoints in " + dimension + " (" + scope + ")..."), false);
         return 1;
     }
 
-    /**
-     * Index an admin's scan batch. The scan is authoritative: a name already on
-     * the list is rewritten in place from the scanned copy — coordinates, colour,
-     * initials, yaw — rather than skipped.
-     *
-     * <p>Skipping was the old behaviour and it made the list unmaintainable. A
-     * waypoint that was indexed at the wrong spot, or in the wrong colour, could
-     * only be corrected by removing it and scanning again, and the same admin who
-     * had just moved their own copy would be told "0 new, 1 already indexed" with
-     * nothing changed. The scan is an operator-only command run by someone looking
-     * at the waypoints they mean to publish, so their copy is the newer truth.
-     *
-     * <p>{@code owner} is the one field a rewrite preserves. Ownership decides who
-     * may {@code /mmswp remove} an entry, so a rescan must not quietly transfer it
-     * to whoever scanned last.
-     */
+    // Applies a scan by set and name, rewriting known entries but keeping their owner.
     private static void onScanResult(ServerPlayer player, ScanResultC2S payload) {
-        String expected = pendingScans.remove(player.getUUID());
-        if (expected == null || !expected.equals(payload.dimension())) {
+        PendingScan expected = pendingScans.remove(player.getUUID());
+        if (expected == null || !expected.dimension().equals(payload.dimension())) {
             LOGGER.warn("dropping unsolicited waypoint scan from '{}'", player.getName().getString());
             return;
         }
@@ -169,11 +160,21 @@ public final class SharedWaypointServer {
         int updated = 0;
         int unchanged = 0;
         for (Entry raw : payload.entries()) {
-            Entry entry = new Entry(raw.name(), raw.initials(), raw.x(), raw.y(), raw.z(),
-                    raw.colorIdx(), raw.yaw(), player.getUUID()).sanitized();
+            Entry entry = new Entry(
+                    raw.set(),
+                    raw.name(),
+                    raw.initials(),
+                    raw.x(),
+                    raw.y(),
+                    raw.z(),
+                    raw.colorIdx(),
+                    raw.yaw(),
+                    player.getUUID()
+            ).sanitized();
             if (entry.name().isEmpty()) continue;
+            if (!expected.set().isEmpty() && !entry.set().equalsIgnoreCase(expected.set())) continue;
 
-            int at = indexOfName(list, entry.name());
+            int at = indexOf(list, entry.key());
             if (at < 0) {
                 list.add(entry);
                 added++;
@@ -181,12 +182,17 @@ public final class SharedWaypointServer {
             }
 
             Entry existing = list.get(at);
-            // Keep the stored name and owner: the name so the file keeps whatever
-            // casing it was indexed under, the owner so a rescan never reassigns
-            // who is allowed to remove the entry.
-            Entry merged = new Entry(existing.name(), entry.initials(),
-                    entry.x(), entry.y(), entry.z(), entry.colorIdx(), entry.yaw(),
-                    existing.owner());
+            Entry merged = new Entry(
+                    existing.set(),
+                    existing.name(),
+                    entry.initials(),
+                    entry.x(),
+                    entry.y(),
+                    entry.z(),
+                    entry.colorIdx(),
+                    entry.yaw(),
+                    existing.owner()
+            );
             if (merged.equals(existing)) {
                 unchanged++;
             } else {
@@ -206,19 +212,32 @@ public final class SharedWaypointServer {
                 "Indexed " + newCount + " new waypoint" + (newCount == 1 ? "" : "s")
                         + ", updated " + changedCount
                         + (sameCount > 0 ? " (" + sameCount + " already up to date)" : "") + "."));
-        LOGGER.info("'{}' globalscan in {}: {} scanned, {} added, {} updated, {} unchanged",
+        LOGGER.info("'{}' globalscan in {} ({}): {} scanned, {} added, {} updated, {} unchanged",
                 player.getName().getString(), payload.dimension(),
+                expected.set().isEmpty() ? "all sets" : expected.set(),
                 payload.entries().size(), added, updated, unchanged);
     }
 
-    private static int remove(CommandSourceStack source, String name) {
-        String dimension = source.getLevel().dimension().identifier().toString();
-        List<Entry> list = store().get(dimension);
-        Entry entry = list == null ? null : byName(list, name);
-        if (entry == null) {
-            source.sendFailure(Component.literal("No shared waypoint named \"" + name + "\" here."));
+    private static int remove(CommandSourceStack source, String set, String name) {
+        String dimension = dimensionOf(source);
+        List<Entry> list = store().getOrDefault(dimension, List.of());
+        List<Entry> matches = list.stream()
+                .filter(e -> e.name().equalsIgnoreCase(name))
+                .filter(e -> set == null || e.set().equalsIgnoreCase(set))
+                .toList();
+        if (matches.isEmpty()) {
+            String where = set == null ? "here" : "in set \"" + set + "\"";
+            source.sendFailure(Component.literal("No shared waypoint named \"" + name + "\" " + where + "."));
             return 0;
         }
+        if (matches.size() > 1) {
+            String sets = String.join(", ", matches.stream().map(Entry::set).toList());
+            source.sendFailure(Component.literal(
+                    "\"" + name + "\" exists in several sets (" + sets + "). Use /mmswp removefrom <set> <name>."));
+            return 0;
+        }
+
+        Entry entry = matches.get(0);
         UUID caller = source.getPlayer() != null ? source.getPlayer().getUUID() : null;
         boolean isOwner = caller != null && caller.equals(entry.owner());
         if (!isOwner && !isOperator(source)) {
@@ -228,16 +247,41 @@ public final class SharedWaypointServer {
         list.remove(entry);
         save();
         broadcast(source.getServer(), dimension);
-        source.sendSuccess(() -> Component.literal("Removed shared waypoint \"" + name + "\"."), true);
+        source.sendSuccess(() -> Component.literal(
+                "Removed shared waypoint \"" + entry.name() + "\" from set \"" + entry.set() + "\"."), true);
         return 1;
     }
 
-    private static void listWaypoints(CommandSourceStack source) {
-        String dimension = source.getLevel().dimension().identifier().toString();
-        List<Entry> list = store().getOrDefault(dimension, List.of());
-        source.sendSuccess(() -> Component.literal(
-                "Shared waypoints here (" + list.size() + "): "
-                        + String.join(", ", list.stream().map(Entry::name).toList())), false);
+    private static int list(CommandSourceStack source, String set) {
+        String dimension = dimensionOf(source);
+        List<Entry> all = store().getOrDefault(dimension, List.of());
+        Set<String> sets = setsIn(dimension);
+        if (set != null) {
+            sets.removeIf(s -> !s.equalsIgnoreCase(set));
+            if (sets.isEmpty()) {
+                source.sendFailure(Component.literal("No shared waypoint set named \"" + set + "\" here."));
+                return 0;
+            }
+        }
+        if (sets.isEmpty()) {
+            source.sendSuccess(() -> Component.literal("No shared waypoints here."), false);
+            return 1;
+        }
+        for (String s : sets) {
+            List<String> names = all.stream()
+                    .filter(e -> e.set().equals(s))
+                    .map(Entry::name)
+                    .toList();
+            source.sendSuccess(() -> Component.literal(
+                    s + " (" + names.size() + "): " + String.join(", ", names)), false);
+        }
+        return 1;
+    }
+
+    private static Set<String> setsIn(String dimension) {
+        Set<String> sets = new LinkedHashSet<>();
+        for (Entry e : store().getOrDefault(dimension, List.of())) sets.add(e.set());
+        return sets;
     }
 
     private static void broadcast(MinecraftServer server, String dimension) {
@@ -248,24 +292,18 @@ public final class SharedWaypointServer {
         }
     }
 
-    private static Entry byName(List<Entry> list, String name) {
-        int at = indexOfName(list, name);
-        return at < 0 ? null : list.get(at);
-    }
-
-    private static int indexOfName(List<Entry> list, String name) {
+    private static int indexOf(List<Entry> list, String key) {
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).name().equalsIgnoreCase(name)) return i;
+            if (list.get(i).key().equals(key)) return i;
         }
         return -1;
     }
-
-    // ── persistence ──
 
     private static Path file() {
         return FabricLoader.getInstance().getConfigDir().resolve("mms_compat").resolve("shared_waypoints.json");
     }
 
+    // Loads the store, filling in the default set for entries saved without one.
     private static synchronized Map<String, List<Entry>> store() {
         if (store == null) {
             store = new LinkedHashMap<>();
@@ -274,7 +312,10 @@ public final class SharedWaypointServer {
                 try (Reader r = Files.newBufferedReader(f)) {
                     Map<String, List<Entry>> loaded = GSON.fromJson(r,
                             new TypeToken<Map<String, List<Entry>>>() {}.getType());
-                    if (loaded != null) store.putAll(loaded);
+                    if (loaded != null) {
+                        loaded.forEach((dim, entries) -> store.put(dim,
+                                new ArrayList<>(entries.stream().map(Entry::sanitized).toList())));
+                    }
                 } catch (Exception e) {
                     LOGGER.error("failed to load shared waypoints; starting empty", e);
                 }

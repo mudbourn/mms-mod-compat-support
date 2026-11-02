@@ -5,7 +5,8 @@
   "plugin": "info.mudbourn.mmscompat.CaMixinPlugin",
   "mixins": [
     "EntityEquipmentTrinketsMixin",
-    "EquipmentOwnerInitMixin"
+    "EquipmentOwnerInitMixin",
+    "InventoryMenuSlotOrderMixin"
   ],
   "client": [
     "CreativeSlotPayloadMixin"
