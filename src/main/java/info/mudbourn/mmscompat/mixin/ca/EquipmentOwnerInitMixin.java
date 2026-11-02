@@ -21,13 +21,9 @@ public class EquipmentOwnerInitMixin {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void mmsCompat$stampEquipmentOwner(CallbackInfo ci) {
-        try {
-            EntityEquipment eq = ((EquipmentInterface) this).combat_Amenities$getEquipment();
-            if (eq != null) {
-                ((EntityEquipmentDuck) eq).mms_compat$setOwner((LivingEntity) (Object) this);
-            }
-        } catch (Throwable ignored) {
-            // EquipmentInterface duck may not be present on all LivingEntity subclasses
+        EntityEquipment eq = ((EquipmentInterface) this).combat_Amenities$getEquipment();
+        if (eq != null) {
+            ((EntityEquipmentDuck) eq).mms_compat$setOwner((LivingEntity) (Object) this);
         }
     }
 }
