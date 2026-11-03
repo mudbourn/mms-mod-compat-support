@@ -5,7 +5,8 @@
   "plugin": "info.mudbourn.mmscompat.mixin.mapsync.MapSyncMixinGate",
   "mixins": [
     "ScheduledScanOffThreadMixin",
-    "ScanSaveOnServerThreadMixin"
+    "ScanSaveOnServerThreadMixin",
+    "McaLz4DecompressMixin"
   ],
   "injectors": {
     "defaultRequire": 1
