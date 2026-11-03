@@ -18,7 +18,9 @@ import java.util.regex.Pattern;
  */
 public final class ChatEmoji {
     private static final String TABLE = "/assets/mms_compat/emoji/shortcodes.json";
-    private static final Pattern SHORTCODE = Pattern.compile(":([a-z0-9_+\\-]+):");
+    private static final Pattern SHORTCODE = Pattern.compile(
+        ":([A-Za-z0-9_+\\-]+):|(?<!\\S):([A-Za-z0-9_+\\-]{2,})(?!\\S)"
+    );
     private static Map<String, String> codes;
 
     private ChatEmoji() {
@@ -28,15 +30,24 @@ public final class ChatEmoji {
         if (message.indexOf(':') < 0) {
             return message;
         }
-        Map<String, String> table = table();
         Matcher m = SHORTCODE.matcher(message);
         StringBuilder out = new StringBuilder();
         while (m.find()) {
-            String emoji = table.get(m.group(1).toLowerCase());
+            String emoji = resolve(m.group(1) != null ? m.group(1) : m.group(2));
             m.appendReplacement(out, Matcher.quoteReplacement(emoji != null ? emoji : m.group()));
         }
         m.appendTail(out);
         return out.toString();
+    }
+
+    // Exact shortcode first, otherwise the top match for a partial name.
+    private static String resolve(String name) {
+        String exact = table().get(name.toLowerCase());
+        if (exact != null) {
+            return exact;
+        }
+        List<Map.Entry<String, String>> best = matching(name, 1);
+        return best.isEmpty() ? null : best.get(0).getValue();
     }
 
     public static List<Map.Entry<String, String>> matching(String partial, int limit) {
