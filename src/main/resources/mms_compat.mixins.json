@@ -8,6 +8,10 @@
     "MobEmbargoedEquipmentMixin",
     "SoundLibraryReleaseGuardMixin"
   ],
+  "client": [
+    "ChatEmojiMixin",
+    "ChatEmojiSuggestionsMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
