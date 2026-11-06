@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.trinkets",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.trinkets.TrinketsMixinGate",
+  "mixins": [
+    "TrinketsFullSyncRegistryMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
