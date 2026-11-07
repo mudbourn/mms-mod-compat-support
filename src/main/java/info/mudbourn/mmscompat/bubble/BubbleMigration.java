@@ -57,6 +57,9 @@ public final class BubbleMigration {
     private static final int PLAYER_SCAN_TICKS = 200;
 
     private static final Queue<Display.ItemDisplay> QUEUE = new ArrayDeque<>();
+    // Containers are converted on the next tick, never inside CHUNK_LOAD: any write marks
+    // the chunk dirty through a blocking getChunk on the chunk still loading, which deadlocks.
+    private static final Queue<BlockEntity> CONTAINER_QUEUE = new ArrayDeque<>();
 
     private BubbleMigration() {}
 
@@ -68,12 +71,25 @@ public final class BubbleMigration {
                 item.setItem(convert(item.getItem()));
             }
         });
-        ServerChunkEvents.CHUNK_LOAD.register((level, chunk) -> convertContainers(chunk));
+        ServerChunkEvents.CHUNK_LOAD.register((level, chunk) -> queueContainers(chunk));
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> convertPlayer(handler.getPlayer()));
         ServerTickEvents.END_SERVER_TICK.register(BubbleMigration::tick);
     }
 
     private static void tick(MinecraftServer server) {
+        while (!CONTAINER_QUEUE.isEmpty()) {
+            BlockEntity entity = CONTAINER_QUEUE.poll();
+            if (
+                !entity.isRemoved()
+                    && entity.getLevel() instanceof ServerLevel level
+                    && level.isLoaded(entity.getBlockPos())
+                    // An unrolled loot table would roll on getItem; leave it to the first opener.
+                    && !(entity instanceof RandomizableContainer loot && loot.getLootTable() != null)
+                    && entity instanceof Container container
+            ) {
+                convertContainer(container);
+            }
+        }
         for (int i = 0; i < PER_TICK && !QUEUE.isEmpty(); i++) {
             Display.ItemDisplay display = QUEUE.poll();
             if (
@@ -94,15 +110,10 @@ public final class BubbleMigration {
         convertContainer(player.getEnderChestInventory());
     }
 
-    private static void convertContainers(LevelChunk chunk) {
+    private static void queueContainers(LevelChunk chunk) {
         for (BlockEntity entity : chunk.getBlockEntities().values()) {
-            // A container with an unrolled loot table would roll it on getItem, and that
-            // marks the chunk dirty through a blocking getChunk on the chunk still loading.
-            if (entity instanceof RandomizableContainer loot && loot.getLootTable() != null) {
-                continue;
-            }
-            if (entity instanceof Container container) {
-                convertContainer(container);
+            if (entity instanceof Container) {
+                CONTAINER_QUEUE.add(entity);
             }
         }
     }
