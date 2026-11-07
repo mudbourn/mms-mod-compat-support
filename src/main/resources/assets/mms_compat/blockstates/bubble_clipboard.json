@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "mms_compat:block/bubble/clipboard"
+    },
+    "facing=east": {
+      "model": "mms_compat:block/bubble/clipboard",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "mms_compat:block/bubble/clipboard",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "mms_compat:block/bubble/clipboard",
+      "y": 270
+    }
+  }
+}

@@ -15,6 +15,9 @@ public class MmsModCompatSupportClient implements ClientModInitializer {
             SharedWaypointClient.register();
             XaeroGlobalWaypointBridge.register();
         }
+        if (FabricLoader.getInstance().isModLoaded("mr_bubblellaneous")) {
+            BubbleClient.register();
+        }
         if (FabricLoader.getInstance().isModLoaded("particlerain")) {
             ClientPlayConnectionEvents.DISCONNECT.register(
                 (handler, client) -> ParticleRainBiomeMemo.reset());

@@ -1,5 +1,6 @@
 package info.mudbourn.mmscompat;
 
+import info.mudbourn.mmscompat.bubble.BubbleContent;
 import info.mudbourn.mmscompat.ca.CaCreativeSlotLock;
 import info.mudbourn.mmscompat.carpet.CarpetPayloadRegistration;
 import net.fabricmc.api.ModInitializer;
@@ -25,6 +26,11 @@ public class MmsModCompatSupport implements ModInitializer {
         if (FabricLoader.getInstance().isModLoaded("combatamenities")
             && FabricLoader.getInstance().isModLoaded("trinkets")) {
             CaCreativeSlotLock.register();
+        }
+
+        // Bubblellaneous Java port
+        if (FabricLoader.getInstance().isModLoaded("mr_bubblellaneous")) {
+            BubbleContent.register();
         }
 
         // Xaero's World Map chunk sync (server-side packet handler)

@@ -1,0 +1,49 @@
+{
+  "variants": {
+    "facing=north,state=default": {
+      "model": "mms_compat:block/bubble/computer/default"
+    },
+    "facing=north,state=boot": {
+      "model": "mms_compat:block/bubble/computer/boot"
+    },
+    "facing=north,state=login": {
+      "model": "mms_compat:block/bubble/computer/login"
+    },
+    "facing=east,state=default": {
+      "model": "mms_compat:block/bubble/computer/default",
+      "y": 90
+    },
+    "facing=east,state=boot": {
+      "model": "mms_compat:block/bubble/computer/boot",
+      "y": 90
+    },
+    "facing=east,state=login": {
+      "model": "mms_compat:block/bubble/computer/login",
+      "y": 90
+    },
+    "facing=south,state=default": {
+      "model": "mms_compat:block/bubble/computer/default",
+      "y": 180
+    },
+    "facing=south,state=boot": {
+      "model": "mms_compat:block/bubble/computer/boot",
+      "y": 180
+    },
+    "facing=south,state=login": {
+      "model": "mms_compat:block/bubble/computer/login",
+      "y": 180
+    },
+    "facing=west,state=default": {
+      "model": "mms_compat:block/bubble/computer/default",
+      "y": 270
+    },
+    "facing=west,state=boot": {
+      "model": "mms_compat:block/bubble/computer/boot",
+      "y": 270
+    },
+    "facing=west,state=login": {
+      "model": "mms_compat:block/bubble/computer/login",
+      "y": 270
+    }
+  }
+}

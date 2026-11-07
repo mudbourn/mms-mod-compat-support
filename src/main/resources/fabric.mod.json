@@ -39,7 +39,8 @@
     "mms_compat.cosycritters.mixins.json",
     "mms_compat.crawlondemand.mixins.json",
     "mms_compat.trinkets.mixins.json",
-    "mms_compat.rsls.mixins.json"
+    "mms_compat.rsls.mixins.json",
+    "mms_compat.bubblellaneous.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.0",
@@ -54,6 +55,7 @@
     "mms_anim": "*",
     "leawind_third_person": ">=3.0.0-beta.1",
     "perspective_api": "*",
-    "cinematic_respawn": "*"
+    "cinematic_respawn": "*",
+    "mr_bubblellaneous": "*"
   }
 }

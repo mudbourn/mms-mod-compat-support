@@ -1,0 +1,7 @@
+{
+  "credit": "Bubblellaneous - by bbfh",
+  "parent": "mms_compat:block/bubble/computer/default",
+  "textures": {
+    "monitor": "mms_compat:block/bubble/computer/monitor_login"
+  }
+}

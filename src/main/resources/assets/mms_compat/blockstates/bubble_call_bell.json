@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "mms_compat:block/bubble/call_bell"
+    }
+  }
+}

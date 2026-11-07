@@ -1,0 +1,60 @@
+{
+  "variants": {
+    "above=false,axis=x,open=false,powered=false": {
+      "model": "mms_compat:block/bubble/rising_door/iron/default"
+    },
+    "above=false,axis=x,open=false,powered=true": {
+      "model": "mms_compat:block/bubble/rising_door/iron/default"
+    },
+    "above=false,axis=x,open=true,powered=false": {
+      "model": "mms_compat:block/bubble/rising_door/iron/open"
+    },
+    "above=false,axis=x,open=true,powered=true": {
+      "model": "mms_compat:block/bubble/rising_door/iron/open"
+    },
+    "above=true,axis=x,open=false,powered=false": {
+      "model": "mms_compat:block/bubble/rising_door/iron/bottom"
+    },
+    "above=true,axis=x,open=false,powered=true": {
+      "model": "mms_compat:block/bubble/rising_door/iron/bottom"
+    },
+    "above=true,axis=x,open=true,powered=false": {
+      "model": "mms_compat:block/bubble/rising_door/iron/open"
+    },
+    "above=true,axis=x,open=true,powered=true": {
+      "model": "mms_compat:block/bubble/rising_door/iron/open"
+    },
+    "above=false,axis=z,open=false,powered=false": {
+      "model": "mms_compat:block/bubble/rising_door/iron/default",
+      "y": 90
+    },
+    "above=false,axis=z,open=false,powered=true": {
+      "model": "mms_compat:block/bubble/rising_door/iron/default",
+      "y": 90
+    },
+    "above=false,axis=z,open=true,powered=false": {
+      "model": "mms_compat:block/bubble/rising_door/iron/open",
+      "y": 90
+    },
+    "above=false,axis=z,open=true,powered=true": {
+      "model": "mms_compat:block/bubble/rising_door/iron/open",
+      "y": 90
+    },
+    "above=true,axis=z,open=false,powered=false": {
+      "model": "mms_compat:block/bubble/rising_door/iron/bottom",
+      "y": 90
+    },
+    "above=true,axis=z,open=false,powered=true": {
+      "model": "mms_compat:block/bubble/rising_door/iron/bottom",
+      "y": 90
+    },
+    "above=true,axis=z,open=true,powered=false": {
+      "model": "mms_compat:block/bubble/rising_door/iron/open",
+      "y": 90
+    },
+    "above=true,axis=z,open=true,powered=true": {
+      "model": "mms_compat:block/bubble/rising_door/iron/open",
+      "y": 90
+    }
+  }
+}

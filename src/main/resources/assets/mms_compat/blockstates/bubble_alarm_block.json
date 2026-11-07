@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "mms_compat:block/bubble/alarm_block"
+    },
+    "powered=true": {
+      "model": "mms_compat:block/bubble/alarm_block"
+    }
+  }
+}
