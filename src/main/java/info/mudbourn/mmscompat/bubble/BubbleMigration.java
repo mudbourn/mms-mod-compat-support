@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.Container;
+import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -95,6 +96,11 @@ public final class BubbleMigration {
 
     private static void convertContainers(LevelChunk chunk) {
         for (BlockEntity entity : chunk.getBlockEntities().values()) {
+            // A container with an unrolled loot table would roll it on getItem, and that
+            // marks the chunk dirty through a blocking getChunk on the chunk still loading.
+            if (entity instanceof RandomizableContainer loot && loot.getLootTable() != null) {
+                continue;
+            }
             if (entity instanceof Container container) {
                 convertContainer(container);
             }
