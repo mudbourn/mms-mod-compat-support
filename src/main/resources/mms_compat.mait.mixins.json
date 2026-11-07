@@ -1,0 +1,10 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.mait",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.mait.MaitMixinGate",
+  "mixins": ["MaitEnchantItemsMixin"],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

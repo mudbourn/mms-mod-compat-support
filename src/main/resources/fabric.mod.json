@@ -18,6 +18,7 @@
   },
   "mixins": [
     "mms_compat.mixins.json",
+    "mms_compat.mait.mixins.json",
     "mms_compat.rei.mixins.json",
     "mms_compat.ca.mixins.json",
     "mms_compat.ar.mixins.json",
@@ -37,7 +38,8 @@
     "mms_compat.etfnbt.mixins.json",
     "mms_compat.cosycritters.mixins.json",
     "mms_compat.crawlondemand.mixins.json",
-    "mms_compat.trinkets.mixins.json"
+    "mms_compat.trinkets.mixins.json",
+    "mms_compat.rsls.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.0",
