@@ -1,18 +1,18 @@
 {
   "variants": {
     "facing=north": {
-      "model": "mms_compat:block/bubble/surveillance_camera/default"
+      "model": "mms_compat:block/bubble/surveillance_camera/stand"
     },
     "facing=east": {
-      "model": "mms_compat:block/bubble/surveillance_camera/default",
+      "model": "mms_compat:block/bubble/surveillance_camera/stand",
       "y": 90
     },
     "facing=south": {
-      "model": "mms_compat:block/bubble/surveillance_camera/default",
+      "model": "mms_compat:block/bubble/surveillance_camera/stand",
       "y": 180
     },
     "facing=west": {
-      "model": "mms_compat:block/bubble/surveillance_camera/default",
+      "model": "mms_compat:block/bubble/surveillance_camera/stand",
       "y": 270
     }
   }
