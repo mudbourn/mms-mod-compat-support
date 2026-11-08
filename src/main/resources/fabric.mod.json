@@ -41,7 +41,8 @@
     "mms_compat.trinkets.mixins.json",
     "mms_compat.rsls.mixins.json",
     "mms_compat.bubblellaneous.mixins.json",
-    "mms_compat.brewinchat.mixins.json"
+    "mms_compat.brewinchat.mixins.json",
+    "mms_compat.chatpatches.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.0",

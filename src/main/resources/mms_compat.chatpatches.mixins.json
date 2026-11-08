@@ -1,0 +1,15 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.chatpatches",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.chatpatches.ChatPatchesMixinGate",
+  "mixins": [],
+  "client": [
+    "ChatComponentLinesAccessor",
+    "ChatLogBoundaryMixin",
+    "ConfigBoundaryMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
