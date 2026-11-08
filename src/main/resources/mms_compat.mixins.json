@@ -6,7 +6,8 @@
     "CreativeTabDedupMixin",
     "ArrowFlightMixin",
     "MobEmbargoedEquipmentMixin",
-    "SoundLibraryReleaseGuardMixin"
+    "SoundLibraryReleaseGuardMixin",
+    "DataFixerLookupQuietMixin"
   ],
   "client": [
     "ChatEmojiMixin",
