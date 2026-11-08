@@ -6,9 +6,13 @@
   "mixins": [
     "ScheduledScanOffThreadMixin",
     "ScanSaveOnServerThreadMixin",
-    "McaLz4DecompressMixin"
+    "McaLz4DecompressMixin",
+    "UpToDateChatMuteMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "client": [
+    "AutoSyncChatMuteMixin"
+  ]
 }
