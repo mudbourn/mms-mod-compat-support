@@ -3,5 +3,6 @@
   "item.mms_compat.invisible_helmet": "Invisible Helmet",
   "item.mms_compat.invisible_chestplate": "Invisible Chestplate",
   "item.mms_compat.invisible_leggings": "Invisible Leggings",
-  "item.mms_compat.invisible_boots": "Invisible Boots"
+  "item.mms_compat.invisible_boots": "Invisible Boots",
+  "mms_compat.camera.auto_mode": "The camera is sweeping. Use [%s] or [%s] to take manual control, press [%s] to stop watching"
 }

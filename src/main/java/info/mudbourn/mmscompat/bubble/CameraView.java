@@ -9,6 +9,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -43,7 +44,11 @@ public final class CameraView {
 
     private static final int JUMP_COOLDOWN_TICKS = 5;
 
-    private static final int HINT_COOLDOWN_TICKS = 600;
+    private static final int HINT_INTERVAL_TICKS = 20;
+
+    private static final int CAMERA_RESEND_TICKS = 100;
+
+    private static final int CAMERA_RESEND_INTERVAL = 5;
 
     private CameraView() {}
 
@@ -53,7 +58,7 @@ public final class CameraView {
         final BlockPos camera;
         boolean jumpHeld;
         int jumpCooldown;
-        long hintTick = Long.MIN_VALUE;
+        int age;
 
         Session(CameraViewEntity entity, ServerLevel level, BlockPos camera) {
             this.entity = entity;
@@ -155,9 +160,7 @@ public final class CameraView {
         player.setCamera(entity);
         player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20, 0, true, false));
         cue(player, SoundEvents.HORSE_ARMOR.value(), SoundSource.BLOCKS, 0.5f);
-        if (camera.isManual()) {
-            hint(player, session);
-        }
+        hint(player, camera);
     }
 
     private static void place(CameraViewEntity entity, SurveillanceCameraBlockEntity camera) {
@@ -165,6 +168,7 @@ public final class CameraView {
         entity.setPos(head.x, head.y - entity.getEyeHeight(), head.z);
         entity.setYRot(camera.viewYaw());
         entity.setXRot(VIEW_PITCH);
+        entity.setCamera(camera.getBlockPos());
     }
 
     private static void tick(MinecraftServer server) {
@@ -196,7 +200,7 @@ public final class CameraView {
             if (!camera.isManual()) {
                 camera.setManual(true);
                 cue(player, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.MASTER, 1.0f);
-                hint(player, session);
+                hint(player, camera);
             }
             camera.turn(input.right() ? 1 : -1);
         }
@@ -207,29 +211,36 @@ public final class CameraView {
             camera.setManual(!camera.isManual());
             session.jumpCooldown = JUMP_COOLDOWN_TICKS;
             cue(player, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.MASTER, 1.0f);
+            hint(player, camera);
         }
         session.jumpHeld = input.jump();
         camera.advance(session.level);
-        Vec3 head = camera.headPos();
-        session.entity.setPos(head.x, head.y - session.entity.getEyeHeight(), head.z);
-        session.entity.setYRot(camera.viewYaw());
-        session.entity.setXRot(VIEW_PITCH);
+        session.age++;
+        if (session.age <= CAMERA_RESEND_TICKS && session.age % CAMERA_RESEND_INTERVAL == 0) {
+            player.connection.send(new ClientboundSetCameraPacket(session.entity));
+        }
+        if (session.age % HINT_INTERVAL_TICKS == 0) {
+            hint(player, camera);
+        }
     }
 
-    private static void hint(ServerPlayer player, Session session) {
-        long now = player.level().getGameTime();
-        if (now - session.hintTick < HINT_COOLDOWN_TICKS) {
-            return;
-        }
-        session.hintTick = now;
-        player.sendSystemMessage(
-            Component.translatable(
+    private static void hint(ServerPlayer player, SurveillanceCameraBlockEntity camera) {
+        Component left = Component.keybind("key.left").withStyle(ChatFormatting.BOLD);
+        Component right = Component.keybind("key.right").withStyle(ChatFormatting.BOLD);
+        Component text = camera.isManual()
+            ? Component.translatable(
                 "ui.bubblellaneous.camera.manual_mode",
-                Component.keybind("key.left").withStyle(ChatFormatting.BOLD),
-                Component.keybind("key.right").withStyle(ChatFormatting.BOLD),
+                left,
+                right,
                 Component.keybind("key.jump").withStyle(ChatFormatting.BOLD)
-            ).withStyle(style -> style.withColor(0xFCD78D))
-        );
+            )
+            : Component.translatable(
+                "mms_compat.camera.auto_mode",
+                left,
+                right,
+                Component.keybind("key.sneak").withStyle(ChatFormatting.BOLD)
+            );
+        player.displayClientMessage(text.copy().withStyle(style -> style.withColor(0xFCD78D)), true);
     }
 
     private static void finish(ServerPlayer player, Session session, boolean restoreMode, String failureKey) {
