@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.brewinchat",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.brewinchat.BrewinChatMixinGate",
+  "mixins": [],
+  "client": ["TipsyChatLineMixin"],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}
