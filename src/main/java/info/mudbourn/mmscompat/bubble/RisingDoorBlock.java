@@ -3,6 +3,7 @@ package info.mudbourn.mmscompat.bubble;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -13,8 +14,13 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -32,8 +38,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** Iron sliding door whose connected panels open and close together, by hand or redstone. */
-public class RisingDoorBlock extends Block {
+/** Iron rising door whose connected panels open and close together, by hand or redstone. */
+public class RisingDoorBlock extends BaseEntityBlock {
 
     public static final MapCodec<RisingDoorBlock> CODEC = simpleCodec(RisingDoorBlock::new);
 
@@ -59,10 +65,6 @@ public class RisingDoorBlock extends Block {
 
     private static final VoxelShape SHAPE_Z = Block.box(7, 0, 0, 9, 16, 16);
 
-    private static final VoxelShape OPEN_X = Block.box(0, 15, 7, 16, 16, 9);
-
-    private static final VoxelShape OPEN_Z = Block.box(7, 15, 0, 9, 16, 16);
-
     public RisingDoorBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any()
@@ -73,8 +75,18 @@ public class RisingDoorBlock extends Block {
     }
 
     @Override
-    protected MapCodec<? extends Block> codec() {
+    protected MapCodec<? extends BaseEntityBlock> codec() {
         return CODEC;
+    }
+
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new RisingDoorBlockEntity(pos, state);
+    }
+
+    @Override
+    protected RenderShape getRenderShape(BlockState state) {
+        return RenderShape.INVISIBLE;
     }
 
     @Override
@@ -111,11 +123,7 @@ public class RisingDoorBlock extends Block {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        boolean x = state.getValue(AXIS) == Direction.Axis.X;
-        if (state.getValue(OPEN)) {
-            return x ? OPEN_X : OPEN_Z;
-        }
-        return x ? SHAPE_X : SHAPE_Z;
+        return state.getValue(AXIS) == Direction.Axis.X ? SHAPE_X : SHAPE_Z;
     }
 
     @Override
@@ -169,6 +177,28 @@ public class RisingDoorBlock extends Block {
             setGroup(level, pos, true, true);
         } else if (!anyPowered(level, pos)) {
             setGroup(level, pos, false, true);
+        }
+    }
+
+    /** Gives doors placed before the door had a block entity their missing one. */
+    public static void backfill(LevelChunk chunk) {
+        LevelChunkSection[] sections = chunk.getSections();
+        for (int index = 0; index < sections.length; index++) {
+            LevelChunkSection section = sections[index];
+            if (section.hasOnlyAir() || !section.maybeHas(state -> state.getBlock() instanceof RisingDoorBlock)) {
+                continue;
+            }
+            int baseY = SectionPos.sectionToBlockCoord(chunk.getSectionYFromSectionIndex(index));
+            for (int y = 0; y < 16; y++) {
+                for (int z = 0; z < 16; z++) {
+                    for (int x = 0; x < 16; x++) {
+                        if (section.getBlockState(x, y, z).getBlock() instanceof RisingDoorBlock) {
+                            BlockPos pos = chunk.getPos().getBlockAt(x, baseY + y, z);
+                            chunk.getBlockEntity(pos, LevelChunk.EntityCreationType.IMMEDIATE);
+                        }
+                    }
+                }
+            }
         }
     }
 

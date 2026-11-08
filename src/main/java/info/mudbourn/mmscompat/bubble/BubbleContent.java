@@ -1,5 +1,6 @@
 package info.mudbourn.mmscompat.bubble;
 
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
@@ -104,6 +105,12 @@ public final class BubbleContent {
         FabricBlockEntityTypeBuilder.create(SurveillanceCameraBlockEntity::new, SURVEILLANCE_CAMERA).build()
     );
 
+    public static final BlockEntityType<RisingDoorBlockEntity> RISING_DOOR_ENTITY = Registry.register(
+        BuiltInRegistries.BLOCK_ENTITY_TYPE,
+        id("iron_rising_door"),
+        FabricBlockEntityTypeBuilder.create(RisingDoorBlockEntity::new, IRON_RISING_DOOR).build()
+    );
+
     public static final EntityType<CameraViewEntity> CAMERA_VIEW = Registry.register(
         BuiltInRegistries.ENTITY_TYPE,
         id("camera_view"),
@@ -131,6 +138,7 @@ public final class BubbleContent {
     public static void register() {
         CameraView.register();
         BubbleMigration.register();
+        ServerChunkEvents.CHUNK_LOAD.register((level, chunk) -> RisingDoorBlock.backfill(chunk));
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries ->
             REPLACED_LOOT.values().forEach(entries::accept)
         );

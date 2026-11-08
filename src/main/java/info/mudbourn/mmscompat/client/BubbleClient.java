@@ -14,5 +14,6 @@ public final class BubbleClient {
         EntityRendererRegistry.register(BubbleContent.CAMERA_VIEW, NoopRenderer::new);
         SurveillanceCameraRenderer.registerModel();
         BlockEntityRenderers.register(BubbleContent.CAMERA_ENTITY, context -> new SurveillanceCameraRenderer());
+        BlockEntityRenderers.register(BubbleContent.RISING_DOOR_ENTITY, context -> new RisingDoorRenderer());
     }
 }

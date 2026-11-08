@@ -19,10 +19,10 @@
       "model": "mms_compat:block/bubble/rising_door/iron/bottom"
     },
     "above=true,axis=x,open=true,powered=false": {
-      "model": "mms_compat:block/bubble/rising_door/iron/open"
+      "model": "mms_compat:block/bubble/rising_door/iron/open_bottom"
     },
     "above=true,axis=x,open=true,powered=true": {
-      "model": "mms_compat:block/bubble/rising_door/iron/open"
+      "model": "mms_compat:block/bubble/rising_door/iron/open_bottom"
     },
     "above=false,axis=z,open=false,powered=false": {
       "model": "mms_compat:block/bubble/rising_door/iron/default",
@@ -49,11 +49,11 @@
       "y": 90
     },
     "above=true,axis=z,open=true,powered=false": {
-      "model": "mms_compat:block/bubble/rising_door/iron/open",
+      "model": "mms_compat:block/bubble/rising_door/iron/open_bottom",
       "y": 90
     },
     "above=true,axis=z,open=true,powered=true": {
-      "model": "mms_compat:block/bubble/rising_door/iron/open",
+      "model": "mms_compat:block/bubble/rising_door/iron/open_bottom",
       "y": 90
     }
   }
