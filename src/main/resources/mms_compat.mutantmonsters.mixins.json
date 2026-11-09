@@ -8,7 +8,8 @@
     "SkeletonArmorInfinityMixin",
     "AttachmentBuilderIdentifierMixin",
     "CreeperMinionShoulderSyncMixin",
-    "SkeletonSkullVanityMixin"
+    "SkeletonSkullVanityMixin",
+    "MutantZombieDeathPoseResetMixin"
   ],
   "injectors": {
     "defaultRequire": 1
