@@ -17,6 +17,9 @@ public class MmsModCompatSupport implements ModInitializer {
         CreativeEmbargo.register();
         info.mudbourn.mmscompat.waypoint.SharedWaypointServer.register();
 
+        // PvP arrow limit
+        info.mudbourn.mmscompat.ranged.PvpArrowLimit.register();
+
         // Carpet hello payload registration
         if (FabricLoader.getInstance().isModLoaded("carpet")) {
             CarpetPayloadRegistration.register();

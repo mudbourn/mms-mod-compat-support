@@ -10,7 +10,8 @@
     "DataFixerLookupQuietMixin",
     "PackFormatLenientMixin",
     "PackMetadataPlaceholderMixin",
-    "LoadFunctionMuteMixin"
+    "LoadFunctionMuteMixin",
+    "InfinityAnyArrowMixin"
   ],
   "client": [
     "ChatEmojiMixin",

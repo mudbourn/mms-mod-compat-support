@@ -8,7 +8,8 @@
     "AbsolutReviveAggroMixin",
     "AbsolutReviveBleedoutMixin",
     "AbsolutReviveNotifyMixin",
-    "AbsolutReviveRescueTimeMixin"
+    "AbsolutReviveRescueTimeMixin",
+    "AbsolutReviveTotemMixin"
   ],
   "injectors": {
     "defaultRequire": 1

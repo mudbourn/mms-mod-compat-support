@@ -22,7 +22,6 @@
     "mms_compat.rei.mixins.json",
     "mms_compat.ca.mixins.json",
     "mms_compat.ar.mixins.json",
-    "mms_compat.jeg.mixins.json",
     "mms_compat.furnish.mixins.json",
     "mms_compat.xaero.mixins.json",
     "mms_compat.mapsync.mixins.json",
