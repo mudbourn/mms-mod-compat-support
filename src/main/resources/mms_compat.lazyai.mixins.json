@@ -1,0 +1,10 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.lazyai",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.lazyai.LazyAiMixinGate",
+  "mixins": ["LazyAiBlockCacheLockMixin"],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
