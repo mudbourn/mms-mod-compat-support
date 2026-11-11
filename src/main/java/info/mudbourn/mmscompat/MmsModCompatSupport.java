@@ -2,6 +2,7 @@ package info.mudbourn.mmscompat;
 
 import info.mudbourn.mmscompat.bubble.BubbleContent;
 import info.mudbourn.mmscompat.ca.CaCreativeSlotLock;
+import info.mudbourn.mmscompat.ca.LanternHolster;
 import info.mudbourn.mmscompat.carpet.CarpetPayloadRegistration;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -29,6 +30,12 @@ public class MmsModCompatSupport implements ModInitializer {
         if (FabricLoader.getInstance().isModLoaded("combatamenities")
             && FabricLoader.getInstance().isModLoaded("trinkets")) {
             CaCreativeSlotLock.register();
+        }
+
+        // Belt-slot lantern warmth and heat penalty
+        if (FabricLoader.getInstance().isModLoaded("trinkets")
+            && FabricLoader.getInstance().isModLoaded("frostiful")) {
+            LanternHolster.register();
         }
 
         // Bubblellaneous Java port

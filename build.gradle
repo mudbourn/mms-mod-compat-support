@@ -39,6 +39,14 @@ dependencies {
     // SandPileGateMixin targets Scorchful's own SandAccumulation class, so the
     // mod has to be on the compile classpath to resolve the tickChunk signature.
     modCompileOnly files("libs/scorchful-0.16.8+1.21.11.jar")
+    // LanternHolster reads and adjusts temperature through the Thermoo API.
+    modCompileOnly files("libs/thermoo-9.1.0.jar")
+    // Frostiful's config class extends Cloth Config's ConfigData, so reading it
+    // needs Cloth Config on the compile classpath.
+    modCompileOnly files("libs/cloth-config-21.11.153-fabric.jar")
+    // BeltLightFalloffMixin targets LambDynamicLights' entity light lookup.
+    modCompileOnly files("libs/lambdynamiclights-4.9.1+1.21.11-fabric.jar")
+    modCompileOnly files("libs/lambdynamiclights-api-4.9.1+1.21.11.jar")
     // BiomeMemoMixin redirects a getBiome call inside Particle Rain's own
     // ParticleSpawner, so the mod has to be a loom dependency -- otherwise the
     // redirect descriptor would have to be hand-written in intermediary.

@@ -38,6 +38,7 @@
     "mms_compat.cosycritters.mixins.json",
     "mms_compat.crawlondemand.mixins.json",
     "mms_compat.trinkets.mixins.json",
+    "mms_compat.lambdynlights.mixins.json",
     "mms_compat.rsls.mixins.json",
     "mms_compat.bubblellaneous.mixins.json",
     "mms_compat.brewinchat.mixins.json",
