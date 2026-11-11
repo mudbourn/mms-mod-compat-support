@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_21",
   "plugin": "info.mudbourn.mmscompat.mixin.frostiful.FrostifulMixinGate",
   "mixins": [
-    "IceSkateVanityMixin"
+    "IceSkateVanityMixin",
+    "HolsterLightWarmthMixin"
   ],
   "client": [
     "IceSkateFeatureRendererMixin"

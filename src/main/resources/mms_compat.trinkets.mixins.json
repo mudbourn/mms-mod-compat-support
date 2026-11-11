@@ -6,6 +6,9 @@
   "mixins": [
     "TrinketsFullSyncRegistryMixin"
   ],
+  "client": [
+    "HolsterBurnBarMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

@@ -4,21 +4,27 @@ import com.github.thedeathlycow.frostiful.Frostiful;
 import com.github.thedeathlycow.frostiful.config.group.EnvironmentConfigGroup;
 import com.github.thedeathlycow.thermoo.api.ThermooAttributes;
 import com.github.thedeathlycow.thermoo.api.temperature.TemperatureAware;
-import com.github.thedeathlycow.thermoo.api.temperature.event.EnvironmentTickContext;
-import com.github.thedeathlycow.thermoo.api.temperature.event.LivingEntityTemperatureTickEvents;
+import com.mojang.serialization.Codec;
+import dev.emi.trinkets.api.TrinketInventory;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LightLayer;
 
 /**
- * Lets a light source carried in the Trinkets belt slot (Combat Amenities' belt)
- * warm its wearer like the same light placed beside them, at the cost of
- * heating up faster in hot places.
+ * Makes a light source in the Trinkets belt slot (Combat Amenities' belt) count
+ * as placed light for Frostiful, heats its wearer faster, and burns one item
+ * out of the stack after two days of keeping the cold away. The burn progress
+ * syncs to its owner to draw a durability bar on the belt stack.
  */
 public final class LanternHolster {
 
@@ -29,36 +35,36 @@ public final class LanternHolster {
 
     private static final int CHECK_INTERVAL = 20;
 
+    public static final int BURN_TICKS = 2 * 24000;
+
+    public static final AttachmentType<Integer> WARDED_TICKS = AttachmentRegistry.create(
+        Identifier.fromNamespaceAndPath("mms_compat", "lantern_holster_warded"),
+        builder -> builder
+            .persistent(Codec.INT)
+            .copyOnDeath()
+            .syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
+
     private LanternHolster() {
     }
 
     public static void register() {
-        LivingEntityTemperatureTickEvents.GET_PASSIVE_TEMPERATURE_CHANGE.register(LanternHolster::warmth);
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             if (server.getTickCount() % CHECK_INTERVAL != 0) {
                 return;
             }
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 updateHeatPenalty(player);
+                burnDown(player);
             }
         });
     }
 
-    // Tops Frostiful's block-light warmth up to what the holstered light would give.
-    private static int warmth(EnvironmentTickContext<? extends LivingEntity> context) {
-        LivingEntity entity = context.affected();
-        if (!(entity instanceof Player player) || player.isSpectator()) {
-            return 0;
-        }
-        if (TemperatureAware.get(player).thermoo$getTemperature() > 0) {
-            return 0;
-        }
-        int carried = BeltLight.of(player);
-        if (carried <= 0) {
-            return 0;
-        }
-        int ambient = context.level().getBrightness(LightLayer.BLOCK, context.pos());
-        return Math.max(0, lightWarmth(carried) - lightWarmth(ambient));
+    /**
+     * Frostiful's light warmth at the wearer's feet, raised to what the
+     * holstered light would give if placed there.
+     */
+    public static int withHolster(ServerPlayer player, int placedWarmth) {
+        return Math.max(placedWarmth, lightWarmth(BeltLight.of(player)));
     }
 
     private static int lightWarmth(int light) {
@@ -82,5 +88,36 @@ public final class LanternHolster {
         } else if (!holstered && applied) {
             resistance.removeModifier(HEAT_PENALTY_ID);
         }
+    }
+
+    // Counts time the holster is the light keeping the wearer warm, and spends one item per two days.
+    private static void burnDown(ServerPlayer player) {
+        if (player.isSpectator() || TemperatureAware.get(player).thermoo$getTemperature() > 0) {
+            return;
+        }
+        TrinketInventory slot = BeltLight.slot(player);
+        if (slot == null) {
+            return;
+        }
+        ItemStack stack = slot.getItem(0);
+        int carried = lightWarmth(BeltLight.lightOf(stack));
+        int ambient = lightWarmth(player.level().getBrightness(LightLayer.BLOCK, player.blockPosition()));
+        if (carried <= ambient) {
+            return;
+        }
+        int warded = player.getAttachedOrElse(WARDED_TICKS, 0) + CHECK_INTERVAL;
+        if (warded < BURN_TICKS) {
+            player.setAttached(WARDED_TICKS, warded);
+            return;
+        }
+        player.removeAttached(WARDED_TICKS);
+        slot.setItem(0, stack.copyWithCount(stack.getCount() - 1));
+        player.level().playSound(
+            null,
+            player.blockPosition(),
+            SoundEvents.FIRE_EXTINGUISH,
+            SoundSource.PLAYERS,
+            1.0F,
+            1.0F);
     }
 }
