@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.alexscaves",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.alexscaves.AlexsCavesMixinGate",
+  "mixins": [
+    "AcPotPatternMutableMixin",
+    "DecoratedPotPatternsAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
