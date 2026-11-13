@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "farmersdelight:melon_popsicle",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:melon_juice",
+      "required": false
+    },
+    {
+      "id": "moredelight:chocolate_popsicle",
+      "required": false
+    },
+    {
+      "id": "accdelight:peppermint_parfait",
+      "required": false
+    }
+  ]
+}

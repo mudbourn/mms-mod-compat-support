@@ -44,7 +44,8 @@
     "mms_compat.brewinchat.mixins.json",
     "mms_compat.chatpatches.mixins.json",
     "mms_compat.lazyai.mixins.json",
-    "mms_compat.alexscaves.mixins.json"
+    "mms_compat.alexscaves.mixins.json",
+    "mms_compat.iris.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.0",

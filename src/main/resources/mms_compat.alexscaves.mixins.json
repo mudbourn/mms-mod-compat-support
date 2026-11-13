@@ -7,6 +7,9 @@
     "AcPotPatternMutableMixin",
     "DecoratedPotPatternsAccessor"
   ],
+  "client": [
+    "AcLightmapNullPlayerMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

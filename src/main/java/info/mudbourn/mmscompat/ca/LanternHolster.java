@@ -23,7 +23,7 @@ import net.minecraft.world.level.LightLayer;
 /**
  * Makes a light source in the Trinkets belt slot (Combat Amenities' belt) count
  * as placed light for Frostiful, heats its wearer faster, and burns one item
- * out of the stack after two days of keeping the cold away. The burn progress
+ * out of the stack after one day of keeping the cold away. The burn progress
  * syncs to its owner to draw a durability bar on the belt stack.
  */
 public final class LanternHolster {
@@ -35,7 +35,7 @@ public final class LanternHolster {
 
     private static final int CHECK_INTERVAL = 20;
 
-    public static final int BURN_TICKS = 2 * 24000;
+    public static final int BURN_TICKS = 24000;
 
     public static final AttachmentType<Integer> WARDED_TICKS = AttachmentRegistry.create(
         Identifier.fromNamespaceAndPath("mms_compat", "lantern_holster_warded"),
@@ -90,7 +90,7 @@ public final class LanternHolster {
         }
     }
 
-    // Counts time the holster is the light keeping the wearer warm, and spends one item per two days.
+    // Counts time the holster is the light keeping the wearer warm, and spends one item per day.
     private static void burnDown(ServerPlayer player) {
         if (player.isSpectator() || TemperatureAware.get(player).thermoo$getTemperature() > 0) {
             return;
@@ -117,7 +117,7 @@ public final class LanternHolster {
             player.blockPosition(),
             SoundEvents.FIRE_EXTINGUISH,
             SoundSource.PLAYERS,
-            1.0F,
+            0.35F,
             1.0F);
     }
 }

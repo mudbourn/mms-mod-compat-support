@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.iris",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "info.mudbourn.mmscompat.mixin.iris.IrisMixinGate",
+  "client": [
+    "IrisFeatureMissingBlurMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

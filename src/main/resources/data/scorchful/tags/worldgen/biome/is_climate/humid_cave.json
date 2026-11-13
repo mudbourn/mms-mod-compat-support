@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "alexscaves:abyssal_chasm",
+      "required": false
+    },
+    {
+      "id": "alexscaves:candy_cavity",
+      "required": false
+    },
+    {
+      "id": "alexscaves:magnetic_caves",
+      "required": false
+    },
+    {
+      "id": "alexscaves:primordial_caves",
+      "required": false
+    },
+    {
+      "id": "alexscaves:toxic_caves",
+      "required": false
+    }
+  ]
+}
