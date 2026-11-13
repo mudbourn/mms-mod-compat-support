@@ -7,6 +7,7 @@
   "client": [
     "ChatComponentLinesAccessor",
     "ChatLogBoundaryMixin",
+    "ChatLogUnsavableMixin",
     "ConfigBoundaryMixin"
   ],
   "injectors": {
