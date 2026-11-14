@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "alexscaves:primordial_caves",
+      "required": false
+    },
+    {
+      "id": "alexscaves:toxic_caves",
+      "required": false
+    }
+  ]
+}
