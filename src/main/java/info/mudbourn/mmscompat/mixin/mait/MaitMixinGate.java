@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Applies the Mob AI Tweaks enchantment mixins only when Mob AI Tweaks is loaded.
+ * Applies the Mob AI Tweaks compat mixins only when Mob AI Tweaks is loaded.
  */
 public class MaitMixinGate implements IMixinConfigPlugin {
 
