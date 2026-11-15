@@ -15,10 +15,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * <p>Mob AI Tweaks' {@code arrowsOriginateFromClones} fires one arrow per mirror
  * clone using the main-hand stack as the weapon. With no bow held that stack is
  * empty and vanilla's arrow constructor throws "Invalid weapon firing an
- * arrow", crashing the server tick. The raised priority makes this HEAD inject
+ * arrow", crashing the server tick. The lowered priority makes this HEAD inject
  * run before Mob AI Tweaks' own.</p>
  */
-@Mixin(value = Illusioner.class, priority = 1500)
+@Mixin(value = Illusioner.class, priority = 500)
 public abstract class MaitIllusionerEmptyBowGuardMixin {
 
     @Inject(method = "performRangedAttack", at = @At("HEAD"), cancellable = true)
