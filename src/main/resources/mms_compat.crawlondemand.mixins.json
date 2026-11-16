@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_21",
   "plugin": "info.mudbourn.mmscompat.mixin.crawlondemand.CrawlOnDemandMixinGate",
   "mixins": [
-    "CrawlJumpBlockMixin"
+    "CrawlJumpBlockMixin",
+    "CrawlStepUpMixin"
   ],
   "client": [
     "ClientCrawlGateMixin",
