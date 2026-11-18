@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Gates the LambDynamicLights mixins on it and Trinkets both being loaded.
+ * Gates the LambDynamicLights mixins on it and Combat Amenities both being loaded.
  */
 public class LambDynLightsMixinGate implements IMixinConfigPlugin {
 
     private final boolean present = FabricLoader.getInstance().isModLoaded("lambdynlights")
-        && FabricLoader.getInstance().isModLoaded("trinkets");
+        && FabricLoader.getInstance().isModLoaded("combatamenities");
 
     @Override public void onLoad(String mixinPackage) {}
     @Override public String getRefMapperConfig() { return null; }

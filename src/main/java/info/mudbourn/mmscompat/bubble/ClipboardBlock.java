@@ -1,6 +1,5 @@
 package info.mudbourn.mmscompat.bubble;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -18,18 +17,11 @@ import java.util.Map;
 /** Decorative clipboard that lies on a surface. */
 public class ClipboardBlock extends HorizontalDirectionalBlock {
 
-    public static final MapCodec<ClipboardBlock> CODEC = simpleCodec(ClipboardBlock::new);
-
     private static final Map<Direction, VoxelShape> SHAPES = Shapes.rotateHorizontal(Block.box(3, 0, 1, 13, 2, 15));
 
     public ClipboardBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
-    }
-
-    @Override
-    protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
-        return CODEC;
     }
 
     @Override

@@ -16,7 +16,7 @@ public class ConfigBoundaryMixin {
             method = "sendBoundaryLine",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/components/ChatComponent;addMessage(Lnet/minecraft/network/chat/Component;)V",
+                    target = "Lnet/minecraft/client/gui/components/ChatComponent;addClientSystemMessage(Lnet/minecraft/network/chat/Component;)V",
                     shift = At.Shift.AFTER))
     private void mmsCompat$markBoundary(CallbackInfo ci) {
         ChatBoundaryReveal.markSent();

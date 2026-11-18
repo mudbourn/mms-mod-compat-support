@@ -1,7 +1,7 @@
 package info.mudbourn.mmscompat.bubble;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.core.Registry;
@@ -23,7 +23,6 @@ import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -138,8 +137,8 @@ public final class BubbleContent {
     public static void register() {
         CameraView.register();
         BubbleMigration.register();
-        ServerChunkEvents.CHUNK_LOAD.register((level, chunk) -> RisingDoorBlock.backfill(chunk));
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries ->
+        ServerChunkEvents.CHUNK_LOAD.register((level, chunk, newChunk) -> RisingDoorBlock.backfill(chunk));
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries ->
             REPLACED_LOOT.values().forEach(entries::accept)
         );
         LootTableEvents.REPLACE.register((key, original, source, registries) -> {
@@ -153,7 +152,7 @@ public final class BubbleContent {
             }
             return LootTable.lootTable()
                 .setParamSet(LootContextParamSets.COMMAND)
-                .withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add(LootItem.lootTableItem(item)))
+                .withPool(LootPool.lootPool().add(LootItem.lootTableItem(item)))
                 .build();
         });
     }

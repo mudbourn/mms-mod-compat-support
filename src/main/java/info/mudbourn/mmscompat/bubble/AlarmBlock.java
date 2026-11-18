@@ -1,6 +1,5 @@
 package info.mudbourn.mmscompat.bubble;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.resources.Identifier;
@@ -20,8 +19,6 @@ import net.minecraft.world.level.redstone.Orientation;
 /** Block that loops a loud alarm while it receives redstone power. */
 public class AlarmBlock extends Block {
 
-    public static final MapCodec<AlarmBlock> CODEC = simpleCodec(AlarmBlock::new);
-
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
     private static final Identifier ALARM_ID = Identifier.parse("bubblellaneous:block.security_alarm.alarm");
@@ -35,11 +32,6 @@ public class AlarmBlock extends Block {
     public AlarmBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any().setValue(POWERED, false));
-    }
-
-    @Override
-    protected MapCodec<? extends Block> codec() {
-        return CODEC;
     }
 
     @Override

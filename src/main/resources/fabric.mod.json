@@ -3,7 +3,7 @@
   "id": "mms_compat",
   "version": "${version}",
   "name": "MMS Mod Compat Support",
-  "description": "Server-wide mod compat patches for MMSLive01. Creative-tab dedup, REI null-filter fix, CA+Trinkets bridge, AR item-drop suppression, creative embargo, vanity armor.",
+  "description": "Server-wide mod compat patches for MMSLive01. Creative-tab dedup, REI null-filter fix, creative embargo, vanity armor.",
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -18,26 +18,14 @@
   },
   "mixins": [
     "mms_compat.mixins.json",
-    "mms_compat.mait.mixins.json",
     "mms_compat.rei.mixins.json",
-    "mms_compat.ca.mixins.json",
-    "mms_compat.ar.mixins.json",
-    "mms_compat.furnish.mixins.json",
     "mms_compat.xaero.mixins.json",
-    "mms_compat.mapsync.mixins.json",
     "mms_compat.apoli.mixins.json",
     "mms_compat.aerialhell.mixins.json",
     "mms_compat.mutantmonsters.mixins.json",
-    "mms_compat.biscuitroll.mixins.json",
-    "mms_compat.computerpc.mixins.json",
-    "mms_compat.frostiful.mixins.json",
     "mms_compat.jei.mixins.json",
-    "mms_compat.scorchful.mixins.json",
     "mms_compat.particlerain.mixins.json",
     "mms_compat.etfnbt.mixins.json",
-    "mms_compat.cosycritters.mixins.json",
-    "mms_compat.crawlondemand.mixins.json",
-    "mms_compat.trinkets.mixins.json",
     "mms_compat.lambdynlights.mixins.json",
     "mms_compat.rsls.mixins.json",
     "mms_compat.bubblellaneous.mixins.json",
@@ -48,9 +36,9 @@
     "mms_compat.iris.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.16.0",
-    "minecraft": "~1.21.11",
-    "java": ">=21",
+    "fabricloader": ">=0.20.1",
+    "minecraft": "~26.3",
+    "java": ">=25",
     "fabric-api": "*",
     "mms_render_common": "*",
     "mms_vanity": "*",
@@ -58,9 +46,6 @@
   },
   "suggests": {
     "mms_anim": "*",
-    "leawind_third_person": ">=3.0.0-beta.1",
-    "perspective_api": "*",
-    "cinematic_respawn": "*",
     "mr_bubblellaneous": "*"
   }
 }

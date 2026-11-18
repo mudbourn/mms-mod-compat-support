@@ -1,6 +1,5 @@
 package info.mudbourn.mmscompat.bubble;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -25,8 +24,6 @@ import java.util.Map;
 /** Desktop computer that boots to a login screen when clicked. */
 public class ComputerBlock extends HorizontalDirectionalBlock {
 
-    public static final MapCodec<ComputerBlock> CODEC = simpleCodec(ComputerBlock::new);
-
     public static final EnumProperty<ComputerState> STATE = EnumProperty.create("state", ComputerState.class);
 
     private static final int BOOT_TICKS = 66;
@@ -38,11 +35,6 @@ public class ComputerBlock extends HorizontalDirectionalBlock {
         registerDefaultState(stateDefinition.any()
             .setValue(FACING, Direction.NORTH)
             .setValue(STATE, ComputerState.DEFAULT));
-    }
-
-    @Override
-    protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
-        return CODEC;
     }
 
     @Override

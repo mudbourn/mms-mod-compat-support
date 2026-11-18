@@ -1,6 +1,6 @@
 package info.mudbourn.mmscompat.mixin.iris;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -14,14 +14,14 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class IrisFeatureMissingBlurMixin {
 
     @Redirect(
-        method = "method_25394",
+        method = "extractRenderState",
         at = @At(
             value = "INVOKE",
             target = "Lnet/irisshaders/iris/gui/FeatureMissingErrorScreen;"
-                   + "method_25420(Lnet/minecraft/class_332;IIF)V"
+                   + "extractBackground(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIF)V"
         ),
         remap = false
     )
-    private void mms$skipSecondBlur(@Coerce Screen self, GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+    private void mms$skipSecondBlur(@Coerce Screen self, GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
     }
 }

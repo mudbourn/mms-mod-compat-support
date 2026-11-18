@@ -1,10 +1,9 @@
 {
   "required": false,
   "package": "info.mudbourn.mmscompat.mixin.aerialhell",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_25",
   "plugin": "info.mudbourn.mmscompat.mixin.aerialhell.AerialHellMixinGate",
   "client": [
-    "StellarChickenTintMixin",
     "CortinariusCowShroomLayerMixin",
     "HellSpiderSpikesLayerMixin"
   ],

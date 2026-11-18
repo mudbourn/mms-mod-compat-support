@@ -1,7 +1,7 @@
 {
   "required": false,
   "package": "info.mudbourn.mmscompat.mixin.rsls",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_25",
   "plugin": "info.mudbourn.mmscompat.mixin.rsls.RslsMixinGate",
   "mixins": [],
   "client": ["WorldRandomHolderMixin"],

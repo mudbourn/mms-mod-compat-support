@@ -1,6 +1,5 @@
 package info.mudbourn.mmscompat.bubble;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -17,17 +16,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 /** Desk bell that rings when clicked. */
 public class CallBellBlock extends Block {
 
-    public static final MapCodec<CallBellBlock> CODEC = simpleCodec(CallBellBlock::new);
-
     private static final VoxelShape SHAPE = Block.box(5, 0, 5, 11, 6, 11);
 
     public CallBellBlock(Properties properties) {
         super(properties);
-    }
-
-    @Override
-    protected MapCodec<? extends Block> codec() {
-        return CODEC;
     }
 
     @Override

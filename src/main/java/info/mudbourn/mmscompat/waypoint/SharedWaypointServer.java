@@ -59,9 +59,9 @@ public final class SharedWaypointServer {
     private SharedWaypointServer() {}
 
     public static void register() {
-        PayloadTypeRegistry.playC2S().register(ScanResultC2S.TYPE, ScanResultC2S.CODEC);
-        PayloadTypeRegistry.playS2C().register(SyncS2C.TYPE, SyncS2C.CODEC);
-        PayloadTypeRegistry.playS2C().register(ScanRequestS2C.TYPE, ScanRequestS2C.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(ScanResultC2S.TYPE, ScanResultC2S.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(SyncS2C.TYPE, SyncS2C.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(ScanRequestS2C.TYPE, ScanRequestS2C.CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(ScanResultC2S.TYPE, (payload, context) ->
                 context.server().execute(() -> onScanResult(context.player(), payload)));

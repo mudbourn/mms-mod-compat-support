@@ -1,23 +1,24 @@
 package info.mudbourn.mmscompat.ca;
 
-import dev.emi.trinkets.api.TrinketInventory;
-import dev.emi.trinkets.api.TrinketsApi;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Reads the Trinkets belt slot (Combat Amenities' belt) and the light level its
- * block item would emit if placed.
+ * Reads the Combat Amenities belt slot and the light level its block item
+ * would emit if placed.
  */
 public final class BeltLight {
+
+    private static EquipmentSlot beltSlot;
 
     private BeltLight() {
     }
 
     public static int of(LivingEntity entity) {
-        TrinketInventory slot = slot(entity);
-        return slot == null ? 0 : lightOf(slot.getItem(0));
+        EquipmentSlot slot = slot();
+        return slot == null ? 0 : lightOf(entity.getItemBySlot(slot));
     }
 
     public static int lightOf(ItemStack stack) {
@@ -27,11 +28,15 @@ public final class BeltLight {
         return blockItem.getBlock().defaultBlockState().getLightEmission();
     }
 
-    public static TrinketInventory slot(LivingEntity entity) {
-        return TrinketsApi.getTrinketComponent(entity)
-            .map(c -> c.getInventory().get("legs"))
-            .map(g -> g.get("belt"))
-            .filter(inv -> inv.getContainerSize() > 0)
-            .orElse(null);
+    // Combat Amenities adds the belt slot to the vanilla enum at load, so it is found by name.
+    private static EquipmentSlot slot() {
+        if (beltSlot == null) {
+            for (EquipmentSlot candidate : EquipmentSlot.values()) {
+                if (candidate.name().equals("COMBATAMENITIES_BELTSLOT")) {
+                    beltSlot = candidate;
+                }
+            }
+        }
+        return beltSlot;
     }
 }

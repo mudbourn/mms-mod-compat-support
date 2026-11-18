@@ -1,6 +1,6 @@
 package info.mudbourn.mmscompat.client.etfnbt;
 
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
@@ -27,18 +27,18 @@ public final class NbtCommand {
 
     public static void register() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) ->
-                dispatcher.register(ClientCommandManager.literal("mmsnbt")
-                        .then(ClientCommandManager.literal("fast")
+                dispatcher.register(ClientCommands.literal("mmsnbt")
+                        .then(ClientCommands.literal("fast")
                                 .executes(ctx -> report(ctx.getSource(), "fast path", NbtTuning.fastPath))
-                                .then(ClientCommandManager.literal("on")
+                                .then(ClientCommands.literal("on")
                                         .executes(ctx -> setFast(ctx.getSource(), true)))
-                                .then(ClientCommandManager.literal("off")
+                                .then(ClientCommands.literal("off")
                                         .executes(ctx -> setFast(ctx.getSource(), false))))
-                        .then(ClientCommandManager.literal("verify")
+                        .then(ClientCommands.literal("verify")
                                 .executes(ctx -> report(ctx.getSource(), "verification", NbtTuning.verify))
-                                .then(ClientCommandManager.literal("on")
+                                .then(ClientCommands.literal("on")
                                         .executes(ctx -> setVerify(ctx.getSource(), true)))
-                                .then(ClientCommandManager.literal("off")
+                                .then(ClientCommands.literal("off")
                                         .executes(ctx -> setVerify(ctx.getSource(), false))))));
     }
 

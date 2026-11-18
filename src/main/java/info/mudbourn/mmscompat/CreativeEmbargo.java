@@ -1,6 +1,6 @@
 package info.mudbourn.mmscompat;
 
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -72,14 +72,13 @@ public class CreativeEmbargo {
     );
 
     public static void register() {
-        ItemGroupEvents.MODIFY_ENTRIES_ALL.register((group, entries) -> {
+        CreativeModeTabEvents.MODIFY_OUTPUT_ALL.register((group, entries) -> {
             entries.getDisplayStacks().removeIf(CreativeEmbargo::isEmbargoed);
             entries.getSearchTabStacks().removeIf(CreativeEmbargo::isEmbargoed);
         });
     }
 
-    // Package-external callers: MobEmbargoedEquipmentMixin reuses this so mob
-    // equipment and the creative tabs cannot disagree about what is embargoed.
+    // Shared with MobEmbargoedEquipmentMixin so mob equipment and creative tabs agree.
     public static boolean isEmbargoed(ItemStack stack) {
         Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         return EMBARGO.contains(id);

@@ -1,12 +1,8 @@
 {
   "required": false,
   "package": "info.mudbourn.mmscompat.mixin.alexscaves",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_25",
   "plugin": "info.mudbourn.mmscompat.mixin.alexscaves.AlexsCavesMixinGate",
-  "mixins": [
-    "AcPotPatternMutableMixin",
-    "DecoratedPotPatternsAccessor"
-  ],
   "client": [
     "AcLightmapNullPlayerMixin"
   ],

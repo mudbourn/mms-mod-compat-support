@@ -1,6 +1,5 @@
 package info.mudbourn.mmscompat.bubble;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -10,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Prediction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -40,8 +40,6 @@ import java.util.Map;
 /** Wall camera that a linked security monitor can view. */
 public class SurveillanceCameraBlock extends BaseEntityBlock {
 
-    public static final MapCodec<SurveillanceCameraBlock> CODEC = simpleCodec(SurveillanceCameraBlock::new);
-
     public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
 
     private static final SoundEvent REGISTER_SOUND = SoundEvent.createVariableRangeEvent(
@@ -53,11 +51,6 @@ public class SurveillanceCameraBlock extends BaseEntityBlock {
     public SurveillanceCameraBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
-    }
-
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
     }
 
     @Override
@@ -142,13 +135,10 @@ public class SurveillanceCameraBlock extends BaseEntityBlock {
         if (stack.isEmpty()) {
             player.setItemInHand(hand, linked);
         } else {
-            player.getInventory().placeItemBackInInventory(linked);
+            player.getInventory().placeItemBackInInventory(linked, Prediction.SERVER_ONLY);
         }
         level.playSound(null, pos, REGISTER_SOUND, SoundSource.BLOCKS, 0.25f, 1.0f);
-        player.displayClientMessage(
-            Component.translatable("ui.bubblellaneous.camera.registered").withStyle(ChatFormatting.GREEN),
-            false
-        );
+        player.sendSystemMessage(Component.translatable("ui.bubblellaneous.camera.registered").withStyle(ChatFormatting.GREEN));
         return InteractionResult.SUCCESS;
     }
 }

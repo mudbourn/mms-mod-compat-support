@@ -65,13 +65,13 @@ public final class BubbleMigration {
 
     public static void register() {
         ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-            if (entity instanceof Display.ItemDisplay display && display.getTags().contains("bbln.block")) {
+            if (entity instanceof Display.ItemDisplay display && display.entityTags().contains("bbln.block")) {
                 QUEUE.add(display);
             } else if (entity instanceof ItemEntity item) {
                 item.setItem(convert(item.getItem()));
             }
         });
-        ServerChunkEvents.CHUNK_LOAD.register((level, chunk) -> queueContainers(chunk));
+        ServerChunkEvents.CHUNK_LOAD.register((level, chunk, newChunk) -> queueContainers(chunk));
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> convertPlayer(handler.getPlayer()));
         ServerTickEvents.END_SERVER_TICK.register(BubbleMigration::tick);
     }
@@ -255,7 +255,7 @@ public final class BubbleMigration {
         List<Entity> nearby = level.getEntities(
             (Entity) null,
             area,
-            entity -> entity != display && entity.getTags().contains("+bubblellaneous")
+            entity -> entity != display && entity.entityTags().contains("+bubblellaneous")
         );
         for (Entity entity : nearby) {
             if (

@@ -3,7 +3,7 @@ package info.mudbourn.mmscompat.client;
 import info.mudbourn.mmscompat.mixin.chatpatches.ChatComponentLinesAccessor;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.client.GuiMessage;
+import net.minecraft.client.multiplayer.chat.GuiMessage;
 import net.minecraft.client.Minecraft;
 
 import java.util.Collections;
@@ -45,15 +45,17 @@ public final class ChatBoundaryReveal {
     }
 
     private static void tick(Minecraft client) {
-        if (PENDING.isEmpty() || client.player == null || client.screen != null) {
+        if (PENDING.isEmpty() || client.player == null || client.gui.screen() != null) {
             return;
         }
-        List<GuiMessage.Line> lines = ((ChatComponentLinesAccessor) client.gui.getChat()).mmsCompat$trimmedMessages();
-        int now = client.gui.getGuiTicks();
+        List<GuiMessage.Line> lines = ((ChatComponentLinesAccessor) client.gui.hud.getChat()).mmsCompat$trimmedMessages();
+        int now = client.gui.hud.getGuiTicks();
         for (int i = 0; i < lines.size(); i++) {
             GuiMessage.Line line = lines.get(i);
             if (PENDING.contains(line)) {
-                lines.set(i, new GuiMessage.Line(now, line.content(), line.tag(), line.endOfEntry()));
+                GuiMessage parent = line.parent();
+                GuiMessage fresh = new GuiMessage(now, parent.content(), parent.signature(), parent.source(), parent.tag());
+                lines.set(i, new GuiMessage.Line(fresh, line.content(), line.endOfEntry()));
             }
         }
         PENDING.clear();

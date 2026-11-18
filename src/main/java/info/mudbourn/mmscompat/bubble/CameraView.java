@@ -240,7 +240,7 @@ public final class CameraView {
                 right,
                 Component.keybind("key.sneak").withStyle(ChatFormatting.BOLD)
             );
-        player.displayClientMessage(text.copy().withStyle(style -> style.withColor(0xFCD78D)), true);
+        player.sendOverlayMessage(text.copy().withStyle(style -> style.withColor(0xFCD78D)));
     }
 
     private static void finish(ServerPlayer player, Session session, boolean restoreMode, String failureKey) {

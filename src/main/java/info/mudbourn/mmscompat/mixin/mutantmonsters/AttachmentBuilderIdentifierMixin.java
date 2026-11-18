@@ -10,13 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/**
- * Records the identifier a puzzleslib attachment builder is building under, so
- * {@link CreeperMinionShoulderSyncMixin} can target a single attachment.
- *
- * <p>Purely bookkeeping — it changes no behaviour on its own, and the field it
- * writes is read by nothing else.
- */
+/** Records the identifier a PuzzlesLib attachment builder is building under. */
 @Mixin(FabricDataAttachmentBuilder.class)
 public abstract class AttachmentBuilderIdentifierMixin implements AttachmentIdentifierDuck {
 

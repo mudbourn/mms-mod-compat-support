@@ -15,7 +15,7 @@ public class ChatLogBoundaryMixin {
 
     @Inject(method = "hideRecentMessages", at = @At("TAIL"))
     private static void mmsCompat$keepBoundary(CallbackInfo ci) {
-        ChatComponentLinesAccessor chat = (ChatComponentLinesAccessor) Minecraft.getInstance().gui.getChat();
+        ChatComponentLinesAccessor chat = (ChatComponentLinesAccessor) Minecraft.getInstance().gui.hud.getChat();
         ChatBoundaryReveal.capture(chat.mmsCompat$trimmedMessages());
     }
 }

@@ -9,11 +9,11 @@ public final class CarpetPayloadRegistration {
 
     // Registers Carpet's hello payload in Fabric's play registries.
     public static void register() {
-        PayloadTypeRegistry.playS2C().register(
+        PayloadTypeRegistry.clientboundPlay().register(
             CarpetClient.CarpetPayload.TYPE,
             CarpetClient.CarpetPayload.STREAM_CODEC
         );
-        PayloadTypeRegistry.playC2S().register(
+        PayloadTypeRegistry.serverboundPlay().register(
             CarpetClient.CarpetPayload.TYPE,
             CarpetClient.CarpetPayload.STREAM_CODEC
         );

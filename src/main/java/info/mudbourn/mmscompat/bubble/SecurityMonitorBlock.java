@@ -1,6 +1,5 @@
 package info.mudbourn.mmscompat.bubble;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,8 +29,6 @@ import java.util.Map;
 /** Wall monitor that shows the surveillance camera it is linked to. */
 public class SecurityMonitorBlock extends BaseEntityBlock {
 
-    public static final MapCodec<SecurityMonitorBlock> CODEC = simpleCodec(SecurityMonitorBlock::new);
-
     public static final BooleanProperty LINKED = BooleanProperty.create("linked");
 
     private static final Map<Direction, VoxelShape> SHAPES = Shapes.rotateHorizontal(Block.box(1, 3, 13, 15, 13, 16));
@@ -41,11 +38,6 @@ public class SecurityMonitorBlock extends BaseEntityBlock {
         registerDefaultState(stateDefinition.any()
             .setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH)
             .setValue(LINKED, false));
-    }
-
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
     }
 
     @Override

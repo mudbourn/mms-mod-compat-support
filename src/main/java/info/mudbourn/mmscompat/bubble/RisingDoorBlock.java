@@ -1,6 +1,5 @@
 package info.mudbourn.mmscompat.bubble;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -41,8 +40,6 @@ import java.util.Set;
 /** Iron rising door whose connected panels open and close together, by hand or redstone. */
 public class RisingDoorBlock extends BaseEntityBlock {
 
-    public static final MapCodec<RisingDoorBlock> CODEC = simpleCodec(RisingDoorBlock::new);
-
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
 
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
@@ -72,11 +69,6 @@ public class RisingDoorBlock extends BaseEntityBlock {
             .setValue(OPEN, false)
             .setValue(POWERED, false)
             .setValue(ABOVE, false));
-    }
-
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
     }
 
     @Override

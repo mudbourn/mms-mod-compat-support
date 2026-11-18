@@ -1,8 +1,6 @@
 package info.mudbourn.mmscompat;
 
 import info.mudbourn.mmscompat.bubble.BubbleContent;
-import info.mudbourn.mmscompat.ca.CaCreativeSlotLock;
-import info.mudbourn.mmscompat.ca.LanternHolster;
 import info.mudbourn.mmscompat.carpet.CarpetPayloadRegistration;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -26,18 +24,6 @@ public class MmsModCompatSupport implements ModInitializer {
             CarpetPayloadRegistration.register();
         }
 
-        // Combat Amenities creative slot packet lock
-        if (FabricLoader.getInstance().isModLoaded("combatamenities")
-            && FabricLoader.getInstance().isModLoaded("trinkets")) {
-            CaCreativeSlotLock.register();
-        }
-
-        // Belt-slot lantern warmth and heat penalty
-        if (FabricLoader.getInstance().isModLoaded("trinkets")
-            && FabricLoader.getInstance().isModLoaded("frostiful")) {
-            LanternHolster.register();
-        }
-
         // Bubblellaneous Java port
         if (FabricLoader.getInstance().isModLoaded("mr_bubblellaneous")) {
             BubbleContent.register();
@@ -45,6 +31,6 @@ public class MmsModCompatSupport implements ModInitializer {
 
         // Xaero's World Map chunk sync (server-side packet handler)
 
-        LOG.info("MMS Mod Compat Support loaded — creative-tab dedup, REI null-filter fix, AR item-drop suppression, creative embargo, Xaero chunk sync.");
+        LOG.info("MMS Mod Compat Support loaded - creative-tab dedup, REI null-filter fix, creative embargo, Xaero chunk sync.");
     }
 }
