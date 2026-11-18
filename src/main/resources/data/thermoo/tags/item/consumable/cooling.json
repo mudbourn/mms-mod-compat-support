@@ -1,0 +1,41 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "farmersdelight:melon_popsicle",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:melon_juice",
+      "required": false
+    },
+    {
+      "id": "moredelight:chocolate_popsicle",
+      "required": false
+    },
+    {
+      "id": "accdelight:peppermint_parfait",
+      "required": false
+    },
+    {
+      "id": "alexscaves:vanilla_ice_cream",
+      "required": false
+    },
+    {
+      "id": "alexscaves:chocolate_ice_cream",
+      "required": false
+    },
+    {
+      "id": "alexscaves:sweetberry_ice_cream",
+      "required": false
+    },
+    {
+      "id": "alexscaves:sundae",
+      "required": false
+    },
+    {
+      "id": "alexscaves:frostmint",
+      "required": false
+    }
+  ]
+}

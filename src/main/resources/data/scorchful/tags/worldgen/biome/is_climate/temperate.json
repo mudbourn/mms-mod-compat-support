@@ -1,0 +1,61 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "aerialhell:aerial_hell_plains",
+      "required": false
+    },
+    {
+      "id": "aerialhell:aerial_tree_forest",
+      "required": false
+    },
+    {
+      "id": "aerialhell:copper_pine_forest",
+      "required": false
+    },
+    {
+      "id": "aerialhell:copper_pine_highland_forest",
+      "required": false
+    },
+    {
+      "id": "aerialhell:cortinarius_violaceus_forest",
+      "required": false
+    },
+    {
+      "id": "aerialhell:crystal_forest",
+      "required": false
+    },
+    {
+      "id": "aerialhell:crystal_plains",
+      "required": false
+    },
+    {
+      "id": "aerialhell:giant_red_mushroom_forest",
+      "required": false
+    },
+    {
+      "id": "aerialhell:lapis_robinia_savana",
+      "required": false
+    },
+    {
+      "id": "aerialhell:shadow_forest",
+      "required": false
+    },
+    {
+      "id": "aerialhell:shadow_plain",
+      "required": false
+    },
+    {
+      "id": "aerialhell:slippery_sand_ocean",
+      "required": false
+    },
+    {
+      "id": "aerialhell:stellar_jungle",
+      "required": false
+    },
+    {
+      "id": "aerialhell:verdigris_agaric_forest",
+      "required": false
+    }
+  ]
+}

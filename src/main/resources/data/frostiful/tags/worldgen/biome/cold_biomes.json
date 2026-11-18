@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "biomeswevegone:frosted_taiga",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:frosted_coniferous_forest",
+      "required": false
+    }
+  ]
+}

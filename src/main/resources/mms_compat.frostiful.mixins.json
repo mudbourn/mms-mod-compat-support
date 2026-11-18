@@ -1,0 +1,17 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.frostiful",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "info.mudbourn.mmscompat.mixin.frostiful.FrostifulMixinGate",
+  "mixins": [
+    "IceSkateVanityMixin",
+    "HolsterLightWarmthMixin"
+  ],
+  "client": [
+    "IceSkateFeatureRendererMixin",
+    "HolsterBurnBarMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

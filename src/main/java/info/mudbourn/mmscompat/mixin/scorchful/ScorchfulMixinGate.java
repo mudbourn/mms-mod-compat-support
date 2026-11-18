@@ -1,4 +1,4 @@
-package info.mudbourn.mmscompat.mixin.lazyai;
+package info.mudbourn.mmscompat.mixin.scorchful;
 
 import net.fabricmc.loader.api.FabricLoader;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -6,12 +6,10 @@ import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Applies the Lazy AI mixins only when Lazy AI is loaded.
- */
-public class LazyAiMixinGate implements IMixinConfigPlugin {
+// Gates the Scorchful mixins on the mod being loaded
+public class ScorchfulMixinGate implements IMixinConfigPlugin {
 
-    private final boolean present = FabricLoader.getInstance().isModLoaded("lazy_ai_pixelindiedev");
+    private final boolean present = FabricLoader.getInstance().isModLoaded("scorchful");
 
     @Override public void onLoad(String mixinPackage) {}
     @Override public String getRefMapperConfig() { return null; }

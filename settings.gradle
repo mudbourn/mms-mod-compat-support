@@ -17,5 +17,4 @@ pluginManagement {
 def siblingRoot = providers.gradleProperty('mmsSiblingRoot').getOrElse('..')
 includeBuild "$siblingRoot/mms-render-common"
 includeBuild "$siblingRoot/mms-vanity"
-includeBuild "$siblingRoot/mms-animation"
 includeBuild "$siblingRoot/mms-weapons"
