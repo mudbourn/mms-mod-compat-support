@@ -12,7 +12,8 @@
     "PackMetadataPlaceholderMixin",
     "LoadFunctionMuteMixin",
     "InfinityAnyArrowMixin",
-    "InfinityMultishotMixin"
+    "InfinityMultishotMixin",
+    "DirtyAttributeSnapshotMixin"
   ],
   "client": [
     "ChatEmojiMixin",

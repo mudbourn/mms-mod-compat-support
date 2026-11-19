@@ -43,7 +43,10 @@
     "mms_compat.crawlondemand.mixins.json",
     "mms_compat.rwa.mixins.json",
     "mms_compat.immersivestorms.mixins.json",
-    "mms_compat.cosmeticarmor.mixins.json"
+    "mms_compat.cosmeticarmor.mixins.json",
+    "mms_compat.ixeris.mixins.json",
+    "mms_compat.combatamenities.mixins.json",
+    "mms_compat.spellengine.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.20.1",

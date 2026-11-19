@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.ixeris",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "info.mudbourn.mmscompat.mixin.ixeris.IxerisMixinGate",
+  "client": [
+    "SkippedFrameUnlockMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

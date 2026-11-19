@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.combatamenities",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "info.mudbourn.mmscompat.mixin.combatamenities.CombatAmenitiesMixinGate",
+  "mixins": [
+    "ExtraSlotGroupMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

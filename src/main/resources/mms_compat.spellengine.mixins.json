@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.spellengine",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "info.mudbourn.mmscompat.mixin.spellengine.SpellEngineMixinGate",
+  "client": [
+    "SpellHotbarToggleMixin",
+    "SpellHotbarMainHandUseMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

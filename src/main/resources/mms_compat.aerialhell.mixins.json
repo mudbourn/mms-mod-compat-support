@@ -5,7 +5,9 @@
   "plugin": "info.mudbourn.mmscompat.mixin.aerialhell.AerialHellMixinGate",
   "client": [
     "CortinariusCowShroomLayerMixin",
-    "HellSpiderSpikesLayerMixin"
+    "HellSpiderSpikesLayerMixin",
+    "PoseStackDepthAccessor",
+    "ResonatorHandPoseMixin"
   ],
   "injectors": {
     "defaultRequire": 1
