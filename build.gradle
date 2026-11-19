@@ -48,6 +48,9 @@ dependencies {
     compileOnly files("libs/26.3/mob-ai-tweaks-1.11.3-1.21.11.jar")
     compileOnly files("libs/26.3/scorchful-0.18.3+26.1.x.jar")
     compileOnly files("libs/26.3/thermoo-fabric-10.1.5.jar")
+    compileOnly files("libs/26.3/ranged_weapon_api-fabric-4.0.0+26.3.jar")
+    compileOnly files("libs/26.3/immersive-storms-2.0.0+26.1.x-beta.1.jar")
+    compileOnly files("libs/26.3/trinkets-4.2.1+26.3.jar")
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"

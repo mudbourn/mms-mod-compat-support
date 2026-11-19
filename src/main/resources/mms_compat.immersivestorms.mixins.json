@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.immersivestorms",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "info.mudbourn.mmscompat.mixin.immersivestorms.ImmersiveStormsMixinGate",
+  "client": [
+    "BlackRainParticleMixin",
+    "BlackRainWeatherRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

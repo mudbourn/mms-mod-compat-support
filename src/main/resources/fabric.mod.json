@@ -40,7 +40,10 @@
     "mms_compat.frostiful.mixins.json",
     "mms_compat.scorchful.mixins.json",
     "mms_compat.cosycritters.mixins.json",
-    "mms_compat.crawlondemand.mixins.json"
+    "mms_compat.crawlondemand.mixins.json",
+    "mms_compat.rwa.mixins.json",
+    "mms_compat.immersivestorms.mixins.json",
+    "mms_compat.cosmeticarmor.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.20.1",
