@@ -1,0 +1,104 @@
+{
+  "elements": [
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/common/features_liv4/zombie_spawner",
+        "processors": "ddd:aging_deepslate_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/common/features_liv4/skeleton_spawner",
+        "processors": "ddd:aging_deepslate_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/common/features_liv4/spider_spawner",
+        "processors": "ddd:cobweb_50",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/common/features_liv4/golden_zombie_spawner",
+        "processors": "ddd:aging_deepslate_bricks",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/common/features_liv4/iron_zombie_spawner",
+        "processors": "ddd:aging_deepslate_bricks",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/common/features_liv4/diamond_zombie_spawner",
+        "processors": "ddd:aging_deepslate_bricks",
+        "projection": "rigid"
+      },
+      "weight": 4
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/common/features_liv3/golden_skeleton_spawner",
+        "processors": "ddd:aging_deepslate_bricks",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/common/features_liv4/iron_skeleton_spawner",
+        "processors": "ddd:aging_deepslate_bricks",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/common/features_liv4/diamond_skeleton_spawner",
+        "processors": "ddd:aging_deepslate_bricks",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/common/features_liv4/cave_spider_spawner",
+        "processors": "ddd:cobweb_50",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/common/features_liv4/metals_blocks",
+        "processors": "ddd:metals_random2",
+        "projection": "rigid"
+      },
+      "weight": 8
+    }
+  ],
+  "fallback": "minecraft:empty"
+}

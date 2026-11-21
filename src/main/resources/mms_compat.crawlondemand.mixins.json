@@ -5,6 +5,7 @@
   "plugin": "info.mudbourn.mmscompat.mixin.crawlondemand.CrawlOnDemandMixinGate",
   "mixins": [
     "CrawlJumpBlockMixin",
+    "CrawlShallowWaterMixin",
     "CrawlStepUpMixin"
   ],
   "client": [

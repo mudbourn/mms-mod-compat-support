@@ -15,5 +15,6 @@ public final class BubbleClient {
         SurveillanceCameraRenderer.registerModel();
         BlockEntityRenderers.register(BubbleContent.CAMERA_ENTITY, context -> new SurveillanceCameraRenderer());
         BlockEntityRenderers.register(BubbleContent.RISING_DOOR_ENTITY, context -> new RisingDoorRenderer());
+        BlockEntityRenderers.register(BubbleContent.ROTATED_ENTITY, context -> new RotatedBlockRenderer());
     }
 }

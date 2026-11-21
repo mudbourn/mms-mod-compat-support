@@ -4,7 +4,9 @@
   "compatibilityLevel": "JAVA_25",
   "plugin": "info.mudbourn.mmscompat.mixin.combatamenities.CombatAmenitiesMixinGate",
   "mixins": [
-    "ExtraSlotGroupMixin"
+    "ExtraSlotGroupMixin",
+    "PerfectBlockCooldownMixin",
+    "TrinketsAnchorOrderMixin"
   ],
   "injectors": {
     "defaultRequire": 1

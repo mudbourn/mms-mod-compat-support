@@ -12,10 +12,13 @@ import java.util.Set;
 public class CombatAmenitiesMixinGate implements IMixinConfigPlugin {
 
     private final boolean present = FabricLoader.getInstance().isModLoaded("combatamenities");
+    private final boolean trinkets = FabricLoader.getInstance().isModLoaded("trinkets") || FabricLoader.getInstance().isModLoaded("trinkets_updated");
 
     @Override public void onLoad(String mixinPackage) {}
     @Override public String getRefMapperConfig() { return null; }
-    @Override public boolean shouldApplyMixin(String targetClassName, String mixinClassName) { return present; }
+    @Override public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        return present && (trinkets || !mixinClassName.endsWith("TrinketsAnchorOrderMixin"));
+    }
     @Override public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {}
     @Override public List<String> getMixins() { return List.of(); }
     @Override public void preApply(String targetClassName, org.objectweb.asm.tree.ClassNode targetClass, String mixinClassName, org.spongepowered.asm.mixin.extensibility.IMixinInfo mixinInfo) {}

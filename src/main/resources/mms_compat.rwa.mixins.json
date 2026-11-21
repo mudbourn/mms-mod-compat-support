@@ -3,6 +3,10 @@
   "package": "info.mudbourn.mmscompat.mixin.rwa",
   "compatibilityLevel": "JAVA_25",
   "plugin": "info.mudbourn.mmscompat.mixin.rwa.RwaMixinGate",
+  "mixins": [
+    "ArrowBaseDamageAccessor",
+    "MobArrowDamageFloorMixin"
+  ],
   "client": [
     "CrossbowHoldPoseMixin"
   ],

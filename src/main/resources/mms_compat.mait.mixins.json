@@ -7,6 +7,9 @@
     "MaitEnchantItemsMixin",
     "MaitIllusionerEmptyBowGuardMixin"
   ],
+  "client": [
+    "ParryWindowGlowMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

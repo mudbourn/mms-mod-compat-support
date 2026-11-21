@@ -1,0 +1,347 @@
+{
+  "elements": [
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_1",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_2",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_3",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_4",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_5",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_6",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_7",
+        "processors": "ddd:frosting_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_8",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_9",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_10",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_11",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_12",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_13",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_14",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_15",
+        "processors": "ddd:frosting_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_16",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_17",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_18",
+        "processors": "ddd:frosting_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_19",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_cross_1",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_cross_2",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_stairs_1",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_stairs_2",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_stairs_3",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_stairs_4",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_stairs_5",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_big_cross",
+        "processors": "ddd:frosting_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_fallen_hall",
+        "processors": "ddd:frosting_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_floded_hall",
+        "processors": "ddd:frosting_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_obstructed_hall",
+        "processors": "ddd:frosting_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_l_hall",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_big_1",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_big_2",
+        "processors": "ddd:frosting_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_big_3",
+        "processors": "ddd:frosting_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls/dungeon_hall_frozen_death_stairs",
+        "processors": "ddd:frosting_stairs",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_bridge",
+        "processors": "ddd:frosting_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_fall",
+        "processors": "ddd:frosting_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/halls_liv2/dungeon_hall_frozen_atrium",
+        "processors": "ddd:frosting_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 3
+    }
+  ],
+  "fallback": "ddd:dungeon/frozen/terminals_liv2/halls"
+}

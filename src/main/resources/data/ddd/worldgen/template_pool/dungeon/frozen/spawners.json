@@ -1,0 +1,77 @@
+{
+  "elements": [
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/spawner/zombie_spawner",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/spawner/skeleton_spawner",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/spawner/leather_zombie_spawner",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/spawner/leather_skeleton_spawner",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/spawner/spider_spawner",
+        "processors": "ddd:cobweb_50",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/spawner/cave_spider_spawner",
+        "processors": "ddd:cobweb_50",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/spawner/baby_zombie_spawner",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/frozen/spawner/breeze",
+        "processors": "ddd:frosting_stone_bricks",
+        "projection": "rigid"
+      },
+      "weight": 3
+    }
+  ],
+  "fallback": "minecraft:empty"
+}

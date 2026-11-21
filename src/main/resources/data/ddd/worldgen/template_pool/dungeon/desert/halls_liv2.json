@@ -1,0 +1,356 @@
+{
+  "elements": [
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_1",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_2",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_3",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_4",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_5",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_6",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_7",
+        "processors": "ddd:sandstone_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_8",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_9",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_10",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_11",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_12",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_13",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_14",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_15",
+        "processors": "ddd:sandstone_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_16",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_17",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_18",
+        "processors": "ddd:sandstone_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_19",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_14",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_cross_1",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_cross_2",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_stairs_1",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_stairs_2",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_stairs_3",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_stairs_4",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_stairs_5",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_big_cross",
+        "processors": "ddd:sandstone_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_desert_fallen_hall",
+        "processors": "ddd:sandstone_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_desert_floded_hall",
+        "processors": "ddd:sandstone_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_obstructed_hall",
+        "processors": "ddd:sandstone_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_l_hall",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_big_1",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_big_2",
+        "processors": "ddd:sandstone_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_big_3",
+        "processors": "ddd:sandstone_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls/dungeon_hall_desert_death_stairs",
+        "processors": "ddd:cracked_deepslate_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_bridge",
+        "processors": "ddd:sandstone_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_fall",
+        "processors": "ddd:sandstone_demolition_70",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/halls_liv2/dungeon_hall_desert_atrium",
+        "processors": "ddd:sandstone_demolition_20",
+        "projection": "rigid"
+      },
+      "weight": 3
+    }
+  ],
+  "fallback": "ddd:dungeon/desert/terminals_liv2/halls"
+}

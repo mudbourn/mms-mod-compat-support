@@ -1,0 +1,59 @@
+{
+  "elements": [
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/small_spawner_liv2/zombie_spawner_small",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/small_spawner_liv2/skeleton_spawner_small",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/small_spawner_liv2/golden_zombie_spawner_small",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/small_spawner_liv2/golden_skeleton_spawner_small",
+        "processors": "ddd:sandstone_texture",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/small_spawner_liv2/spider_spawner_small",
+        "processors": "ddd:cobweb_50",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "ddd:dungeon/desert/small_spawner_liv2/cave_spider_spawner_small",
+        "processors": "ddd:cobweb_50",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ],
+  "fallback": "minecraft:empty"
+}

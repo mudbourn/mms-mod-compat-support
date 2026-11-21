@@ -67,6 +67,14 @@ public class CreativeEmbargo {
         Identifier.parse("weaponsexpanded:golden_hammer"),
         Identifier.parse("weaponsexpanded:diamond_hammer"),
         Identifier.parse("weaponsexpanded:netherite_hammer"),
+        // weaponsexpanded glaives (7)
+        Identifier.parse("weaponsexpanded:wooden_glaive"),
+        Identifier.parse("weaponsexpanded:stone_glaive"),
+        Identifier.parse("weaponsexpanded:copper_glaive"),
+        Identifier.parse("weaponsexpanded:iron_glaive"),
+        Identifier.parse("weaponsexpanded:golden_glaive"),
+        Identifier.parse("weaponsexpanded:diamond_glaive"),
+        Identifier.parse("weaponsexpanded:netherite_glaive"),
         // weaponsexpanded longbow (1)
         Identifier.parse("weaponsexpanded:longbow")
     );

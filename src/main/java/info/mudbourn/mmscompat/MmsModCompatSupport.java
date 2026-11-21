@@ -31,6 +31,11 @@ public class MmsModCompatSupport implements ModInitializer {
             LanternHolster.register();
         }
 
+        // Perfect blocks skip Combat Amenities' shield cooldown
+        if (FabricLoader.getInstance().isModLoaded("combatamenities")) {
+            info.mudbourn.mmscompat.ca.PerfectBlockCooldown.register();
+        }
+
         // Bubblellaneous Java port
         if (FabricLoader.getInstance().isModLoaded("mr_bubblellaneous")) {
             BubbleContent.register();

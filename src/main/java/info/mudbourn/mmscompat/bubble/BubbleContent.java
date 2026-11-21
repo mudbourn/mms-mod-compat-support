@@ -104,6 +104,12 @@ public final class BubbleContent {
         FabricBlockEntityTypeBuilder.create(SurveillanceCameraBlockEntity::new, SURVEILLANCE_CAMERA).build()
     );
 
+    public static final BlockEntityType<RotatedBlockEntity> ROTATED_ENTITY = Registry.register(
+        BuiltInRegistries.BLOCK_ENTITY_TYPE,
+        id("rotated"),
+        FabricBlockEntityTypeBuilder.create(RotatedBlockEntity::new, CLIPBOARD, COMPUTER).build()
+    );
+
     public static final BlockEntityType<RisingDoorBlockEntity> RISING_DOOR_ENTITY = Registry.register(
         BuiltInRegistries.BLOCK_ENTITY_TYPE,
         id("iron_rising_door"),
@@ -137,7 +143,10 @@ public final class BubbleContent {
     public static void register() {
         CameraView.register();
         BubbleMigration.register();
-        ServerChunkEvents.CHUNK_LOAD.register((level, chunk, newChunk) -> RisingDoorBlock.backfill(chunk));
+        ServerChunkEvents.CHUNK_LOAD.register((level, chunk, newChunk) -> {
+            RisingDoorBlock.backfill(chunk);
+            RotatedBlocks.backfill(chunk);
+        });
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries ->
             REPLACED_LOOT.values().forEach(entries::accept)
         );

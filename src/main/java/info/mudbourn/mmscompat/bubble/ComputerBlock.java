@@ -1,6 +1,11 @@
 package info.mudbourn.mmscompat.bubble;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -22,7 +27,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import java.util.Map;
 
 /** Desktop computer that boots to a login screen when clicked. */
-public class ComputerBlock extends HorizontalDirectionalBlock {
+public class ComputerBlock extends HorizontalDirectionalBlock implements EntityBlock {
 
     public static final EnumProperty<ComputerState> STATE = EnumProperty.create("state", ComputerState.class);
 
@@ -79,5 +84,21 @@ public class ComputerBlock extends HorizontalDirectionalBlock {
         if (state.getValue(STATE) == ComputerState.BOOT) {
             level.setBlock(pos, state.setValue(STATE, ComputerState.LOGIN), Block.UPDATE_ALL);
         }
+    }
+
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return RotatedBlocks.create(pos, state);
+    }
+
+    @Override
+    protected RenderShape getRenderShape(BlockState state) {
+        return RenderShape.INVISIBLE;
+    }
+
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        RotatedBlocks.place(level, pos, placer);
     }
 }

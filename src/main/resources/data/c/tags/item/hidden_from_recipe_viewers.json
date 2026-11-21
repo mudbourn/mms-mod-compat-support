@@ -43,6 +43,13 @@
     "weaponsexpanded:stone_hatchet",
     "weaponsexpanded:wooden_greatsword",
     "weaponsexpanded:wooden_hammer",
-    "weaponsexpanded:wooden_hatchet"
+    "weaponsexpanded:wooden_hatchet",
+    "weaponsexpanded:wooden_glaive",
+    "weaponsexpanded:stone_glaive",
+    "weaponsexpanded:copper_glaive",
+    "weaponsexpanded:iron_glaive",
+    "weaponsexpanded:golden_glaive",
+    "weaponsexpanded:diamond_glaive",
+    "weaponsexpanded:netherite_glaive"
   ]
 }

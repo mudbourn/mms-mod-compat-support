@@ -177,6 +177,9 @@ public final class BubbleMigration {
             return;
         }
         level.setBlock(pos, state, Block.UPDATE_ALL);
+        if (level.getBlockEntity(pos) instanceof RotatedBlockEntity rotated) {
+            rotated.setYaw(display.getYRot());
+        }
         if (level.getBlockEntity(pos) instanceof SecurityMonitorBlockEntity monitor) {
             monitor.setLink(readLink(path(data, "block_properties")));
         }

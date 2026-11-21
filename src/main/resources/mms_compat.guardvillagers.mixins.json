@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.guardvillagers",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "info.mudbourn.mmscompat.mixin.guardvillagers.GuardVillagersMixinGate",
+  "mixins": [
+    "GuardSpawnDeferMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
