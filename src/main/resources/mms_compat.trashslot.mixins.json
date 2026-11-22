@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.trashslot",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "info.mudbourn.mmscompat.mixin.trashslot.TrashSlotMixinGate",
+  "client": [
+    "ShiftBackspaceTrashMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -8,11 +8,11 @@ import net.minecraft.resources.Identifier;
 
 /**
  * The spell hotbar toggle. Each press of the key (Left Alt by default) switches number keys
- * 1-9 between casting spells and switching hotbar slots. It starts off, on slots.
+ * 1-9 between casting spells and switching hotbar slots. It starts on, casting spells.
  */
 public final class SpellHotbarToggle {
     private static KeyMapping key;
-    private static boolean on;
+    private static boolean on = true;
 
     private SpellHotbarToggle() {}
 

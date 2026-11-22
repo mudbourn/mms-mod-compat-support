@@ -25,11 +25,12 @@ import java.util.Map;
 public final class PerfectBlockCooldown {
 
     private static final Identifier PERFECT_PARRY = Identifier.fromNamespaceAndPath("mob-ai-tweaks", "perfect_parry");
+    private static final Identifier SHIELD_STATS = Identifier.fromNamespaceAndPath("mms_weapons", "shield_knockback");
     private static final int MAIT_TICKS_PER_LEVEL = 10;
-    private static final int CA_PARRY_FALLBACK = 5;
+    private static final int CA_PARRY_FALLBACK = 7;
     // A weapon that blocks gets a weaker version: a shorter perfect window, and a perfect
     // block only cuts its cooldown to this many ticks instead of lifting it.
-    private static final int WEAPON_WINDOW_TICKS = 2;
+    private static final int WEAPON_WINDOW_TICKS = 3;
     private static final float WEAPON_WINDOW_SHARE = 0.5F;
     private static final int WEAPON_COOLDOWN_TICKS = 10;
 
@@ -66,6 +67,10 @@ public final class PerfectBlockCooldown {
         }
         if (inPerfectWindow(player, shield)) {
             PENDING.put(player, new Pending(player.getCooldowns().getCooldownGroup(shield), isBlockingWeapon(shield)));
+            // A melee attacker that is perfect parried is staggered and cannot attack for a moment.
+            if (source.getEntity() instanceof LivingEntity attacker && source.getDirectEntity() == attacker && attacker != player) {
+                ParryStagger.stagger(attacker);
+            }
         }
     }
 
@@ -92,6 +97,10 @@ public final class PerfectBlockCooldown {
             return false;
         }
         ItemAttributeModifiers modifiers = stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+        // mms-weapons gives shields attack damage too, tagged with its shield knockback modifier.
+        if (modifiers.modifiers().stream().anyMatch(entry -> entry.modifier().id().equals(SHIELD_STATS))) {
+            return false;
+        }
         return modifiers.modifiers().stream().anyMatch(entry -> entry.attribute().equals(Attributes.ATTACK_DAMAGE));
     }
 

@@ -37,6 +37,10 @@ public class MmsModCompatSupport implements ModInitializer {
         }
 
         // Bubblellaneous Java port
+        if (FabricLoader.getInstance().isModLoaded("aerialhell")) {
+            info.mudbourn.mmscompat.aerialhell.AerialHellMobStats.register();
+        }
+
         if (FabricLoader.getInstance().isModLoaded("mr_bubblellaneous")) {
             BubbleContent.register();
         }

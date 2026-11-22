@@ -5,8 +5,14 @@
   "plugin": "info.mudbourn.mmscompat.mixin.combatamenities.CombatAmenitiesMixinGate",
   "mixins": [
     "ExtraSlotGroupMixin",
+    "LoweredGuardCooldownMixin",
+    "ParryStaggerMixin",
     "PerfectBlockCooldownMixin",
+    "PlayerParryStaggerMixin",
     "TrinketsAnchorOrderMixin"
+  ],
+  "client": [
+    "TrinketsCreativeAnchorMixin"
   ],
   "injectors": {
     "defaultRequire": 1

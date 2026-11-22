@@ -15,12 +15,14 @@ repositories {
 }
 
 dependencies {
+    compileOnly files("libs/26.3/trashslot-fabric-26.3-26.3.0.2.jar")
     compileOnly files("libs/26.3/xaerominimap-fabric-26.3-26.6.2.jar")
     compileOnly files("libs/26.3/xaeroworldmap-fabric-26.3-1.47.2.jar")
     compileOnly files("libs/26.3/Origins-Legacy-1.12.20+26.3.jar")
     compileOnly files("libs/26.3/mutantmonsters-v26.3.1-mc26.3.x+fabric.jar")
     compileOnly files("libs/26.3/puzzleslib-v26.3.18-mc26.3.x+fabric.jar")
     compileOnly files("libs/26.3/bettercombat-fabric-3.2.2+26.3.jar")
+    compileOnly files("libs/26.3/perspective_api-1.5.0-beta+fabric-26.2.jar")
     compileOnly files("libs/26.3/emf_compat_core_fabric_26.3_2.4.0.jar")
     compileOnly files("libs/26.3/aerialhell-0.7.9_fabric26.3.jar")
     compileOnly files("libs/26.3/entity_model_features-3.3.12-26.3-fabric.jar")
