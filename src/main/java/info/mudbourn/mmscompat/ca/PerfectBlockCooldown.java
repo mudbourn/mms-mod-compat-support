@@ -29,10 +29,9 @@ public final class PerfectBlockCooldown {
     private static final int MAIT_TICKS_PER_LEVEL = 10;
     private static final int CA_PARRY_FALLBACK = 7;
     // A weapon that blocks gets a weaker version: a shorter perfect window, and a perfect
-    // block only cuts its cooldown to this many ticks instead of lifting it.
+    // block lifts its cooldown just as a shield's does.
     private static final int WEAPON_WINDOW_TICKS = 3;
     private static final float WEAPON_WINDOW_SHARE = 0.5F;
-    private static final int WEAPON_COOLDOWN_TICKS = 10;
 
     private static final Map<ServerPlayer, Pending> PENDING = new HashMap<>();
     private static int caParryTime = -1;
@@ -41,31 +40,45 @@ public final class PerfectBlockCooldown {
     }
 
     public static void register() {
+        ParryStreak.register();
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-            PENDING.forEach((player, pending) -> {
-                player.getCooldowns().removeCooldown(pending.group());
-                if (pending.weapon()) {
-                    player.getCooldowns().addCooldown(pending.group(), WEAPON_COOLDOWN_TICKS);
-                }
-            });
+            // A perfect parry lifts the cooldown for shields and blocking weapons alike; the streak keeps it off.
+            PENDING.forEach((player, pending) -> player.getCooldowns().removeCooldown(pending.group()));
             PENDING.clear();
         });
     }
 
     // Called at the head of hurtServer, before Combat Amenities handles the block.
     public static void onHurt(ServerPlayer player, DamageSource source) {
+        // Any attack that is not perfect-parried breaks the parry streak.
+        boolean attack = source.getEntity() != null && source.getEntity() != player;
         if (!player.isUsingItem()) {
+            if (attack) {
+                ParryStreak.end(player);
+            }
             return;
         }
         ItemStack shield = player.getUseItem();
         if (!shield.has(DataComponents.BLOCKS_ATTACKS) || source.is(DamageTypeTags.BYPASSES_SHIELD)) {
+            if (attack) {
+                ParryStreak.end(player);
+            }
             return;
         }
         Vec3 from = source.getSourcePosition();
         if (from == null || player.getViewVector(1.0F).dot(from.subtract(player.position()).normalize()) <= 0.0) {
+            if (attack) {
+                ParryStreak.end(player);
+            }
             return;
         }
+        if (!inPerfectWindow(player, shield)) {
+            if (attack) {
+                ParryStreak.end(player);
+            }
+        }
         if (inPerfectWindow(player, shield)) {
+            ParryStreak.extend(player);
             PENDING.put(player, new Pending(player.getCooldowns().getCooldownGroup(shield), isBlockingWeapon(shield)));
             // A melee attacker that is perfect parried is staggered and cannot attack for a moment.
             if (source.getEntity() instanceof LivingEntity attacker && source.getDirectEntity() == attacker && attacker != player) {

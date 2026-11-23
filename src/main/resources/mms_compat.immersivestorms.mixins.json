@@ -5,7 +5,8 @@
   "plugin": "info.mudbourn.mmscompat.mixin.immersivestorms.ImmersiveStormsMixinGate",
   "client": [
     "BlackRainParticleMixin",
-    "BlackRainWeatherRendererMixin"
+    "BlackRainWeatherRendererMixin",
+    "StormHidesCloudsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

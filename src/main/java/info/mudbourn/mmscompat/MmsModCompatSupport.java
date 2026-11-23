@@ -36,9 +36,15 @@ public class MmsModCompatSupport implements ModInitializer {
             info.mudbourn.mmscompat.ca.PerfectBlockCooldown.register();
         }
 
+        // A Totem of Possession worn in a trinket slot, used with the possess key
+        if (FabricLoader.getInstance().isModLoaded("alexscaves") && FabricLoader.getInstance().isModLoaded("trinkets")) {
+            info.mudbourn.mmscompat.alexscaves.WornPossession.register();
+        }
+
         // Bubblellaneous Java port
         if (FabricLoader.getInstance().isModLoaded("aerialhell")) {
             info.mudbourn.mmscompat.aerialhell.AerialHellMobStats.register();
+            info.mudbourn.mmscompat.aerialhell.TrinketTotems.register();
         }
 
         if (FabricLoader.getInstance().isModLoaded("mr_bubblellaneous")) {

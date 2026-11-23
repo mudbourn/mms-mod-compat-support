@@ -3,7 +3,11 @@
   "package": "info.mudbourn.mmscompat.mixin.scorchful",
   "compatibilityLevel": "JAVA_25",
   "plugin": "info.mudbourn.mmscompat.mixin.scorchful.ScorchfulMixinGate",
-  "mixins": ["SandPileGateMixin"],
+  "mixins": [
+    "SandPileGateMixin",
+    "PlayerBurnHeatMixin",
+    "SandstormBreezeSpawnMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

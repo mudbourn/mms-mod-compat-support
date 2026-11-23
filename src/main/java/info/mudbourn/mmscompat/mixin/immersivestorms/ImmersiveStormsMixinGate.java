@@ -15,7 +15,12 @@ public class ImmersiveStormsMixinGate implements IMixinConfigPlugin {
 
     @Override public void onLoad(String mixinPackage) {}
     @Override public String getRefMapperConfig() { return null; }
-    @Override public boolean shouldApplyMixin(String targetClassName, String mixinClassName) { return present; }
+    private final boolean betterClouds = FabricLoader.getInstance().isModLoaded("betterclouds");
+
+    @Override public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        if (mixinClassName.endsWith("StormHidesCloudsMixin")) return present && betterClouds;
+        return present;
+    }
     @Override public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {}
     @Override public List<String> getMixins() { return List.of(); }
     @Override public void preApply(String targetClassName, org.objectweb.asm.tree.ClassNode targetClass, String mixinClassName, org.spongepowered.asm.mixin.extensibility.IMixinInfo mixinInfo) {}

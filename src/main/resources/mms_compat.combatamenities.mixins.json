@@ -9,7 +9,10 @@
     "ParryStaggerMixin",
     "PerfectBlockCooldownMixin",
     "PlayerParryStaggerMixin",
-    "TrinketsAnchorOrderMixin"
+    "TrinketsAnchorOrderMixin",
+    "ServerItemCooldownsAccessor",
+    "ParryStreakCooldownMixin",
+    "ParryStreakRaiseMixin"
   ],
   "client": [
     "TrinketsCreativeAnchorMixin"

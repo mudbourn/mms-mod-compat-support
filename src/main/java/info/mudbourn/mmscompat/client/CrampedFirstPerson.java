@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.lang.reflect.Method;
 
-// Forces first person through PerspectiveAPI's override chain where third person aim breaks: tight spots, and while Axiom's editor or context menu is open, since its picks come from the eyes.
+// Forces first person through PerspectiveAPI's override chain where third person aim breaks: tight spots, riding a Useless Reptile dragon, and while Axiom's editor or context menu is open, since its picks come from the eyes.
 public final class CrampedFirstPerson {
 
     private static final String FIRST_PERSON = "perspective_api.first_person";
@@ -33,6 +33,8 @@ public final class CrampedFirstPerson {
 
     private static volatile boolean cramped;
     private static volatile boolean axiomOpen;
+    // Riding a Useless Reptile dragon: Leawind's camera fights the dragon's own steering and camera.
+    private static volatile boolean dragon;
     private static int clearTicks;
     private static boolean wasForced;
     private static float[] pending;
@@ -95,7 +97,7 @@ public final class CrampedFirstPerson {
     public static void register() {
         ClientTickEvents.END_CLIENT_TICK.register(CrampedFirstPerson::tick);
         PerspectiveAPI.runWhenReady("mms_compat", () -> PerspectiveAPI.getOverrideChain()
-                .register(OVERRIDE_PRIORITY, () -> cramped || axiomOpen ? FIRST_PERSON : null));
+                .register(OVERRIDE_PRIORITY, () -> cramped || axiomOpen || dragon ? FIRST_PERSON : null));
     }
 
     private static void tick(Minecraft client) {
@@ -103,6 +105,7 @@ public final class CrampedFirstPerson {
         if (player == null || client.level == null) {
             cramped = false;
             axiomOpen = false;
+            dragon = false;
             wasForced = false;
             return;
         }
@@ -116,7 +119,8 @@ public final class CrampedFirstPerson {
             clearTicks = tight(client, player, LEAVE_DISTANCE, null) || blockedBehind(client, player) ? 0 : clearTicks + 1;
             tight = clearTicks < LEAVE_DELAY_TICKS;
         }
-        boolean forced = tight || axiom;
+        boolean riding = info.mudbourn.mmscompat.client.sharedkeys.SharedKeys.ridingDragon();
+        boolean forced = tight || axiom || riding;
         if (forced && !wasForced && camera != null) {
             // Turn straight to the third person camera's direction.
             pending = camera;
@@ -136,6 +140,7 @@ public final class CrampedFirstPerson {
         wasForced = forced;
         cramped = tight;
         axiomOpen = axiom;
+        dragon = riding;
     }
 
     // Sets the rotation and the previous-tick rotation together, so the game has nothing to blend.

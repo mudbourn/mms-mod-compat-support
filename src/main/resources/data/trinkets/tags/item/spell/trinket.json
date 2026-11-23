@@ -1,0 +1,54 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:totem_of_undying",
+    {
+      "id": "#friendsandfoes:totems",
+      "required": false
+    },
+    {
+      "id": "aerialhell:agility_totem",
+      "required": false
+    },
+    {
+      "id": "aerialhell:cursed_totem",
+      "required": false
+    },
+    {
+      "id": "aerialhell:god_totem",
+      "required": false
+    },
+    {
+      "id": "aerialhell:head_in_the_clouds_totem",
+      "required": false
+    },
+    {
+      "id": "aerialhell:hero_totem",
+      "required": false
+    },
+    {
+      "id": "aerialhell:night_vision_totem",
+      "required": false
+    },
+    {
+      "id": "aerialhell:regeneration_totem",
+      "required": false
+    },
+    {
+      "id": "aerialhell:shadow_totem",
+      "required": false
+    },
+    {
+      "id": "aerialhell:speed_ii_totem",
+      "required": false
+    },
+    {
+      "id": "aerialhell:speed_totem",
+      "required": false
+    },
+    {
+      "id": "alexscaves:totem_of_possession",
+      "required": false
+    }
+  ]
+}
