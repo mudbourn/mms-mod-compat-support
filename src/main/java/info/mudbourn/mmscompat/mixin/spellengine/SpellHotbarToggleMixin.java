@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 // Spell Engine casts with number keys 1-9 whenever a spell item is held, so slot
 // switching by number key stops working. In the pack the spell hotbar is live only
-// while the spell hotbar toggle (Left Alt) is on; while it is off, Spell Engine treats
+// while the spell hotbar toggle (period) is on; while it is off, Spell Engine treats
 // the hotbar as bypassed. The first isDown in handleSlotsInternal is the
 // bypass_spell_hotbar check.
 @Mixin(targets = "net.spell_engine.client.input.SpellHotbar")

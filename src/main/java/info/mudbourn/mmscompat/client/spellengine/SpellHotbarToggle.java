@@ -7,7 +7,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
 
 /**
- * The spell hotbar toggle. Each press of the key (Left Alt by default) switches number keys
+ * The spell hotbar toggle. Each press of the key (period by default; Left Alt was too easy to hit while alt-tabbing) switches number keys
  * 1-9 between casting spells and switching hotbar slots. It starts on, casting spells.
  */
 public final class SpellHotbarToggle {
@@ -23,7 +23,7 @@ public final class SpellHotbarToggle {
     public static void register() {
         key = KeyMappingHelper.registerKeyMapping(new KeyMapping(
             "key.mms_compat.spell_hotbar_toggle",
-            InputConstants.KEY_LALT,
+            InputConstants.KEY_PERIOD,
             mmsCategory()));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (key.consumeClick()) {

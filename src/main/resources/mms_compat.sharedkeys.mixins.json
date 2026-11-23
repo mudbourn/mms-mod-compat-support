@@ -1,0 +1,16 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.sharedkeys",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "DragonDismountMixin"
+  ],
+  "client": [
+    "ApoliSharedKeysMixin",
+    "UselessReptileSharedKeysMixin",
+    "AlexsCavesSharedKeysMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

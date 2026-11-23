@@ -49,6 +49,7 @@
     "mms_compat.ixeris.mixins.json",
     "mms_compat.combatamenities.mixins.json",
     "mms_compat.spellengine.mixins.json",
+    "mms_compat.sharedkeys.mixins.json",
     "mms_compat.trashslot.mixins.json"
   ],
   "depends": {
