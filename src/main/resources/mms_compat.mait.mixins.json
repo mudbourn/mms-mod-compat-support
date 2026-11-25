@@ -8,7 +8,11 @@
     "MaitIllusionerEmptyBowGuardMixin"
   ],
   "client": [
-    "ParryWindowGlowMixin"
+    "ParryWindowGlowMixin",
+    "HumanoidArmorLayerAccessor",
+    "HumanoidArmorLayerMixin",
+    "LivingEntityRendererAccessor",
+    "AbstractSkeletonRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

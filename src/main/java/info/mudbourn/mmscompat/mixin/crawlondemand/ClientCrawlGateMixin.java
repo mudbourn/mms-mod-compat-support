@@ -1,17 +1,18 @@
 package info.mudbourn.mmscompat.mixin.crawlondemand;
 
-import net.minecraft.world.entity.Pose;
+import me.thecraftycoder.minecraft.crawlondemand.platform.CrawlStateManager;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-// Lets a crawl start only from a settled stance: on the ground, still, not crouching, not riding.
+// Lets a crawl start on the ground at up to walking pace, or in water or lava at any speed; stopping is never gated.
 @Mixin(targets = "me.thecraftycoder.minecraft.crawlondemand.client.ClientCrawlHandler")
 public abstract class ClientCrawlGateMixin {
 
-    private static final double STILL_SPEED_SQR = 1.0E-3;
+    // Walking pace squared, in blocks per tick; anything up to a walk may drop into a crawl.
+    private static final double WALK_SPEED_SQR = 0.06;
 
     @Inject(method = "crawl", at = @At("HEAD"), cancellable = true, remap = false)
     private static void mmsCompat$gateHoldCrawl(Player player, int action, CallbackInfo ci) {
@@ -22,16 +23,21 @@ public abstract class ClientCrawlGateMixin {
 
     @Inject(method = "toggleCrawl", at = @At("HEAD"), cancellable = true, remap = false)
     private static void mmsCompat$gateToggleCrawl(Player player, CallbackInfo ci) {
-        if (player.getPose() != Pose.SWIMMING && !mmsCompat$canStartCrawl(player)) {
+        if (player != null && !CrawlStateManager.isCrawling(player) && !mmsCompat$canStartCrawl(player)) {
             ci.cancel();
         }
     }
 
     private static boolean mmsCompat$canStartCrawl(Player player) {
-        return player != null
-            && player.onGround()
+        if (player == null || player.isPassenger()) {
+            return false;
+        }
+        if (player.isInWater() || player.isInLava()) {
+            return true;
+        }
+        return player.onGround()
             && !player.isShiftKeyDown()
-            && !player.isPassenger()
-            && player.getDeltaMovement().horizontalDistanceSqr() < STILL_SPEED_SQR;
+            && !player.isSprinting()
+            && player.getDeltaMovement().horizontalDistanceSqr() < WALK_SPEED_SQR;
     }
 }

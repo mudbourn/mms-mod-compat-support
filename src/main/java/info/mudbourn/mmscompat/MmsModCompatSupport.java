@@ -47,6 +47,10 @@ public class MmsModCompatSupport implements ModInitializer {
             info.mudbourn.mmscompat.aerialhell.TrinketTotems.register();
         }
 
+        if (FabricLoader.getInstance().isModLoaded("ferrite")) {
+            info.mudbourn.mmscompat.ferrite.FerriteOreOff.register();
+        }
+
         if (FabricLoader.getInstance().isModLoaded("mr_bubblellaneous")) {
             BubbleContent.register();
         }
