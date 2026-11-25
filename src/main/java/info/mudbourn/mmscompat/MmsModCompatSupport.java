@@ -15,6 +15,7 @@ public class MmsModCompatSupport implements ModInitializer {
     public void onInitialize() {
         // Creative-menu embargo strip
         CreativeEmbargo.register();
+        info.mudbourn.mmscompat.mait.BabySkeletonWeapons.register();
         info.mudbourn.mmscompat.waypoint.SharedWaypointServer.register();
 
         // PvP arrow limit

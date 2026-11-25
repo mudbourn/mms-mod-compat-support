@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.entityculling",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "info.mudbourn.mmscompat.mixin.entityculling.EntityCullingMixinGate",
+  "mixins": [],
+  "client": [
+    "TickCullingRefreshMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

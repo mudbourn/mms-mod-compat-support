@@ -5,14 +5,13 @@
   "plugin": "info.mudbourn.mmscompat.mixin.mait.MaitMixinGate",
   "mixins": [
     "MaitEnchantItemsMixin",
-    "MaitIllusionerEmptyBowGuardMixin"
+    "MaitIllusionerEmptyBowGuardMixin",
+    "MobEquipmentInvoker"
   ],
   "client": [
     "ParryWindowGlowMixin",
-    "HumanoidArmorLayerAccessor",
     "HumanoidArmorLayerMixin",
-    "LivingEntityRendererAccessor",
-    "AbstractSkeletonRendererMixin"
+    "ItemInHandLayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

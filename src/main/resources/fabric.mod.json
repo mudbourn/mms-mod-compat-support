@@ -42,6 +42,7 @@
     "mms_compat.scorchful.mixins.json",
     "mms_compat.cosycritters.mixins.json",
     "mms_compat.crawlondemand.mixins.json",
+    "mms_compat.entityculling.mixins.json",
     "mms_compat.thirdperson.mixins.json",
     "mms_compat.rwa.mixins.json",
     "mms_compat.immersivestorms.mixins.json",

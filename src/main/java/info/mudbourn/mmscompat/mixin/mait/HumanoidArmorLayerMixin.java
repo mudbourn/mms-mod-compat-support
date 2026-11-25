@@ -10,7 +10,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(HumanoidArmorLayer.class)
 public abstract class HumanoidArmorLayerMixin {
 
-    // Skeleton armor keeps the standard textures, since its baby model is not the zombie baby body.
+    // Mob AI Tweaks' baby skeletons are the adult skeleton model drawn at half size, so their armor is the adult
+    // armor (the layer's default baby set) with the standard textures, not the baby textures made for the zombie baby body.
     @Redirect(
         method = "renderArmorPiece",
         at = @At(

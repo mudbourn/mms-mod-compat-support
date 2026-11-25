@@ -35,7 +35,6 @@ public class MmsModCompatSupportClient implements ClientModInitializer {
         }
         if (FabricLoader.getInstance().isModLoaded("mob-ai-tweaks")) {
             info.mudbourn.mmscompat.client.mait.ParryWindowGlow.register();
-            info.mudbourn.mmscompat.client.mait.BabySkeletonArmor.register();
         }
         if (FabricLoader.getInstance().isModLoaded("spell_engine")) {
             info.mudbourn.mmscompat.client.spellengine.SpellHotbarToggle.register();
