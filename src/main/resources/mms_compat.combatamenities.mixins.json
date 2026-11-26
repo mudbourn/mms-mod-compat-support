@@ -12,7 +12,10 @@
     "TrinketsAnchorOrderMixin",
     "ServerItemCooldownsAccessor",
     "ParryStreakCooldownMixin",
-    "ParryStreakRaiseMixin"
+    "ParryStreakRaiseMixin",
+    "UnparryableMarkMixin",
+    "UnparryableClearMixin",
+    "UnparryableUseItemMixin"
   ],
   "client": [
     "TrinketsCreativeAnchorMixin"

@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.panorama",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "info.mudbourn.mmscompat.mixin.panorama.PanoramaMixinGate",
+  "client": [
+    "PanoramaFirstPersonMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
