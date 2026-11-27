@@ -1,41 +1,47 @@
 package info.mudbourn.mmscompat.client;
 
+import info.mudbourn.mmscompat.client.sharedkeys.SharedKeys;
 import io.github.leawind.perspectiveapi.api.PerspectiveAPI;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.block.DoorBlock;
-import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.lang.reflect.Method;
 
-// Forces first person through PerspectiveAPI's override chain where third person aim breaks: tight spots, riding a Useless Reptile dragon, and while Axiom's editor or context menu is open, since its picks come from the eyes.
+// Forces first person when there is no room behind the player, riding a dragon, or using Axiom, and swaps the camera's shoulder away from walls.
 public final class CrampedFirstPerson {
 
     private static final String FIRST_PERSON = "perspective_api.first_person";
     private static final String THIRD_PERSON = "leawind_third_person.third_person";
     private static final int OVERRIDE_PRIORITY = 1000;
-    private static final double ENTER_DISTANCE = 1.0;
-    private static final double LEAVE_DISTANCE = 1.5;
-    private static final int LEAVE_DELAY_TICKS = 10;
-    private static final float LOOK_DOWN_PITCH = 45.0F;
-    private static final double LOOK_DOWN_EXTRA = 1.5;
-    // Third person camera pushed this close to the eyes by terrain behind you.
-    private static final double CAMERA_SQUEEZE = 1.2;
-    // To leave, the space behind you along the view must be clear this far.
-    private static final double CAMERA_CLEAR = 2.0;
+    private static final double PLAYER_RADIUS = 0.5;
+    private static final double FLOOR_MARGIN = 0.05;
+    private static final double CAMERA_DISTANCE = 4.0;
+    private static final double ENTER_ROOM = 1.0;
+    private static final double LEAVE_ROOM = 2.0;
+    private static final int ENTER_TICKS = 5;
+    private static final int LEAVE_TICKS = 20;
+    private static final double MARCH_STEP = 0.1;
+    private static final double SHOULDER_WIDTH = 1.0;
+    private static final double SWAP_ROOM = 1.5;
+    private static final double SWAP_MARGIN = 1.0;
+    private static final int SWAP_COOLDOWN_TICKS = 40;
 
     private static volatile boolean cramped;
     private static volatile boolean axiomOpen;
-    // Riding a Useless Reptile dragon: Leawind's camera fights the dragon's own steering and camera.
     private static volatile boolean dragon;
-    private static int clearTicks;
+    private static int squeezeTicks;
+    private static int roomyTicks;
+    private static int swapCooldown;
     private static boolean wasForced;
     private static float[] pending;
 
@@ -59,7 +65,6 @@ public final class CrampedFirstPerson {
             instance = manager.getMethod("getInstance");
             menu = manager.getMethod("isActive");
         } catch (ReflectiveOperationException | LinkageError ignored) {
-            // Axiom isn't installed.
         }
         AXIOM_EDITOR_ACTIVE = editor;
         AXIOM_MENU_INSTANCE = instance;
@@ -109,28 +114,26 @@ public final class CrampedFirstPerson {
             wasForced = false;
             return;
         }
-        float[] camera = !wasForced && PerspectiveAPI.isCurrent(THIRD_PERSON) ? cameraRotation() : null;
+        boolean thirdPerson = !wasForced && PerspectiveAPI.isCurrent(THIRD_PERSON);
+        float[] camera = thirdPerson ? cameraRotation() : null;
+        Vec3 eye = player.getEyePosition();
+        Vec3 view = player.getViewVector(1.0F);
+        boolean hugging = nearWall(client.level, player, eye, PLAYER_RADIUS);
+        double behind = room(client.level, player, eye, view.scale(-CAMERA_DISTANCE));
+        squeezeTicks = hugging || behind < ENTER_ROOM ? squeezeTicks + 1 : 0;
+        roomyTicks = !hugging && behind >= LEAVE_ROOM ? roomyTicks + 1 : 0;
+        boolean tight = cramped ? roomyTicks < LEAVE_TICKS : squeezeTicks >= ENTER_TICKS;
         boolean axiom = axiomOpen();
-        boolean tight;
-        if (!cramped) {
-            tight = tight(client, player, ENTER_DISTANCE, camera) || (camera != null && squeezed(client, player, camera));
-            if (tight) clearTicks = 0;
-        } else {
-            clearTicks = tight(client, player, LEAVE_DISTANCE, null) || blockedBehind(client, player) ? 0 : clearTicks + 1;
-            tight = clearTicks < LEAVE_DELAY_TICKS;
-        }
-        boolean riding = info.mudbourn.mmscompat.client.sharedkeys.SharedKeys.ridingDragon();
+        boolean riding = SharedKeys.ridingDragon();
         boolean forced = tight || axiom || riding;
+        if (thirdPerson && !forced) swapShoulder(client, player, eye, view);
         if (forced && !wasForced && camera != null) {
-            // Turn straight to the third person camera's direction.
             pending = camera;
             face(player, camera);
         } else if (forced && pending != null) {
-            // Leawind can still turn the body on the switch frame, so set it once more.
             face(player, pending);
             pending = null;
         } else if (!forced && wasForced && look != null) {
-            // Third person picks up from where you looked in first person.
             try {
                 lookInitialize.invoke(look, player.getXRot(), player.getYRot());
             } catch (ReflectiveOperationException ignored) {
@@ -141,6 +144,85 @@ public final class CrampedFirstPerson {
         cramped = tight;
         axiomOpen = axiom;
         dragon = riding;
+    }
+
+    // Moves the camera to the other shoulder when its side is blocked and the other side has clearly more room.
+    private static void swapShoulder(Minecraft client, LocalPlayer player, Vec3 eye, Vec3 view) {
+        if (swapCooldown > 0) {
+            swapCooldown--;
+            return;
+        }
+        Camera camera = client.gameRenderer.mainCamera();
+        if (!camera.isDetached()) return;
+        Vec3 right = new Vec3(-view.z, 0.0, view.x);
+        if (right.lengthSqr() < 1.0E-4) return;
+        right = right.normalize();
+        double side = Math.signum(camera.position().subtract(eye).dot(right));
+        if (side == 0.0) return;
+        Vec3 back = view.scale(-CAMERA_DISTANCE);
+        double current = room(client.level, player, eye, back.add(right.scale(side * SHOULDER_WIDTH)));
+        if (current >= SWAP_ROOM) return;
+        double other = room(client.level, player, eye, back.add(right.scale(-side * SHOULDER_WIDTH)));
+        if (other < current + SWAP_MARGIN) return;
+        ShoulderSwap.flip();
+        swapCooldown = SWAP_COOLDOWN_TICKS;
+    }
+
+    // How far a ray from a point travels along an offset before it meets a solid block.
+    private static double room(ClientLevel level, LocalPlayer player, Vec3 from, Vec3 offset) {
+        double length = offset.length();
+        Vec3 step = offset.scale(MARCH_STEP / length);
+        Vec3 point = from;
+        for (double travelled = MARCH_STEP; travelled < length; travelled += MARCH_STEP) {
+            point = point.add(step);
+            if (solidAt(level, player, point)) return travelled;
+        }
+        return length;
+    }
+
+    // A point inside a solid block, ignoring leaves, fluids and the floor.
+    private static boolean solidAt(ClientLevel level, LocalPlayer player, Vec3 point) {
+        BlockPos pos = BlockPos.containing(point);
+        BlockState state = level.getBlockState(pos);
+        if (state.isAir() || state.is(BlockTags.LEAVES)) return false;
+        double floor = floor(player);
+        VoxelShape shape = state.getCollisionShape(level, pos, CollisionContext.of(player));
+        for (AABB box : shape.toAabbs()) {
+            AABB placed = box.move(pos);
+            if (placed.maxY > floor && placed.contains(point)) return true;
+        }
+        return false;
+    }
+
+    // Blocks topping out at or below this height count as floor: the feet normally, the eyes while crawling.
+    private static double floor(LocalPlayer player) {
+        return player.isVisuallyCrawling() ? player.getEyeY() : player.getY() + FLOOR_MARGIN;
+    }
+
+    // A solid block within a radius of a point, ignoring leaves, fluids and the floor.
+    private static boolean nearWall(ClientLevel level, LocalPlayer player, Vec3 center, double radius) {
+        double floor = floor(player);
+        double reach = radius * radius;
+        BlockPos min = BlockPos.containing(center.subtract(radius, radius, radius));
+        BlockPos max = BlockPos.containing(center.add(radius, radius, radius));
+        for (BlockPos pos : BlockPos.betweenClosed(min, max)) {
+            BlockState state = level.getBlockState(pos);
+            if (state.isAir() || state.is(BlockTags.LEAVES)) continue;
+            VoxelShape shape = state.getCollisionShape(level, pos, CollisionContext.of(player));
+            for (AABB box : shape.toAabbs()) {
+                AABB placed = box.move(pos);
+                if (placed.maxY <= floor) continue;
+                if (distanceSq(placed, center) <= reach) return true;
+            }
+        }
+        return false;
+    }
+
+    private static double distanceSq(AABB box, Vec3 point) {
+        double dx = Math.max(Math.max(box.minX - point.x, 0.0), point.x - box.maxX);
+        double dy = Math.max(Math.max(box.minY - point.y, 0.0), point.y - box.maxY);
+        double dz = Math.max(Math.max(box.minZ - point.z, 0.0), point.z - box.maxZ);
+        return dx * dx + dy * dy + dz * dz;
     }
 
     // Sets the rotation and the previous-tick rotation together, so the game has nothing to blend.
@@ -156,42 +238,10 @@ public final class CrampedFirstPerson {
     private static boolean axiomOpen() {
         if (AXIOM_EDITOR_ACTIVE == null) return false;
         try {
-            return (boolean) AXIOM_EDITOR_ACTIVE.invoke(null) || (boolean) AXIOM_MENU_ACTIVE.invoke(AXIOM_MENU_INSTANCE.invoke(null));
+            return (boolean) AXIOM_EDITOR_ACTIVE.invoke(null)
+                    || (boolean) AXIOM_MENU_ACTIVE.invoke(AXIOM_MENU_INSTANCE.invoke(null));
         } catch (ReflectiveOperationException | RuntimeException e) {
             return false;
         }
-    }
-
-    // Terrain right behind the player along the third person camera's view, which would push the camera in next to
-    // the player (e.g. climbing a hillside). A ray, not the camera's position: the camera starts at the eyes when third
-    // person comes back and eases out, so its position would read as squeezed every time and loop.
-    private static boolean squeezed(Minecraft client, LocalPlayer player, float[] camera) {
-        return behind(client, player, Vec3.directionFromRotation(camera[0], camera[1]), CAMERA_SQUEEZE);
-    }
-
-    // Terrain behind the player along the view, where the third person camera would sit.
-    private static boolean blockedBehind(Minecraft client, LocalPlayer player) {
-        return behind(client, player, player.getViewVector(1.0F), CAMERA_CLEAR);
-    }
-
-    private static boolean behind(Minecraft client, LocalPlayer player, Vec3 look, double distance) {
-        Vec3 eye = player.getEyePosition();
-        Vec3 back = eye.subtract(look.scale(distance));
-        return client.level.clip(new ClipContext(eye, back, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, player)).getType() == HitResult.Type.BLOCK;
-    }
-
-    // Tight means a wall right in front, climbing a ladder or vine, or looking down at a nearby door, trapdoor or ladder.
-    private static boolean tight(Minecraft client, LocalPlayer player, double distance, float[] camera) {
-        if (player.onClimbable()) return true;
-        Vec3 eye = player.getEyePosition();
-        Vec3 look = camera != null ? Vec3.directionFromRotation(camera[0], camera[1]) : player.getViewVector(1.0F);
-        float pitch = camera != null ? camera[0] : player.getXRot();
-        // A wall only counts while looking roughly level; looking down at a block by your feet isn't cramped.
-        if (Math.abs(pitch) < LOOK_DOWN_PITCH && client.level.clip(new ClipContext(eye, eye.add(look.scale(distance)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getType() == HitResult.Type.BLOCK) return true;
-        if (pitch < LOOK_DOWN_PITCH) return false;
-        BlockHitResult below = client.level.clip(new ClipContext(eye, eye.add(look.scale(distance + LOOK_DOWN_EXTRA)), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
-        if (below.getType() != HitResult.Type.BLOCK) return false;
-        BlockState state = client.level.getBlockState(below.getBlockPos());
-        return state.getBlock() instanceof DoorBlock || state.getBlock() instanceof TrapDoorBlock || state.is(BlockTags.CLIMBABLE);
     }
 }

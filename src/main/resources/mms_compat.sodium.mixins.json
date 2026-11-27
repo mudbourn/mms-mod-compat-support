@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.sodium",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "info.mudbourn.mmscompat.mixin.sodium.SodiumMixinGate",
+  "client": [
+    "ChunkBuilderShutdownMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

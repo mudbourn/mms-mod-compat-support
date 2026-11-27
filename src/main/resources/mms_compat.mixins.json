@@ -6,7 +6,6 @@
     "CreativeTabDedupMixin",
     "ArrowFlightMixin",
     "MobEmbargoedEquipmentMixin",
-    "SoundLibraryReleaseGuardMixin",
     "DataFixerLookupQuietMixin",
     "PackFormatLenientMixin",
     "PackMetadataPlaceholderMixin",
@@ -18,7 +17,8 @@
   "client": [
     "ChatEmojiMixin",
     "ChatEmojiSuggestionsMixin",
-    "DoubleBlurGuardMixin"
+    "DoubleBlurGuardMixin",
+    "SoundLibraryReleaseGuardMixin"
   ],
   "injectors": {
     "defaultRequire": 1

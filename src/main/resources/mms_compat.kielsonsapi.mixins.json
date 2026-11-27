@@ -1,0 +1,9 @@
+{
+  "required": false,
+  "package": "info.mudbourn.mmscompat.mixin.kielsonsapi",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "info.mudbourn.mmscompat.mixin.kielsonsapi.KielsonsApiMixinGate",
+  "mixins": [
+    "ItemHelperServerMixin"
+  ]
+}
