@@ -2,7 +2,7 @@ package info.mudbourn.mmscompat.client;
 
 import java.lang.reflect.Method;
 
-// Flips Leawind's third person camera to the other shoulder through its scheduler runtime.
+// Reads and sets which shoulder Leawind's third person camera sits on, through its scheduler runtime.
 final class ShoulderSwap {
 
     private static final String PACKAGE = "io.github.leawind.thirdperson.internal.logic.";
@@ -70,18 +70,41 @@ final class ShoulderSwap {
     private ShoulderSwap() {
     }
 
-    // Mirrors the active profile's sideways offset; does nothing while the camera is centered.
-    static void flip() {
-        if (GET_INSTANCE == null) return;
+    // The sign of the active profile's sideways offset: 1 or -1, or 0 while centered or unreadable.
+    static double side() {
+        Object profile = profile();
+        if (profile == null) return 0.0;
         try {
+            if ((boolean) CENTERED.invoke(profile)) return 0.0;
+            return Math.signum((double) OFFSET_X.invoke(profile));
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return 0.0;
+        }
+    }
+
+    // Puts the active profile's camera on the shoulder with this offset sign.
+    static void setSide(double side) {
+        Object profile = profile();
+        if (profile == null) return;
+        try {
+            double offset = Math.abs((double) OFFSET_X.invoke(profile)) * side;
             Object runtime = GET_INSTANCE.invoke(null);
-            Object slot = MODE.invoke(SESSION.invoke(runtime)) == MODE_AIMING ? SLOT_AIMING : SLOT_NORMAL;
-            Object profile = PROFILE.invoke(CAMERA_SETTINGS.invoke(runtime), slot);
-            if ((boolean) CENTERED.invoke(profile)) return;
-            double offset = (double) OFFSET_X.invoke(profile);
-            if (offset == 0.0) return;
-            UPDATE_PROFILE.invoke(runtime, slot, WITH_OFFSET_X.invoke(profile, -offset));
+            UPDATE_PROFILE.invoke(runtime, slot(runtime), WITH_OFFSET_X.invoke(profile, offset));
         } catch (ReflectiveOperationException | RuntimeException ignored) {
         }
+    }
+
+    private static Object profile() {
+        if (GET_INSTANCE == null) return null;
+        try {
+            Object runtime = GET_INSTANCE.invoke(null);
+            return PROFILE.invoke(CAMERA_SETTINGS.invoke(runtime), slot(runtime));
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return null;
+        }
+    }
+
+    private static Object slot(Object runtime) throws ReflectiveOperationException {
+        return MODE.invoke(SESSION.invoke(runtime)) == MODE_AIMING ? SLOT_AIMING : SLOT_NORMAL;
     }
 }

@@ -12,7 +12,8 @@
     "LoadFunctionMuteMixin",
     "InfinityAnyArrowMixin",
     "InfinityMultishotMixin",
-    "DirtyAttributeSnapshotMixin"
+    "DirtyAttributeSnapshotMixin",
+    "LegacySavedDataMixin"
   ],
   "client": [
     "ChatEmojiMixin",

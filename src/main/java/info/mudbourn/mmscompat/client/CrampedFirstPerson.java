@@ -34,6 +34,7 @@ public final class CrampedFirstPerson {
     private static final double SHOULDER_WIDTH = 1.0;
     private static final double SWAP_ROOM = 1.5;
     private static final double SWAP_MARGIN = 1.0;
+    private static final double RESTORE_ROOM = 2.5;
     private static final int SWAP_COOLDOWN_TICKS = 40;
 
     private static volatile boolean cramped;
@@ -42,6 +43,8 @@ public final class CrampedFirstPerson {
     private static int squeezeTicks;
     private static int roomyTicks;
     private static int swapCooldown;
+    private static double chosenSide;
+    private static boolean swapped;
     private static boolean wasForced;
     private static float[] pending;
 
@@ -108,6 +111,7 @@ public final class CrampedFirstPerson {
     private static void tick(Minecraft client) {
         LocalPlayer player = client.player;
         if (player == null || client.level == null) {
+            restoreShoulder();
             cramped = false;
             axiomOpen = false;
             dragon = false;
@@ -126,7 +130,11 @@ public final class CrampedFirstPerson {
         boolean axiom = axiomOpen();
         boolean riding = SharedKeys.ridingDragon();
         boolean forced = tight || axiom || riding;
-        if (thirdPerson && !forced) swapShoulder(client, player, eye, view);
+        if (thirdPerson && !forced) {
+            swapShoulder(client, player, eye, view);
+        } else {
+            restoreShoulder();
+        }
         if (forced && !wasForced && camera != null) {
             pending = camera;
             face(player, camera);
@@ -146,8 +154,12 @@ public final class CrampedFirstPerson {
         dragon = riding;
     }
 
-    // Moves the camera to the other shoulder when its side is blocked and the other side has clearly more room.
+    // Moves the camera off the player's chosen shoulder while a wall blocks it, and back once that side is clear.
     private static void swapShoulder(Minecraft client, LocalPlayer player, Vec3 eye, Vec3 view) {
+        double offsetSide = ShoulderSwap.side();
+        if (offsetSide == 0.0) return;
+        if (swapped && offsetSide != -chosenSide) swapped = false;
+        if (!swapped) chosenSide = offsetSide;
         if (swapCooldown > 0) {
             swapCooldown--;
             return;
@@ -157,14 +169,28 @@ public final class CrampedFirstPerson {
         Vec3 right = new Vec3(-view.z, 0.0, view.x);
         if (right.lengthSqr() < 1.0E-4) return;
         right = right.normalize();
-        double side = Math.signum(camera.position().subtract(eye).dot(right));
-        if (side == 0.0) return;
+        double worldSide = Math.signum(camera.position().subtract(eye).dot(right));
+        if (worldSide == 0.0) return;
+        double chosenWorldSide = swapped ? -worldSide : worldSide;
         Vec3 back = view.scale(-CAMERA_DISTANCE);
-        double current = room(client.level, player, eye, back.add(right.scale(side * SHOULDER_WIDTH)));
-        if (current >= SWAP_ROOM) return;
-        double other = room(client.level, player, eye, back.add(right.scale(-side * SHOULDER_WIDTH)));
-        if (other < current + SWAP_MARGIN) return;
-        ShoulderSwap.flip();
+        double chosen = room(client.level, player, eye, back.add(right.scale(chosenWorldSide * SHOULDER_WIDTH)));
+        if (swapped) {
+            if (chosen >= RESTORE_ROOM) restoreShoulder();
+            return;
+        }
+        if (chosen >= SWAP_ROOM) return;
+        double other = room(client.level, player, eye, back.add(right.scale(-chosenWorldSide * SHOULDER_WIDTH)));
+        if (other < chosen + SWAP_MARGIN) return;
+        ShoulderSwap.setSide(-chosenSide);
+        swapped = true;
+        swapCooldown = SWAP_COOLDOWN_TICKS;
+    }
+
+    // Puts the camera back on the shoulder the player chose.
+    private static void restoreShoulder() {
+        if (!swapped) return;
+        ShoulderSwap.setSide(chosenSide);
+        swapped = false;
         swapCooldown = SWAP_COOLDOWN_TICKS;
     }
 
