@@ -52,6 +52,11 @@ public class MmsModCompatSupport implements ModInitializer {
             info.mudbourn.mmscompat.ferrite.FerriteOreOff.register();
         }
 
+        // Axe turtles fell whole trees
+        if (FabricLoader.getInstance().isModLoaded("computercraft")) {
+            info.mudbourn.mmscompat.cc.TurtleTimber.register();
+        }
+
         if (FabricLoader.getInstance().isModLoaded("mr_bubblellaneous")) {
             BubbleContent.register();
         }
