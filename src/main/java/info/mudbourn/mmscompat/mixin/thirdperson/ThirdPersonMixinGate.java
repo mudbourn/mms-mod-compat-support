@@ -7,12 +7,15 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Gates the Leawind's Third Person aim patch on that mod being loaded.
+ * Gates the Leawind's Third Person aim patch on that mod being loaded and on {@link #ENABLED}.
  */
 public class ThirdPersonMixinGate implements IMixinConfigPlugin {
 
+    // The Leawind's Third Person compat is broken, so it is switched off. Set true to turn on the aim patch and cramped first person again.
+    public static final boolean ENABLED = false;
+
     private final boolean present =
-        FabricLoader.getInstance().isModLoaded("leawind_third_person");
+        ENABLED && FabricLoader.getInstance().isModLoaded("leawind_third_person");
 
     @Override public void onLoad(String mixinPackage) {}
     @Override public String getRefMapperConfig() { return null; }

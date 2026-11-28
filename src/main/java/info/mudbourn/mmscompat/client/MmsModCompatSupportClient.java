@@ -39,7 +39,8 @@ public class MmsModCompatSupportClient implements ClientModInitializer {
         if (FabricLoader.getInstance().isModLoaded("spell_engine")) {
             info.mudbourn.mmscompat.client.spellengine.SpellHotbarToggle.register();
         }
-        if (FabricLoader.getInstance().isModLoaded("leawind_third_person")) {
+        if (info.mudbourn.mmscompat.mixin.thirdperson.ThirdPersonMixinGate.ENABLED
+                && FabricLoader.getInstance().isModLoaded("leawind_third_person")) {
             CrampedFirstPerson.register();
         }
         if (FabricLoader.getInstance().isModLoaded("particlerain")) {
