@@ -2,6 +2,8 @@ package info.mudbourn.mmscompat.client;
 
 import info.mudbourn.mmscompat.client.sharedkeys.SharedKeys;
 import io.github.leawind.perspectiveapi.api.PerspectiveAPI;
+import io.github.leawind.perspectiveapi.internal.impl.TransitionImpl;
+import io.github.leawind.perspectiveapi.internal.impl.transition.rotation.RotationTransitionAlgorithm;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -14,39 +16,58 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 
 import java.lang.reflect.Method;
 
-// Forces first person when there is no room behind the player, riding a dragon, or using Axiom, and swaps the camera's shoulder away from walls.
+// Forces first person when a block is close beside, above or behind the player, the player looks steeply up or down, the camera's shoulder is against a wall, the player rides a dragon, or uses Axiom.
 public final class CrampedFirstPerson {
 
     private static final String FIRST_PERSON = "perspective_api.first_person";
     private static final String THIRD_PERSON = "leawind_third_person.third_person";
     private static final int OVERRIDE_PRIORITY = 1000;
-    private static final double PLAYER_RADIUS = 0.5;
+    private static final double SIDE_ROOM = 2.0;
+    private static final float ENTER_PITCH = 65.0F;
+    private static final float LEAVE_PITCH = 60.0F;
     private static final double FLOOR_MARGIN = 0.05;
     private static final double CAMERA_DISTANCE = 4.0;
     private static final double ENTER_ROOM = 1.0;
     private static final double LEAVE_ROOM = 2.0;
-    private static final int ENTER_TICKS = 5;
+    private static final int ENTER_TICKS = 1;
     private static final int LEAVE_TICKS = 20;
     private static final double MARCH_STEP = 0.1;
     private static final double SHOULDER_WIDTH = 1.0;
-    private static final double SWAP_ROOM = 1.5;
-    private static final double SWAP_MARGIN = 1.0;
-    private static final double RESTORE_ROOM = 2.5;
-    private static final int SWAP_COOLDOWN_TICKS = 40;
+    private static final double SHOULDER_ENTER_ROOM = 1.5;
+    private static final double SHOULDER_LEAVE_ROOM = 2.5;
+    private static final int FORCED_TRANSITION_TICKS = 4;
+    private static final RotationTransitionAlgorithm SNAP_ROTATION = new RotationTransitionAlgorithm() {
+        @Override
+        public String id() {
+            return "mms_compat:snap";
+        }
+
+        @Override
+        public void start(Quaternionfc rotation) {
+        }
+
+        @Override
+        public void update(float progress, Quaternionfc target, Quaternionf out) {
+            out.set(target);
+        }
+    };
 
     private static volatile boolean cramped;
     private static volatile boolean axiomOpen;
     private static volatile boolean dragon;
     private static int squeezeTicks;
     private static int roomyTicks;
-    private static int swapCooldown;
-    private static double chosenSide;
-    private static boolean swapped;
+    private static double shoulderSign;
     private static boolean wasForced;
     private static float[] pending;
+    private static int fastTicks;
+    private static double savedDurationMs;
+    private static RotationTransitionAlgorithm savedRotation;
 
     private static Object look;
     private static Method lookInitialized;
@@ -111,7 +132,10 @@ public final class CrampedFirstPerson {
     private static void tick(Minecraft client) {
         LocalPlayer player = client.player;
         if (player == null || client.level == null) {
-            restoreShoulder();
+            if (fastTicks > 0) {
+                fastTicks = 0;
+                restoreTransition();
+            }
             cramped = false;
             axiomOpen = false;
             dragon = false;
@@ -122,18 +146,20 @@ public final class CrampedFirstPerson {
         float[] camera = thirdPerson ? cameraRotation() : null;
         Vec3 eye = player.getEyePosition();
         Vec3 view = player.getViewVector(1.0F);
-        boolean hugging = nearWall(client.level, player, eye, PLAYER_RADIUS);
+        boolean boxed = boxedIn(client.level, player, eye);
+        double shoulder = shoulderRoom(client, player, eye, view);
         double behind = room(client.level, player, eye, view.scale(-CAMERA_DISTANCE));
-        squeezeTicks = hugging || behind < ENTER_ROOM ? squeezeTicks + 1 : 0;
-        roomyTicks = !hugging && behind >= LEAVE_ROOM ? roomyTicks + 1 : 0;
+        float pitch = Math.abs(camera != null ? camera[0] : player.getXRot());
+        squeezeTicks = boxed || behind < ENTER_ROOM || shoulder < SHOULDER_ENTER_ROOM || pitch >= ENTER_PITCH ? squeezeTicks + 1 : 0;
+        roomyTicks = !boxed && behind >= LEAVE_ROOM && shoulder >= SHOULDER_LEAVE_ROOM && pitch < LEAVE_PITCH ? roomyTicks + 1 : 0;
         boolean tight = cramped ? roomyTicks < LEAVE_TICKS : squeezeTicks >= ENTER_TICKS;
         boolean axiom = axiomOpen();
         boolean riding = SharedKeys.ridingDragon();
         boolean forced = tight || axiom || riding;
-        if (thirdPerson && !forced) {
-            swapShoulder(client, player, eye, view);
-        } else {
-            restoreShoulder();
+        if (forced && !wasForced) {
+            fastTransition();
+        } else if (fastTicks > 0 && --fastTicks == 0) {
+            restoreTransition();
         }
         if (forced && !wasForced && camera != null) {
             pending = camera;
@@ -154,44 +180,39 @@ public final class CrampedFirstPerson {
         dragon = riding;
     }
 
-    // Moves the camera off the player's chosen shoulder while a wall blocks it, and back once that side is clear.
-    private static void swapShoulder(Minecraft client, LocalPlayer player, Vec3 eye, Vec3 view) {
-        double offsetSide = ShoulderSwap.side();
-        if (offsetSide == 0.0) return;
-        if (swapped && offsetSide != -chosenSide) swapped = false;
-        if (!swapped) chosenSide = offsetSide;
-        if (swapCooldown > 0) {
-            swapCooldown--;
-            return;
+    // Skips Perspective API's transition and snaps its rotation for the switch into forced first person.
+    private static void fastTransition() {
+        if (!(PerspectiveAPI.getTransition() instanceof TransitionImpl transition)) return;
+        if (fastTicks == 0) {
+            savedDurationMs = transition.getDurationMs();
+            savedRotation = transition.getRotationAlgorithm();
         }
-        Camera camera = client.gameRenderer.mainCamera();
-        if (!camera.isDetached()) return;
-        Vec3 right = new Vec3(-view.z, 0.0, view.x);
-        if (right.lengthSqr() < 1.0E-4) return;
-        right = right.normalize();
-        double worldSide = Math.signum(camera.position().subtract(eye).dot(right));
-        if (worldSide == 0.0) return;
-        double chosenWorldSide = swapped ? -worldSide : worldSide;
-        Vec3 back = view.scale(-CAMERA_DISTANCE);
-        double chosen = room(client.level, player, eye, back.add(right.scale(chosenWorldSide * SHOULDER_WIDTH)));
-        if (swapped) {
-            if (chosen >= RESTORE_ROOM) restoreShoulder();
-            return;
-        }
-        if (chosen >= SWAP_ROOM) return;
-        double other = room(client.level, player, eye, back.add(right.scale(-chosenWorldSide * SHOULDER_WIDTH)));
-        if (other < chosen + SWAP_MARGIN) return;
-        ShoulderSwap.setSide(-chosenSide);
-        swapped = true;
-        swapCooldown = SWAP_COOLDOWN_TICKS;
+        transition.setDurationMs(0.0);
+        transition.setRotationAlgorithm(SNAP_ROTATION);
+        fastTicks = FORCED_TRANSITION_TICKS;
     }
 
-    // Puts the camera back on the shoulder the player chose.
-    private static void restoreShoulder() {
-        if (!swapped) return;
-        ShoulderSwap.setSide(chosenSide);
-        swapped = false;
-        swapCooldown = SWAP_COOLDOWN_TICKS;
+    // Puts back the transition length and rotation blending the forced switch replaced.
+    private static void restoreTransition() {
+        if (!(PerspectiveAPI.getTransition() instanceof TransitionImpl transition)) return;
+        transition.setDurationMs(savedDurationMs);
+        transition.setRotationAlgorithm(savedRotation);
+    }
+
+    // How far the camera's shoulder spot behind the player is from a wall, or the full distance while centered.
+    private static double shoulderRoom(Minecraft client, LocalPlayer player, Vec3 eye, Vec3 view) {
+        double offsetSide = CameraShoulder.side();
+        Vec3 right = new Vec3(-view.z, 0.0, view.x);
+        if (offsetSide == 0.0 || right.lengthSqr() < 1.0E-4) return CAMERA_DISTANCE;
+        right = right.normalize();
+        Camera camera = client.gameRenderer.mainCamera();
+        if (camera.isDetached()) {
+            double worldSide = Math.signum(camera.position().subtract(eye).dot(right));
+            if (worldSide != 0.0) shoulderSign = worldSide * offsetSide;
+        }
+        if (shoulderSign == 0.0) return CAMERA_DISTANCE;
+        Vec3 spot = view.scale(-CAMERA_DISTANCE).add(right.scale(shoulderSign * offsetSide * SHOULDER_WIDTH));
+        return room(client.level, player, eye, spot);
     }
 
     // How far a ray from a point travels along an offset before it meets a solid block.
@@ -225,30 +246,12 @@ public final class CrampedFirstPerson {
         return player.isVisuallyCrawling() ? player.getEyeY() : player.getY() + FLOOR_MARGIN;
     }
 
-    // A solid block within a radius of a point, ignoring leaves, fluids and the floor.
-    private static boolean nearWall(ClientLevel level, LocalPlayer player, Vec3 center, double radius) {
-        double floor = floor(player);
-        double reach = radius * radius;
-        BlockPos min = BlockPos.containing(center.subtract(radius, radius, radius));
-        BlockPos max = BlockPos.containing(center.add(radius, radius, radius));
-        for (BlockPos pos : BlockPos.betweenClosed(min, max)) {
-            BlockState state = level.getBlockState(pos);
-            if (state.isAir() || state.is(BlockTags.LEAVES)) continue;
-            VoxelShape shape = state.getCollisionShape(level, pos, CollisionContext.of(player));
-            for (AABB box : shape.toAabbs()) {
-                AABB placed = box.move(pos);
-                if (placed.maxY <= floor) continue;
-                if (distanceSq(placed, center) <= reach) return true;
-            }
-        }
-        return false;
-    }
-
-    private static double distanceSq(AABB box, Vec3 point) {
-        double dx = Math.max(Math.max(box.minX - point.x, 0.0), point.x - box.maxX);
-        double dy = Math.max(Math.max(box.minY - point.y, 0.0), point.y - box.maxY);
-        double dz = Math.max(Math.max(box.minZ - point.z, 0.0), point.z - box.maxZ);
-        return dx * dx + dy * dy + dz * dz;
+    // A solid block within reach to the player's left, right or above their eyes.
+    private static boolean boxedIn(ClientLevel level, LocalPlayer player, Vec3 eye) {
+        Vec3 right = Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F).scale(SIDE_ROOM);
+        return room(level, player, eye, right) < SIDE_ROOM
+                || room(level, player, eye, right.scale(-1.0)) < SIDE_ROOM
+                || room(level, player, eye, new Vec3(0.0, SIDE_ROOM, 0.0)) < SIDE_ROOM;
     }
 
     // Sets the rotation and the previous-tick rotation together, so the game has nothing to blend.
